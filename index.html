@@ -1,158 +1,116 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>GS MUSUMBA SCHOOL MANAGEMENT SYSTEM | Student Information System (SIS)</title>
-
-<meta name="description" content="Official GS Musumba School Management System for student information, attendance, marks entry, CAMIS integration, academic reports, discipline management, teacher management and school administration in Rwanda.">
-
-<style>
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial,sans-serif;
-}
-
-body{
-background:linear-gradient(135deg,#eef4ff,#ffffff);
-display:flex;
-justify-content:center;
-align-items:center;
-min-height:100vh;
-padding:20px;
-}
-
-.card{
-max-width:850px;
-width:100%;
-background:#fff;
-border-radius:20px;
-padding:50px;
-text-align:center;
-box-shadow:0 15px 40px rgba(0,0,0,.15);
-}
-
-.logo{
-width:170px;
-margin-bottom:25px;
-}
-
-h1{
-font-size:42px;
-color:#0b3b74;
-margin-bottom:10px;
-}
-
-h2{
-font-size:24px;
-color:#555;
-margin-bottom:25px;
-}
-
-p{
-font-size:18px;
-color:#666;
-line-height:1.8;
-margin-bottom:40px;
-}
-
-.button{
-display:inline-block;
-padding:18px 45px;
-background:#0b3b74;
-color:#fff;
-text-decoration:none;
-font-size:22px;
-font-weight:bold;
-border-radius:12px;
-transition:.3s;
-}
-
-.button:hover{
-background:#f4b400;
-color:#000;
-}
-
-.features{
-margin-top:45px;
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-gap:15px;
-}
-
-.box{
-background:#f7f9fc;
-padding:18px;
-border-radius:12px;
-font-weight:bold;
-color:#0b3b74;
-}
-
-footer{
-margin-top:45px;
-color:#777;
-font-size:14px;
-}
-</style>
-
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>GS MUSUMBA | Official School Management System</title>
+  <meta name="description" content="Official GS MUSUMBA School Management System access page for students, teachers and school administration.">
+  <meta name="keywords" content="GS MUSUMBA, gsmusumba, GS Musumba School, School Management System, Kamonyi, Rwanda">
+  <meta name="robots" content="index,follow">
+  <meta name="theme-color" content="#0b3b6e">
+  <meta property="og:title" content="GS MUSUMBA | Official School Management System">
+  <meta property="og:description" content="Official access page for the GS MUSUMBA School Management System.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://gsmusumba.github.io/">
+  <meta property="og:image" content="https://gsmusumba.github.io/GS_MUSUMBA_OFFICIAL_LOGO.jpg">
+  <style>
+    :root {
+      --navy:#0b3b6e; --navy-dark:#082d54; --blue:#165a96; --gold:#d5a31a;
+      --ink:#10243a; --muted:#66788c; --line:#dce6f0; --soft:#f3f7fb;
+      --white:#ffffff; --green:#0f7a4d;
+    }
+    *{box-sizing:border-box} html{scroll-behavior:smooth}
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:linear-gradient(180deg,#eef4fa 0%,#f9fbfd 100%);color:var(--ink)}
+    .topbar{background:var(--navy-dark);color:#fff;padding:10px 20px;font-size:13px}
+    .topbar-inner{max-width:1160px;margin:auto;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    .header{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+    .header-inner{max-width:1160px;margin:auto;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;gap:18px}
+    .brand{display:flex;align-items:center;gap:12px;min-width:0}
+    .brand img{width:58px;height:58px;object-fit:contain;border-radius:8px;background:#fff}
+    .brand-title{font-size:20px;font-weight:900;color:var(--navy);letter-spacing:.3px}
+    .brand-sub{font-size:12px;color:var(--muted);margin-top:3px}
+    .header-badge{padding:9px 13px;border-radius:999px;background:#eef5fc;color:var(--navy);font-size:12px;font-weight:800;white-space:nowrap}
+    .hero{max-width:1160px;margin:auto;padding:66px 20px 42px;display:grid;grid-template-columns:1.15fr .85fr;gap:34px;align-items:center}
+    .eyebrow{display:inline-flex;align-items:center;gap:8px;padding:8px 11px;border-radius:999px;background:#e9f3fc;color:var(--navy);font-size:12px;font-weight:900;letter-spacing:.4px;margin-bottom:17px}
+    h1{margin:0;font-size:clamp(40px,6vw,68px);line-height:1;color:var(--navy-dark);letter-spacing:-1.6px}
+    .hero h2{margin:13px 0 0;font-size:clamp(20px,3vw,30px);color:var(--blue)}
+    .lead{margin:20px 0 0;max-width:720px;color:#53677e;font-size:17px;line-height:1.7}
+    .actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
+    .btn{text-decoration:none;display:inline-flex;align-items:center;justify-content:center;min-height:50px;padding:0 22px;border-radius:10px;font-weight:900;font-size:14px;transition:.18s ease}
+    .btn-primary{background:var(--navy);color:#fff;box-shadow:0 10px 24px rgba(11,59,110,.22)}
+    .btn-primary:hover{background:var(--navy-dark);transform:translateY(-1px)}
+    .btn-secondary{background:#fff;color:var(--navy);border:1px solid var(--line)}
+    .hero-card{background:#fff;border:1px solid var(--line);border-radius:22px;padding:28px;box-shadow:0 18px 50px rgba(31,64,101,.10)}
+    .hero-card img{display:block;width:118px;height:118px;object-fit:contain;margin:0 auto 18px}
+    .hero-card h3{text-align:center;margin:0;font-size:22px;color:var(--navy)}
+    .hero-card p{text-align:center;margin:10px 0 0;color:var(--muted);line-height:1.6;font-size:14px}
+    .status{margin-top:20px;display:flex;justify-content:center;align-items:center;gap:8px;color:var(--green);font-weight:800;font-size:13px}
+    .dot{width:9px;height:9px;background:var(--green);border-radius:50%}
+    .section{max-width:1160px;margin:auto;padding:20px 20px 60px}
+    .section-title{text-align:center;margin:0 0 10px;color:var(--navy-dark);font-size:30px}
+    .section-lead{text-align:center;max-width:700px;margin:0 auto 28px;color:var(--muted);line-height:1.6}
+    .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}
+    .feature{background:#fff;border:1px solid var(--line);border-radius:15px;padding:20px;min-height:128px}
+    .feature strong{display:block;color:var(--navy);font-size:15px;margin-bottom:7px}
+    .feature span{color:var(--muted);font-size:13px;line-height:1.55}
+    .info{margin-top:34px;background:var(--navy);border-radius:18px;padding:24px;color:#fff;display:grid;grid-template-columns:1fr auto;gap:20px;align-items:center}
+    .info h3{margin:0 0 7px;font-size:21px}
+    .info p{margin:0;color:#d9e8f6;line-height:1.6;font-size:14px}
+    .info .btn{background:#fff;color:var(--navy)}
+    footer{background:#fff;border-top:1px solid var(--line);color:var(--muted);padding:24px 20px;text-align:center;font-size:12px}
+    @media(max-width:900px){.hero{grid-template-columns:1fr;padding-top:42px}.grid{grid-template-columns:repeat(2,1fr)}.info{grid-template-columns:1fr}.info .btn{width:100%}}
+    @media(max-width:560px){.header-inner{align-items:flex-start}.header-badge{display:none}.brand img{width:48px;height:48px}.brand-title{font-size:17px}.hero{padding-top:34px}h1{font-size:42px}.grid{grid-template-columns:1fr}.actions{flex-direction:column}.btn{width:100%}}
+  </style>
 </head>
-
 <body>
-
-<div class="card">
-
-<img class="logo" src="GS_MUSUMBA_OFFICIAL_LOGO.jpg" alt="GS Musumba Logo">
-
-<h1>GS MUSUMBA</h1>
-
-<h2>School Management System</h2>
-
-<p>
-
-Official Student Information System (SIS) for GS Musumba School.
-
-Manage Students, Teachers, Attendance, Marks, CAMIS Reports,
-Discipline, Academic Records and School Administration.
-
-</p>
-
-<a class="button"
-href="https://script.google.com/macros/s/AKfycbxgR0giXjvPyJY-IezcXj3DdvNt-XTRze2QO3g1-5sfW2bESYrypb4ZGXJle-g9HfQcNA/exec">
-
-LOGIN TO SYSTEM
-
-</a>
-
-<div class="features">
-
-<div class="box">Students</div>
-
-<div class="box">Teachers</div>
-
-<div class="box">Attendance</div>
-
-<div class="box">Marks</div>
-
-<div class="box">CAMIS</div>
-
-<div class="box">Reports</div>
-
-<div class="box">Discipline</div>
-
-<div class="box">Administration</div>
-
-</div>
-
-<footer>
-
-© 2026 GS Musumba School Management System
-
-</footer>
-
-</div>
-
+  <div class="topbar"><div class="topbar-inner"><span>GS MUSUMBA â€¢ Kamonyi District â€¢ Rwanda</span><span>Official School Management System Access</span></div></div>
+  <header class="header">
+    <div class="header-inner">
+      <div class="brand">
+        <img src="GS_MUSUMBA_OFFICIAL_LOGO.jpg" alt="GS MUSUMBA logo">
+        <div><div class="brand-title">GS MUSUMBA</div><div class="brand-sub">School Management System</div></div>
+      </div>
+      <div class="header-badge">Official Access Portal</div>
+    </div>
+  </header>
+  <main>
+    <section class="hero">
+      <div>
+        <div class="eyebrow">OFFICIAL SCHOOL PLATFORM</div>
+        <h1>GS MUSUMBA</h1>
+        <h2>School Management System</h2>
+        <p class="lead">A secure digital platform supporting school administration, teachers and authorized staff with student management, attendance, marks, CAMIS, academic reporting, timetables and school operations.</p>
+        <div class="actions">
+          <a class="btn btn-primary" href="https://script.google.com/macros/s/AKfycbxgR0giXjvPyJY-IezcXj3DdvNt-XTRze2QO3g1-5sfW2bESYrypb4ZGXJle-g9HfQcNA/exec" target="_blank" rel="noopener noreferrer">LOGIN TO SYSTEM</a>
+          <a class="btn btn-secondary" href="#services">VIEW SYSTEM SERVICES</a>
+        </div>
+      </div>
+      <aside class="hero-card">
+        <img src="GS_MUSUMBA_OFFICIAL_LOGO.jpg" alt="GS MUSUMBA official logo">
+        <h3>GS MUSUMBA</h3>
+        <p>Secure access to the official school management platform. Private school data is protected inside the authenticated system.</p>
+        <div class="status"><span class="dot"></span>Secure system access available</div>
+      </aside>
+    </section>
+    <section class="section" id="services">
+      <h2 class="section-title">School Digital Services</h2>
+      <p class="section-lead">The platform centralizes core school operations while keeping access controlled by user role.</p>
+      <div class="grid">
+        <div class="feature"><strong>Student Management</strong><span>Student records, class allocation, promotion and academic-year administration.</span></div>
+        <div class="feature"><strong>Teachers & Timetables</strong><span>Teacher assignments, class timetables and individual work schedules.</span></div>
+        <div class="feature"><strong>Attendance</strong><span>Class, subject and staff attendance management and monitoring.</span></div>
+        <div class="feature"><strong>Marks & CAMIS</strong><span>Assessment, examination, CAMIS entry, validation and academic analysis.</span></div>
+        <div class="feature"><strong>Academic Reports</strong><span>Performance analysis, report cards and printable academic reports.</span></div>
+        <div class="feature"><strong>Discipline & Conduct</strong><span>Student conduct, discipline follow-up and non-academic student services.</span></div>
+        <div class="feature"><strong>School Administration</strong><span>Role-based services for school leadership and authorized staff.</span></div>
+        <div class="feature"><strong>Print & Export</strong><span>Professional PDF, XLSX and CSV outputs for operational and academic reporting.</span></div>
+      </div>
+      <div class="info">
+        <div><h3>Open GS MUSUMBA School Management System</h3><p>Use the official login button to continue to the secure school platform.</p></div>
+        <a class="btn" href="https://script.google.com/macros/s/AKfycbxgR0giXjvPyJY-IezcXj3DdvNt-XTRze2QO3g1-5sfW2bESYrypb4ZGXJle-g9HfQcNA/exec" target="_blank" rel="noopener noreferrer">OPEN SYSTEM</a>
+      </div>
+    </section>
+  </main>
+  <footer>&copy; 2026 GS MUSUMBA &bull; School Management System &bull; Official Public Access Page</footer>
 </body>
 </html>
