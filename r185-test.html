@@ -10310,4 +10310,98 @@ try{document.documentElement.setAttribute('data-gsm-release','R185.1')}catch(_){
 })();
 </script>
 
+<!-- R185.2 OFFICIAL TIMETABLE POLICY + TEACHER-SCOPED VIEW -->
+<style id="gsm-r1852-timetable-style">
+.r1852-tt{display:grid;gap:8px;min-width:0;color:#102b46}
+.r1852-tt-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 10px;border:1px solid #a9bfd2;border-top:4px solid #1769a8;background:#fff}
+.r1852-tt-head h2{margin:0;font-size:15px!important;font-weight:950!important;color:#0b3159}.r1852-tt-head p{margin:3px 0 0;font-size:9px;font-weight:750;color:#556b7f}
+.r1852-tt-badges{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}.r1852-badge{border:1px solid #aac0d4;border-radius:999px;padding:4px 7px;background:#f7fbff;font-size:8px;font-weight:950;color:#164d7d;white-space:nowrap}
+.r1852-note{padding:7px 9px;border:1px solid #d7b366;border-left:4px solid #d68a00;background:#fff9e8;font-size:9px;font-weight:800;line-height:1.35}
+.r1852-note.good{border-color:#86caa7;border-left-color:#168a52;background:#effbf4}.r1852-note.bad{border-color:#e2a1a1;border-left-color:#c62828;background:#fff2f2;color:#7c1515}
+.r1852-section{background:#fff;border:1px solid #b2c5d7;min-width:0}.r1852-section-h{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 9px;background:#f4f8fc;border-bottom:1px solid #b2c5d7}
+.r1852-section-h b{font-size:11px!important;font-weight:950!important;color:#0b3159}.r1852-section-h span{font-size:8px;font-weight:850;color:#5a6c7e}
+.r1852-table-wrap{width:100%;max-width:100%;overflow-x:hidden}.r1852-table{width:100%!important;border-collapse:collapse!important;table-layout:fixed!important;border:3px double #304b64!important;background:#fff}
+.r1852-table th,.r1852-table td{border:1px solid #9db7cd!important;padding:4px 5px!important;vertical-align:middle!important;line-height:1.15!important;white-space:normal!important;overflow-wrap:anywhere!important;font-size:9px!important;font-weight:850!important}
+.r1852-table thead th{position:sticky;top:0;z-index:3;background:#0867a8!important;color:#fff!important;font-size:9.5px!important;font-weight:950!important;text-align:left}
+.r1852-table th:first-child,.r1852-table td:first-child{width:13%;font-weight:950!important}.r1852-table tbody tr:nth-child(even):not(.r1852-shift) td{background:#eaf7ff}.r1852-table tbody tr:nth-child(odd):not(.r1852-shift) td{background:#fff}
+.r1852-table .r1852-shift td{background:#d9efbd!important;text-align:center!important;font-weight:950!important;font-size:10px!important}.r1852-table .r1852-fixed td{background:#ffc400!important;color:#1f2b35!important}
+.r1852-live-cell b{display:block;font-size:9.2px!important;font-weight:950!important;color:#0b3159}.r1852-live-cell small{display:block;margin-top:2px;font-size:7.8px;font-weight:800;color:#587087}
+.r1852-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}.r1852-kpi{padding:7px 8px;border:1px solid #b1c4d6;border-top:3px solid #1769a8;background:#fff}.r1852-kpi b{display:block;font-size:19px!important;font-weight:950!important;line-height:1;color:#0b3159}.r1852-kpi span{display:block;margin-top:3px;font-size:8px;font-weight:950;color:#566a7e}
+.r1852-rules{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.r1852-rule-card{border:1px solid #b3c5d6;background:#fff}.r1852-rule-card h3{margin:0;padding:7px 8px;background:#0f5d94;color:#fff;font-size:10px!important;font-weight:950!important}.r1852-rule-grid{display:grid;grid-template-columns:minmax(0,1fr) 66px}.r1852-rule-grid div{padding:4px 7px;border-top:1px solid #d3e0ea;font-size:8.6px;font-weight:850}.r1852-rule-grid div:nth-child(even){text-align:center;font-weight:950}.r1852-rule-foot{padding:6px 8px;border-top:2px solid #6f8faa;background:#f3f8fc;font-size:8.5px;font-weight:900}
+.r1852-check{width:100%;border-collapse:collapse;border:3px double #415466}.r1852-check th,.r1852-check td{padding:4px 5px;border:1px solid #a9bdce;font-size:8.5px;font-weight:850}.r1852-check th{background:#174c80;color:#fff;font-weight:950}.r1852-ok{color:#087947;font-weight:950}.r1852-warn{color:#b35b00;font-weight:950}.r1852-bad{color:#b40000;font-weight:950}
+.r1852-actions{display:flex;gap:6px;justify-content:flex-end}.r1852-actions button{min-height:31px;padding:5px 10px;border:1px solid #0d4f80;background:#174c80;color:#fff;border-radius:4px;font-size:8.5px;font-weight:950;cursor:pointer}
+@media(max-width:760px){.r1852-tt-head{align-items:flex-start;flex-direction:column}.r1852-badges{justify-content:flex-start}.r1852-kpis,.r1852-rules{grid-template-columns:1fr 1fr}.r1852-table-wrap{overflow-x:auto!important}.r1852-table{min-width:760px!important}.r1852-table th,.r1852-table td{font-size:8.5px!important}}
+@media(max-width:430px){.r1852-kpis,.r1852-rules{grid-template-columns:1fr}}
+@media print{.r1852-actions{display:none!important}.r1852-table th{position:static!important}.r1852-table-wrap{overflow:visible!important}.r1852-table{min-width:0!important}.r1852-tt{gap:5px}.r1852-section{break-inside:avoid}.r1852-rules{break-inside:avoid}}
+</style>
+<script id="gsm-r1852-timetable-policy">
+(function(){
+if(window.__GSM_R1852_TT__)return;window.__GSM_R1852_TT__=true;
+var V=window.GSM_VIEWS||{};if(!V.__r1852_prior_tt)V.__r1852_prior_tt=V.myteachertimetable;function q(s,r){return (r||document).querySelector(s)}function qa(s,r){return Array.from((r||document).querySelectorAll(s))}
+function E(v){return String(v==null?'':v).replace(/[&<>\"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]})}
+function U(v){return String(v||'').trim().toUpperCase()}function N(v){v=Number(v);return Number.isFinite(v)?v:0}function F(v){return N(v).toLocaleString()}
+function T(v){return String(v||'').slice(0,5)}
+function rpc2(n,p){if(window.GSM_LIVE&&typeof window.GSM_LIVE.rpc==='function')return window.GSM_LIVE.rpc(n,p||{});if(typeof window.rpc==='function')return window.rpc(n,p||{});return Promise.reject(new Error('LIVE RPC CONNECTION REQUIRED'))}
+function top(t){try{if(typeof window.topOnly==='function')return window.topOnly(t)}catch(_){ }try{document.title='GS MUSUMBA SCHOOL MANAGEMENT SYSTEM · '+t}catch(_){}}
+var DAYS=['MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY'];
+var PRE=[
+ ['7:45–8:00','Welcome time','Welcome time','Welcome time','Welcome time','Welcome time'],
+ ['8:00–8:30','Discovery of the World','Discovery of the World','Discovery of the World','Discovery of the World','Discovery of the World'],
+ ['8:30–9:00','Numeracy','Numeracy','Numeracy','Numeracy','Numeracy'],
+ ['9:00–9:30','Language and Literacy: Kinyarwanda','Language and Literacy: Kinyarwanda','Language and Literacy: Kinyarwanda','Language and Literacy: Kinyarwanda','Language and Literacy: Kinyarwanda'],
+ ['9:30–10:00','Language and Literacy: English (Oral communication)','Language and Literacy: English (Oral communication)','Language and Literacy: English (Oral communication)','Language and Literacy: English (Oral communication)','Language and Literacy: English (Oral communication)'],
+ ['10:00–10:40','Break','Break','Break','Break','Break'],
+ ['10:40–11:00','Physical Development and Health: Outdoor play, Health and self-care','Physical Development and Health: Outdoor play, Health and self-care','Physical Development and Health: Outdoor play, Health and self-care','Physical Development and Health: Outdoor play, Health and self-care','Physical Development and Health: Outdoor play, Health and self-care'],
+ ['11:00–11:30','Creative Arts and culture','Story time: Kinyarwanda','Creative Arts and culture','Story time: Kinyarwanda','Story time: Kinyarwanda'],
+ ['11:30–11:50','Play Scheme / Free Play in corners','Play Scheme / Free Play in corners','Play Scheme / Free Play in corners','Play Scheme / Free Play in corners','Play Scheme / Free Play in corners'],
+ ['11:50–12:00','Closing time','Closing time','Closing time','Closing time','Closing time'],
+ ['12:00–5:00','Lesson preparation and CPD for teachers','Lesson preparation and CPD for teachers','Lesson preparation and CPD for teachers','Lesson preparation and CPD for teachers','Lesson preparation and CPD for teachers','fixed']
+];
+var LP=[
+ {section:'MORNING SHIFT'},
+ ['7:45–8:00','Morning Assembly','Morning Assembly','Morning Assembly','Morning Assembly','Morning Assembly'],
+ ['8:00–8:40','Ikinyarwanda','Ikinyarwanda','Ikinyarwanda','Ikinyarwanda','Ikinyarwanda'],
+ ['8:40–9:20','Mathematics','Mathematics','Mathematics','Mathematics','Mathematics'],
+ ['9:20–10:00','English','English','English','English / Phonics Reading','English / Phonics Reading'],
+ ['10:00–10:20','Break','Break','Break','Break','Break'],
+ ['10:20–11:00','SRE','SRE','SET','SET','French'],
+ ['11:00–11:40','PE & Sports','Creative Arts (Music)','PE & Sports','French','Creative Arts (Fine Arts)'],
+ ['11:40–12:40','Lunch','Lunch','Lunch','Lunch','Lunch'],
+ {section:'AFTERNOON SHIFT'},
+ ['12:40–12:50','Afternoon Assembly','Afternoon Assembly','Afternoon Assembly','Afternoon Assembly','Afternoon Assembly'],
+ ['12:50–1:30','Ikinyarwanda','Ikinyarwanda','Ikinyarwanda','Ikinyarwanda','Ikinyarwanda'],
+ ['1:30–2:10','Mathematics','Mathematics','Mathematics','Mathematics','Mathematics'],
+ ['2:10–2:50','English','English','English','English / Phonics Reading','English / Phonics Reading'],
+ ['2:50–3:30','SRE','Creative Arts','PES','SET','French'],
+ ['3:30–3:40','Break','Break','Break','Break','Break'],
+ ['3:40–4:20','Ikinyarwanda reading / remedial','Creative Arts activities','PES Activities','Creative Arts activities','CPD','fixed'],
+ ['4:20–5:00','PES Activities','English reading / remedial','Itorero and life skills','French reading / Maths remedial','CPD','fixed']
+];
+var UP_RULES=[['Ikinyarwanda / Rwanda Sign Language',9],['English',9],['Mathematics',9],['Science and Elementary Technology',5],['Social Studies and Religious Education',5],['French',5],['Creative Arts (Fine Arts and Music)',2],['Physical Education and Sport',2],['Co-Curricular Activities',7],['Continuous Professional Development',2]];
+var SEC_RULES=[['Mathematics',6],['English',5],['Physics',4],['Chemistry',4],['Biology and Health Sciences',4],['Geography and Environment',3],['History and Citizenship',3],['Entrepreneurship',3],['Ikinyarwanda',3],['French',3],['Kiswahili',3],['ICT',2],['Physical Education and Sports',2],['Religion and Ethics',2],['Elective subject (school chooses one)',2],['Co-curricular activities',4],['Continuous Professional Development',2]];
+window.GSM_TIMETABLE_POLICY={release:'R185.2',fixed:{NURSERY:PRE,LOWER_PRIMARY:LP},weekly:{UPPER_PRIMARY:UP_RULES,SECONDARY:SEC_RULES},rules:{nursery:'EXACT_OFFICIAL_TEMPLATE',lower_primary:'EXACT_OFFICIAL_TEMPLATE',upper_primary:'GENERATE_FROM_ASSIGNMENTS_WITH_OFFICIAL_PERIOD_ALLOCATION',secondary:'GENERATE_FROM_ASSIGNMENTS_WITH_OFFICIAL_PERIOD_ALLOCATION'}};
+function klass(code){code=U(code);if(/^N/.test(code))return 'NURSERY';var m=code.match(/^P(\d)/);if(m&&+m[1]<=3)return 'LOWER_PRIMARY';if(m&&+m[1]>=4&&+m[1]<=6)return 'UPPER_PRIMARY';if(/^S[1-3]/.test(code))return 'SECONDARY';return 'OTHER'}
+function grid(title,sub,rows,classes){return '<section class="r1852-section"><div class="r1852-section-h"><b>'+E(title)+'</b><span>'+E(sub||'')+'</span></div><div class="r1852-table-wrap"><table class="r1852-table"><thead><tr><th>HOURS</th>'+DAYS.map(function(d){return '<th>'+d[0]+d.slice(1).toLowerCase()+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(r){if(r.section)return '<tr class="r1852-shift"><td colspan="6">'+E(r.section)+'</td></tr>';var fixed=r[6]==='fixed';return '<tr class="'+(fixed?'r1852-fixed':'')+'"><td>'+E(r[0])+'</td>'+r.slice(1,6).map(function(x){return '<td>'+E(x)+'</td>'}).join('')+'</tr>'}).join('')+'</tbody></table></div>'+(classes?'<div class="r1852-note good"><b>AUTHORIZED CLASSES:</b> '+E(classes.join(', '))+'. This official template is intentionally identical for this level.</div>':'')+'</section>'}
+function ruleCard(title,arr,contact){return '<div class="r1852-rule-card"><h3>'+E(title)+'</h3><div class="r1852-rule-grid">'+arr.map(function(x){return '<div>'+E(x[0])+'</div><div>'+E(x[1])+'</div>'}).join('')+'</div><div class="r1852-rule-foot">Official contact periods/week: <b>'+E(contact)+'</b> · 40 minutes each. CPD is teacher professional time and is not counted inside learner contact periods.</div></div>'}
+function liveGrid(rows){var slots=[...new Map(rows.map(function(r){return [(T(r.start_time)+'|'+T(r.end_time)+'|'+String(r.lesson_number||'')),r]})).values()].sort(function(a,b){var aa=T(a.start_time),bb=T(b.start_time);return aa.localeCompare(bb)||N(a.lesson_number)-N(b.lesson_number)});var mp=new Map(rows.map(function(r){return [U(r.day_of_week)+'|'+T(r.start_time)+'|'+T(r.end_time),r]}));return '<div class="r1852-table-wrap"><table class="r1852-table"><thead><tr><th>PERIOD / TIME</th>'+DAYS.map(function(d){return '<th>'+d[0]+d.slice(1).toLowerCase()+'</th>'}).join('')+'</tr></thead><tbody>'+(slots.length?slots.map(function(s){var st=T(s.start_time),en=T(s.end_time);return '<tr><td><b>'+E(st+'–'+en)+'</b></td>'+DAYS.map(function(d){var r=mp.get(d+'|'+st+'|'+en);return '<td>'+(r?'<div class="r1852-live-cell"><b>'+E((r.class_code||'')+' · '+(r.subject_name||r.subject_code||r.display_label||'ACTIVITY'))+'</b><small>'+E(r.room||'')+'</small></div>':'—')+'</td>'}).join('')+'</tr>'}).join(''):'<tr><td colspan="6" style="text-align:center;padding:14px">No published teacher-specific timetable rows are available yet.</td></tr>')+'</tbody></table></div>'}
+function allocationCheck(assign,rows,groups){var a=assign.filter(function(x){return groups.indexOf(klass(x.class_code))>=0});var counts={};rows.forEach(function(r){var k=String(r.class_id||'')+'|'+String(r.subject_id||'');counts[k]=(counts[k]||0)+1});return '<table class="r1852-check"><thead><tr><th>CLASS</th><th>SUBJECT</th><th>REQUIRED / WEEK</th><th>PUBLISHED</th><th>CHECK</th></tr></thead><tbody>'+(a.length?a.map(function(x){var need=N(x.periods_per_week),got=counts[String(x.class_id||'')+'|'+String(x.subject_id||'')]||0,ok=got===need;return '<tr><td>'+E(x.class_code||'—')+'</td><td>'+E(x.subject_name||x.subject_code||'—')+'</td><td>'+F(need)+'</td><td>'+F(got)+'</td><td class="'+(ok?'r1852-ok':got?'r1852-warn':'r1852-bad')+'">'+(ok?'PASS':got?'REVIEW':'MISSING')+'</td></tr>'}).join(''):'<tr><td colspan="5">No upper-primary/secondary assignment rows found.</td></tr>')+'</tbody></table>'}
+V.myteachertimetable=function(mount,ctx){
+ if(typeof window.role==='function'&&window.role()!=='TEACHER'){var old=V.__r1852_prior_tt;return typeof old==='function'?old(mount,ctx):undefined}
+ top('MY TIMETABLE');mount.innerHTML='<div class="r1852-tt"><div class="r1852-note">Loading official timetable policy and your authorized teaching scope…</div></div>';
+ var boot=(window.BOOT&&BOOT.context)||{};var args={p_academic_year_id:boot.academic_year_id||boot.ay_id||null,p_term_id:boot.term_id||null};
+ Promise.all([rpc2('get_teacher_operational_context',args),rpc2('r136_teacher_timetable',{})]).then(function(all){var op=all[0]||{},tt=all[1]||{},assign=op.assignments||[],rows=tt.rows||[];var codes=[...new Set(assign.map(function(x){return x.class_code}).filter(Boolean))],groups=[...new Set(codes.map(klass))];var teacher=(op.teacher&&op.teacher.full_name)||((window.BOOT&&BOOT.profile&&BOOT.profile.full_name)||'TEACHER');var assigned=assign.reduce(function(s,x){return s+N(x.periods_per_week)},0);var published=rows.filter(function(r){return r.subject_id||U(r.activity_type)==='SUBJECT'}).length;var html='<div class="r1852-tt-head"><div><h2>'+E(teacher)+' — MY TIMETABLE</h2><p>Official fixed templates for Nursery and Lower Primary; teacher-specific published schedule for Upper Primary and Secondary.</p></div><div class="r1852-badges"><span class="r1852-badge">2026–2027</span><span class="r1852-badge">TERM 1</span><span class="r1852-badge">'+E(codes.join(', ')||'NO CLASS')+'</span></div></div>';
+ html+='<div class="r1852-kpis"><div class="r1852-kpi"><b>'+F(codes.length)+'</b><span>AUTHORIZED CLASSES</span></div><div class="r1852-kpi"><b>'+F(assign.length)+'</b><span>SUBJECT ASSIGNMENTS</span></div><div class="r1852-kpi"><b>'+F(assigned)+'</b><span>ASSIGNED PERIODS / WEEK</span></div><div class="r1852-kpi"><b>'+F(published)+'</b><span>PUBLISHED SUBJECT ROWS</span></div></div>';
+ if(groups.indexOf('NURSERY')>=0)html+=grid('PRE-PRIMARY DAILY TIMETABLE','OFFICIAL FIXED TEMPLATE · Monday to Friday',PRE,codes.filter(function(c){return klass(c)==='NURSERY'}));
+ if(groups.indexOf('LOWER_PRIMARY')>=0)html+=grid('LOWER PRIMARY (P1–P3) DAILY TIMETABLE','OFFICIAL FIXED TEMPLATE · Morning and Afternoon shifts',LP,codes.filter(function(c){return klass(c)==='LOWER_PRIMARY'}));
+ var dynamicGroups=groups.filter(function(g){return g==='UPPER_PRIMARY'||g==='SECONDARY'});if(dynamicGroups.length){html+='<div class="r1852-note"><b>UPPER PRIMARY / SECONDARY RULE:</b> The official weekly allocation is fixed, but actual class placement must be generated from teacher assignments and validated for teacher, class and room conflicts. We do not copy one identical class grid across all upper classes.</div><div class="r1852-rules">'+(dynamicGroups.indexOf('UPPER_PRIMARY')>=0?ruleCard('UPPER PRIMARY (P4–P6) — TIME ALLOCATION',UP_RULES,53):'')+(dynamicGroups.indexOf('SECONDARY')>=0?ruleCard('LOWER SECONDARY (S1–S3) — TIME ALLOCATION',SEC_RULES,53):'')+'</div><section class="r1852-section"><div class="r1852-section-h"><b>MY PUBLISHED TEACHER-SPECIFIC WEEK</b><span>Generated / published rows assigned to this teacher only</span></div>'+liveGrid(rows)+'</section><section class="r1852-section"><div class="r1852-section-h"><b>ASSIGNMENT × TIMETABLE VALIDATION</b><span>Required weekly load compared with published rows</span></div><div class="r1852-table-wrap">'+allocationCheck(assign,rows,dynamicGroups)+'</div></section>'}
+ if(!groups.length)html+='<div class="r1852-note bad"><b>NO ACTIVE TEACHING ASSIGNMENT:</b> DOS must assign this teacher before My Timetable can be completed.</div>';
+ html+='<div class="r1852-actions"><button type="button" id="r1852TTPrint">PRINT / PDF</button></div>';mount.innerHTML='<div class="r1852-tt">'+html+'</div>';var b=q('#r1852TTPrint',mount);if(b)b.onclick=function(){window.print()};
+ }).catch(function(e){mount.innerHTML='<div class="r1852-note bad"><b>MY TIMETABLE COULD NOT LOAD:</b> '+E(e&&e.message||e)+'</div>'});
+};
+/* keep one previous reference only once, before the override is used */
+window.GSM_R1852={release:'R185.2-OFFICIAL-TIMETABLE-POLICY',nursery:'FIXED_EXACT',lowerPrimary:'FIXED_EXACT',upperPrimary:'ASSIGNMENT_GENERATED',secondary:'ASSIGNMENT_GENERATED'};
+try{document.documentElement.setAttribute('data-gsm-release','R185.2')}catch(_){ }
+})();
+</script>
+
 </body></html>
