@@ -1,0 +1,20 @@
+GS MUSUMBA R186.72 — DEPLOYMENT STEPS
+
+1. Keep the current R186.71 Git commit as rollback.
+2. Replace the local GS MUSUMBA FINAL DEPLOY working folder with this COMPLETE package. Do not mix individual R186.71/R186.72 CSS or JS files.
+3. In VS Code Terminal run:
+   git status --short
+   git add -A
+   git diff --cached --check
+   git commit -m "R186.72 competition production polish"
+   git push origin main
+4. Cloudflare Pages automatically deploys main to https://musumba.pages.dev/.
+5. Wait for green Production status in Cloudflare.
+6. Hard refresh once on desktop. On phones previously using the old service worker, close all GS MUSUMBA tabs and reopen musumba.pages.dev.
+7. Perform live acceptance: login, dashboard, attendance save, marks save/submit, timetable, PDF/Print, XLSX, logout/login.
+8. Only after live QA passes, submit https://musumba.pages.dev/ in Google Search Console and request indexing.
+
+EXPECTED RESULT
+- Cloudflare Production shows a green successful deployment for the new commit.
+- musumba.pages.dev opens R186.72.
+- Old R186.71 remains recoverable from Git history.

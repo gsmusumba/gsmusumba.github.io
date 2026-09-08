@@ -1,8 +1,8 @@
-/* GS MUSUMBA — R186.71 PERFORMANCE SHELL.
+/* GS MUSUMBA — R186.72 PERFORMANCE SHELL.
    Small login shell is pre-cached. Heavy workspace assets are cached only after authentication/on demand.
    Supabase/API responses are NEVER cached. */
-const CACHE='gsm-r186-71-global-print-final-v1';
-const V='R186.71';
+const CACHE='gsm-r186-72-competition-production-v1';
+const V='R186.72';
 const SHELL=[
   './index.html',
   './GS_MUSUMBA_OFFICIAL_LOGO.jpg',

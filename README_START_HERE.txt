@@ -1,23 +1,25 @@
-GS MUSUMBA R186.71 — GLOBAL PRINT + MULTI CLASS-TEACHER AUTHORITY
+GS MUSUMBA SCHOOL MANAGEMENT SYSTEM — R186.72 COMPETITION & PRODUCTION POLISH
 
-PRODUCTION FRONTEND ROOT PACKAGE.
+OFFICIAL PRODUCTION URL
+https://musumba.pages.dev/
 
-DO NOT DELETE from your clean Git clone:
-- hidden .git folder
-- Google Search Console verification HTML file already present in your clone
+DEPLOY ALL FILES TOGETHER. DO NOT MIX WITH OLDER R186.71 ASSETS.
 
-MAIN FIXES:
-1. Primary + ACTIVE co-class-teachers have class-teacher authority in live Supabase.
-2. Final global print stage: one school profile, one title, left Academic Year/Term/Date, Prepared/Verified/Approved.
-3. Timetable defaults to A4 landscape one-page output.
-4. Report cards keep school + student profile; Nursery keeps front colours and back real marks.
-5. Global Print Settings retained: paper, orientation, fit, margins, colour/B&W, title, date, footer.
+R186.72 FINALIZES
+- Competition-clean compact UI while preserving the approved R186.71 working architecture.
+- Reduced repetitive status/authority text and removed floating PRINT SETTINGS button; Print Settings remains inside System Management.
+- Protected student names and SDMS codes from truncation; controlled horizontal scrolling on narrow screens.
+- Softer red attendance monitoring and compact cards/fonts without sacrificing readability.
+- Class + Subject Attendance Monitoring periods: DAILY, WEEKLY, MONTHLY, TERMLY.
+- Level summaries: Nursery, Primary, Secondary and Whole School — Present Boys/Girls and percentages.
+- Attendance CSV/Excel + Print/PDF outputs. Timetable CSV/Excel button added where a timetable table is available.
+- Attendance save actions remain at the lower-left after the roster with blue success confirmation.
+- Marks bottom save/submit area preserved and visually standardized.
+- 2G/Save-Data-aware heavy asset loading with one retry on flaky mobile networks.
+- Production SEO/canonical/sitemap moved to https://musumba.pages.dev/.
 
-BEFORE GITHUB PUSH:
-- Replace package files inside D:\WEBSITE\GS MUSUMBA FINAL DEPLOY
-- Keep .git and google verification HTML
-- Go Live and test dual-class-teacher attendance + timetable + marks + report cards
-- In Chrome Print > More settings turn Headers and footers OFF
-- Only then git add -A, commit and push main
-
-See docs/ for the 135-service route audit, live authority report, reference migration and QA.
+IMPORTANT
+- Supabase/API responses are never service-worker cached.
+- R186.72 does not alter database schema or production data.
+- <1 second cannot be certified for remote Supabase calls without live p50/p95 measurements on the target networks.
+- Perform authenticated browser QA for saves and role permissions before calling the competition build final.

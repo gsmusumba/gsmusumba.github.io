@@ -3,4 +3,4 @@ Allow: /
 Disallow: /r186-qa.html
 Disallow: /docs/
 
-Sitemap: https://gsmusumba.github.io/sitemap.xml
+Sitemap: https://musumba.pages.dev/sitemap.xml

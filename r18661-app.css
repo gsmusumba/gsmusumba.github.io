@@ -5621,7 +5621,7 @@ html body .r123-close{position:absolute!important;right:12px!important;top:10px!
 #appShell #main .r18622-email,#appShell #main .r18622-phone{font-weight:800!important}
 #appShell #main .r18622-role{font-weight:900!important}
 /* Student 360: exact data columns, father/mother separate, compact fit. */
-#appShell #main #s360Rows~*{}#appShell #main .r132-table:has(#s360Rows){min-width:1040px!important;width:100%!important;table-layout:fixed!important}
+#appShell #main .r132-table:has(#s360Rows){min-width:1040px!important;width:100%!important;table-layout:fixed!important}
 #appShell #main .r132-table:has(#s360Rows) th,#appShell #main .r132-table:has(#s360Rows) td{text-align:left!important;padding:4px 5px!important;font-size:9px!important;line-height:1.08!important;vertical-align:middle!important;white-space:normal!important;overflow-wrap:anywhere!important}
 #appShell #main .r132-table:has(#s360Rows) th:nth-child(1),#appShell #main .r132-table:has(#s360Rows) td:nth-child(1){width:38px!important;text-align:center!important}#appShell #main .r132-table:has(#s360Rows) th:nth-child(2){width:105px!important}#appShell #main .r132-table:has(#s360Rows) th:nth-child(3){width:190px!important}#appShell #main .r132-table:has(#s360Rows) th:nth-child(4){width:50px!important}#appShell #main .r132-table:has(#s360Rows) th:nth-child(5){width:72px!important}#appShell #main .r132-table:has(#s360Rows) th:nth-child(6){width:72px!important}#appShell #main .r132-table:has(#s360Rows) th:nth-child(7){width:92px!important}#appShell #main .r132-table:has(#s360Rows) th:nth-child(8),#appShell #main .r132-table:has(#s360Rows) th:nth-child(9){width:170px!important}#appShell #main .r132-table:has(#s360Rows) th:nth-child(10){width:70px!important}
 .r18669-parent b{display:block;font-weight:900}.r18669-parent-phone{display:block;margin-top:2px;font-size:7.5px;font-weight:800;color:#365f7d;white-space:nowrap}
@@ -5740,7 +5740,6 @@ html body .r123-close{position:absolute!important;right:12px!important;top:10px!
 /* ===== R186.71 FINAL PRINT STAGE ===== */
 #r18671PrintStage{display:none}
 @media print{
- body.r18671-printing{}
  body>*:not(#r18671PrintStage){display:none!important}
  #r18671PrintStage{display:block!important;position:static!important;width:100%!important;margin:0!important;padding:0!important;background:#fff!important;color:#000!important;font-family:Arial,Helvetica,sans-serif!important}
  #r18671PrintStage *{box-sizing:border-box}
@@ -5777,3 +5776,121 @@ html body .r123-close{position:absolute!important;right:12px!important;top:10px!
  html[data-r18671-kind="marks"] .r18671-print-body th,html[data-r18671-kind="marks"] .r18671-print-body td{font-size:7.6pt!important;padding:3px!important}
  html[data-r18671-kind="attendance"] .r18671-print-body th,html[data-r18671-kind="attendance"] .r18671-print-body td{font-size:8.2pt!important}
 }
+
+
+/* ==========================================================================
+   R186.72 — COMPETITION + PRODUCTION POLISH AUTHORITY
+   Compact, calm, mobile-safe, slow-network friendly. Loaded last intentionally.
+   ========================================================================== */
+:root{--r72-navy:#0b3e66;--r72-blue:#0b77b7;--r72-blue-soft:#eaf5fb;--r72-gold:#d8b400;--r72-gold-soft:#fff8d8;--r72-green:#1d6b49;--r72-green-soft:#eaf6ef;--r72-red:#b94747;--r72-red-soft:#fff1f1;--r72-ink:#142d40;--r72-muted:#5c7180;--r72-line:#b9cbd8;--r72-bg:#f5f8fb}
+#appShell #main{background:var(--r72-bg)!important;color:var(--r72-ink)!important;font-size:12.5px!important;line-height:1.25!important;padding:8px!important}
+#appShell #topbar{min-height:48px!important}
+#appShell #topbar .crumb{font-size:12px!important;font-weight:900!important}
+#appShell #topbar .ctx-select{height:34px!important;min-width:132px!important;max-width:155px!important;font-size:10.5px!important;font-weight:850!important;padding:0 8px!important}
+#appShell #topbar .tb-user{min-width:0!important}.tb-user .user-copy{min-width:0!important}.tb-user #tbUserName{font-size:11px!important;max-width:150px!important}.tb-user #tbUserRole{font-size:8.5px!important}
+#appShell #sidebar{font-size:11.5px!important}.side-link{min-height:38px!important;padding:7px 10px!important}.side-link .ico{width:25px!important;height:25px!important;font-size:9px!important}.side-brand{min-height:54px!important;padding:7px 10px!important}.side-brand img{width:34px!important;height:34px!important}.side-brand .nm{font-size:12px!important}
+
+/* Compact page/service headings; retain useful context but remove visual noise. */
+#appShell #main :is(.r18638-role-head,.r18638-service-head,.r186x-hero,.r18636-marks-title,.r18654-service-title,.r18661-hero.r18664-colored){padding:8px 11px!important;min-height:0!important;border-radius:8px!important;border-bottom-width:3px!important;box-shadow:none!important}
+#appShell #main :is(.r18638-role-head,.r18638-service-head,.r186x-hero,.r18636-marks-title,.r18654-service-title) :is(h1,h2){font-size:15px!important;line-height:1.12!important;margin:0!important;letter-spacing:.1px!important}
+#appShell #main :is(.r18638-role-head,.r18638-service-head,.r186x-hero,.r18636-marks-title,.r18654-service-title) p{font-size:10.5px!important;line-height:1.2!important;margin:3px 0 0!important;font-weight:650!important}
+#appShell #main #r39RoleLoad.good,#appShell #main #r39SysLoad.good{display:none!important}
+#appShell #main .r18639-registry-state.good{display:none!important}
+#appShell #main .r18639-report-rule{min-height:28px!important;padding:4px 7px!important;font-size:10px!important;line-height:1.15!important;background:#f7fafc!important;color:#314b5d!important;border:1px solid #c6d4de!important}
+#appShell #main .r18638-owner-badge{display:none!important}
+#appShell #main .r18638-service-back{margin-bottom:5px!important}.r18638-service-back .r18638-btn{height:30px!important;padding:4px 9px!important;font-size:9.5px!important}
+
+/* Cards: competition-clean, compact, readable. */
+#appShell #main :is(.r18638-card,.r186x-action,.r186x-kpi,.r18661-kpis article,.r18637-center-card,.r132-card,.r132-subcard){min-height:54px!important;padding:7px 9px!important;border-radius:7px!important;box-shadow:none!important}
+#appShell #main .r18638-card-grid{gap:6px!important}
+#appShell #main .r18638-card b,#appShell #main .r186x-action b{font-size:12px!important;line-height:1.12!important;font-weight:900!important}
+#appShell #main .r18638-card span,#appShell #main .r186x-action small{font-size:9.4px!important;line-height:1.2!important;margin-top:2px!important;color:#445e70!important}
+#appShell #main .r186x-actions{gap:6px!important;padding:5px!important}
+#appShell #main .r186x-action{min-height:60px!important;grid-template-columns:30px minmax(0,1fr)!important;column-gap:7px!important}
+#appShell #main .r186x-action-icon{width:28px!important;height:28px!important;font-size:10px!important}
+#appShell #main .r186x-kpis{gap:6px!important}.r186x-kpi b{font-size:20px!important}.r186x-kpi span{font-size:9.5px!important}
+
+/* Forms/buttons: one compact visual grammar. */
+#appShell #main :is(input,select,textarea){font-size:11.5px!important;color:#112f45!important}
+#appShell #main :is(input:not([type=checkbox]):not([type=radio]),select,button,.btn){min-height:32px!important}
+#appShell #main :is(button,.btn,.r18638-btn,.r18636-btn-white,.r1869-btn,.t160-btn){font-size:10px!important;font-weight:900!important;padding:5px 9px!important;border-radius:5px!important}
+#appShell #main label{font-size:9px!important;font-weight:850!important;line-height:1.1!important}
+#appShell #main :is(.filter-row,.r1869-toolbar,.t160-toolbar,.r18636-form-row,.r18636-tools-row,.r176-toolbar,.r18661-toolbar){gap:6px!important}
+
+/* Tables: compact without cutting names or SDMS. Scroll only when width genuinely requires it. */
+#appShell #main :is(.tbl-wrap,.t160-table-wrap,.r1869-tablewrap,.r18636-table-wrap,.r18637-marks-table-host,.r176-table-wrap,.r18661-tablewrap){overflow-x:auto!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior-inline:contain!important;max-width:100%!important}
+#appShell #main table{border-collapse:collapse!important}
+#appShell #main table th{font-size:10px!important;line-height:1.12!important;padding:5px 4px!important;font-weight:900!important;white-space:normal!important}
+#appShell #main table td{font-size:11px!important;line-height:1.18!important;padding:5px 5px!important;vertical-align:middle!important}
+#appShell #main :is(td.r18669b-sdms,td.sdms,.sticky-sdms,td.code){min-width:112px!important;width:112px!important;white-space:nowrap!important;overflow:visible!important;text-overflow:clip!important;font-variant-numeric:tabular-nums!important;font-size:10.8px!important}
+#appShell #main :is(td.r18669b-student-name,td.student,td.name,.sticky-name){min-width:175px!important;white-space:nowrap!important;overflow:visible!important;text-overflow:clip!important;word-break:normal!important;overflow-wrap:normal!important;font-size:11.2px!important;font-weight:850!important}
+#appShell #main button.r18669b-name-link{white-space:nowrap!important;font-size:11.2px!important;overflow:visible!important;text-overflow:clip!important}
+
+/* Teacher attendance entry: readable identity, bottom-left saves, calm summary. */
+#appShell #main .r18669-attendance-roster{table-layout:auto!important;min-width:920px!important}
+#appShell #main .r18669-attendance-roster th:nth-child(1),#appShell #main .r18669-attendance-roster td:nth-child(1){width:42px!important;min-width:42px!important}
+#appShell #main .r18669-attendance-roster th:nth-child(2),#appShell #main .r18669-attendance-roster td:nth-child(2){width:125px!important;min-width:125px!important}
+#appShell #main .r18669-attendance-roster th:nth-child(3),#appShell #main .r18669-attendance-roster td:nth-child(3){width:210px!important;min-width:210px!important}
+#appShell #main .r18669-attendance-roster th:nth-child(4),#appShell #main .r18669-attendance-roster td:nth-child(4){width:48px!important;min-width:48px!important;text-align:center!important}
+#appShell #main .r18669-attendance-roster th:nth-child(5),#appShell #main .r18669-attendance-roster td:nth-child(5){width:180px!important;min-width:180px!important}
+#appShell #main .r18669-attendance-roster th:nth-child(6),#appShell #main .r18669-attendance-roster td:nth-child(6){min-width:240px!important}
+#appShell #main .r18669b-att-savebar{justify-content:flex-start!important;position:static!important;margin:7px 0 3px!important;padding:5px 0!important;gap:7px!important}
+#appShell #main .r18669b-att-savebar .t160-btn{min-width:120px!important;height:34px!important;font-size:10px!important}
+#appShell #main .r18669b-att-success{background:#e8f5ff!important;color:#075b91!important;border-left-color:#0b77b7!important;font-size:10.5px!important}
+#appShell #main .t160-att-kpis{gap:5px!important}.t160-att-kpi{min-height:49px!important;padding:5px 6px!important}.t160-att-kpi b{font-size:15px!important}.t160-att-kpi span{font-size:8.5px!important}
+
+/* Marks: softer headers, larger rows, names/SDMS protected, save controls at lower-left. */
+#appShell #main .r18636-marks-page .r18636-marks-title{background:#0d6599!important}
+#appShell #main .r18636-marks-table,#appShell #main .r176-marks-table{table-layout:auto!important;min-width:1120px!important}
+#appShell #main .r18636-marks-table thead th,#appShell #main .r176-marks-table thead th{font-size:9.7px!important;line-height:1.12!important;padding:5px 4px!important}
+#appShell #main .r18636-marks-table tbody tr,#appShell #main .r176-marks-table tbody tr{height:36px!important}
+#appShell #main .r18636-marks-table tbody td,#appShell #main .r176-marks-table tbody td{font-size:11px!important;padding:6px 5px!important}
+#appShell #main .r18636-marks-table .sticky-name,#appShell #main .r176-marks-table .name{min-width:185px!important}
+#appShell #main .r18636-marks-bottom{justify-content:flex-start!important;gap:7px!important;margin-top:7px!important;padding:5px 0!important}
+#appShell #main .r18636-marks-bottom button{min-width:125px!important}
+
+/* Attendance monitoring: soft red, period summary and protected identity columns. */
+#appShell #main .r1869-monitor-note{min-height:30px!important;padding:5px 8px!important;font-size:10px!important;background:#f7fafc!important;color:#244257!important;border:1px solid #c6d6e1!important}
+#appShell #main .r1869-kpis{gap:6px!important;margin:7px 0!important}.r1869-kpi{min-height:52px!important;padding:6px 8px!important;border-radius:6px!important}.r1869-kpi b{font-size:18px!important}.r1869-kpi span{font-size:8.7px!important}
+#appShell #main .r1869-kpi.red{background:var(--r72-red-soft)!important;color:#8a3434!important;border:1px solid #e6b4b4!important}.r1869-kpi.red *{color:#8a3434!important}
+#appShell #main .r1869-table tbody tr.r1869-notdone>td{background:var(--r72-red-soft)!important;color:#6f2f2f!important;border-color:#ddb6b6!important}
+#appShell #main .r1869-table tbody tr.r1869-partial>td{background:var(--r72-gold-soft)!important;color:#5d4a00!important}
+#appShell #main .r1869-table tbody tr.r1869-complete>td{background:#f2f9fd!important;color:#123d5a!important}
+#appShell #main .r1869-table{table-layout:auto!important;min-width:1320px!important}
+#appShell #main .r1869-class-table th:nth-child(2),#appShell #main .r1869-class-table td:nth-child(2){min-width:145px!important;white-space:nowrap!important;text-align:left!important}
+#appShell #main .r1869-class-table th:nth-child(3),#appShell #main .r1869-class-table td:nth-child(3){min-width:58px!important;white-space:nowrap!important}
+#appShell #main .r18672-att-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:7px 0}
+#appShell #main .r18672-att-level{background:#fff;border:1px solid #b9cbd8;border-left:4px solid var(--r72-blue);border-radius:7px;padding:7px 8px;min-height:64px}
+#appShell #main .r18672-att-level:nth-child(2){border-left-color:var(--r72-gold)}#appShell #main .r18672-att-level:nth-child(3){border-left-color:var(--r72-green)}#appShell #main .r18672-att-level:nth-child(4){border-left-color:#4e6f86}
+#appShell #main .r18672-att-level h4{margin:0 0 5px;font-size:10.5px;color:#0b3e66}.r18672-att-level .row{display:grid;grid-template-columns:1fr auto;gap:4px;font-size:9.5px;line-height:1.25}.r18672-att-level .row b{font-size:10.5px;color:#162f42}
+#appShell #main .r18672-period-select{min-width:115px!important}
+
+/* Floating print button removed from operational pages. Print Settings remains inside SYSTEM MANAGEMENT. */
+.r186-print-settings{display:none!important}
+
+/* Rendering containment helps long service grids/tables on low-end phones without hiding content. */
+#appShell #main :is(.r18638-card-grid,.r1869-tablewrap,.t160-table-wrap,.r18636-table-wrap,.r176-table-wrap){contain:layout paint style}
+
+@media(max-width:900px){
+ #appShell #main{padding:6px!important;font-size:12px!important}
+ #appShell #topbar{min-height:46px!important;padding-inline:6px!important}.top-search{display:none!important}
+ #appShell #topbar .ctx-select{min-width:112px!important;max-width:122px!important;font-size:9.5px!important}
+ #appShell #main .r18638-card-grid,#appShell #main .r186x-actions{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ #appShell #main .r18672-att-summary{grid-template-columns:repeat(2,minmax(0,1fr))}
+ #appShell #main :is(.r18638-role-head,.r18638-service-head,.r186x-hero){padding:7px 9px!important}
+}
+@media(max-width:600px){
+ #appShell #main{padding:5px!important}
+ #appShell #main .r18638-card-grid,#appShell #main .r186x-actions{grid-template-columns:1fr!important;gap:5px!important}
+ #appShell #main .r18638-card,#appShell #main .r186x-action{min-height:52px!important}
+ #appShell #main .r18638-card span,#appShell #main .r186x-action small{font-size:9.5px!important}
+ #appShell #main .r18672-att-summary{grid-template-columns:1fr 1fr!important}
+ #appShell #main .r1869-toolbar{display:grid!important;grid-template-columns:1fr 1fr!important;align-items:end!important}
+ #appShell #main .r1869-toolbar .r1869-actions{grid-column:1/-1!important;display:flex!important;flex-wrap:wrap!important}
+ #appShell #main .r1869-toolbar .r1869-actions button{flex:1 1 46%!important}
+ #appShell #main .r18669b-att-savebar{position:sticky!important;left:0!important;background:#f5f8fb!important;z-index:8!important}
+ #appShell #main .r18669b-att-savebar button{flex:1 1 42%!important;min-width:0!important}
+ .mobile-bottom{height:54px!important}.mobile-bottom button{font-size:9px!important}
+}
+@media(max-width:390px){#appShell #topbar .ctx-select{min-width:92px!important;max-width:100px!important}.tb-user .user-copy{display:none!important}#appShell #main .r18672-att-summary{grid-template-columns:1fr!important}}
+@media print{.r18672-att-summary{break-inside:avoid!important}.r18672-att-level{padding:4px!important;min-height:0!important}.r18672-att-level .row{font-size:7pt!important}}
