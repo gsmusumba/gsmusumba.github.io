@@ -1,4 +1,6 @@
 User-agent: *
 Allow: /
+Disallow: /r186-qa.html
+Disallow: /docs/
 
 Sitemap: https://gsmusumba.github.io/sitemap.xml

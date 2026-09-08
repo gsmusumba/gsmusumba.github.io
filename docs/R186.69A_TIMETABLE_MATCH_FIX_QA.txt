@@ -1,0 +1,28 @@
+GS MUSUMBA R186.69A — TIMETABLE ACCOUNT MATCH FIX
+
+Scope: preserve the approved R186.69 design exactly; fix one verified teacher timetable identity mismatch found during local authenticated QA.
+
+Verified failure before fix:
+- Signed-in live profile: MUREKATETE JEANNETTE
+- Embedded approved timetable master key: MUREKATETE JEANETTE
+- Result: MY TIMETABLE reported CURRENT TIMETABLE NOT MATCHED TO THIS ACCOUNT.
+
+Fix applied:
+- Canonicalized all timetable-master references from MUREKATETE JEANETTE to MUREKATETE JEANNETTE.
+- No lesson, class, period, time, subject, visual design, permissions, or Supabase data changed.
+- Runtime asset version/cache bumped to R186.69A so browsers do not retain the pre-fix timetable asset.
+
+QA checks:
+- Old spelling absent from runtime bundle.
+- Canonical spelling present in timetable master.
+- JS syntax checks pass.
+- index.html title remains GS MUSUMBA SCHOOL MANAGEMENT SYSTEM.
+- Design CSS files unchanged from R186.69.
+- Google indexing files retained.
+
+Required local acceptance before production push:
+1. Login as MUREKATETE JEANNETTE.
+2. Open MY TIMETABLE.
+3. Confirm actual current timetable grid appears instead of red mismatch banner.
+4. Verify Dashboard, My Students, Class Attendance, Subject Attendance, Marks & Assessments open.
+5. Check DevTools Console for application-origin errors.

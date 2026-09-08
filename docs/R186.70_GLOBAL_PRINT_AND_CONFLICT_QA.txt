@@ -1,0 +1,60 @@
+GS MUSUMBA R186.70 — GLOBAL PRINT AUTHORITY / FULL STATIC REGRESSION QA
+==============================================================================
+RESULT: 38/38 PASS
+
+[PASS] required:index.html
+[PASS] required:r186-core.js
+[PASS] required:r18661-loader.js
+[PASS] required:r18661-extensions.js
+[PASS] required:r18661-app.css
+[PASS] required:r18661-login.css
+[PASS] required:sw.js
+[PASS] required:GS_MUSUMBA_OFFICIAL_LOGO.jpg
+[PASS] required:robots.txt
+[PASS] required:sitemap.xml
+[PASS] required:.nojekyll
+[PASS] index title exact
+[PASS] index version R186.70 — count=4
+[PASS] loader app assets R186.70
+[PASS] service worker R186.70
+[PASS] supabase never cached
+[PASS] R186.70 authority present
+[PASS] R186.70 authority is last print override
+[PASS] no later view reassignment after authority
+[PASS] bold vertical school profile
+[PASS] AY TERM DATE left meta
+[PASS] system name sanitizer
+[PASS] prepared verified approved global
+[PASS] print settings modal
+[PASS] timetable one page auto
+[PASS] marks soft contrast
+[PASS] forms normalized
+[PASS] attendance names plain
+[PASS] popup print hook
+[PASS] noopener conflict removed
+[PASS] final print authority wins legacy stack — legacy/shared overrides total=5; direct print call sites=42; popup open call sites=8
+[PASS] MUREKATETE exact retained
+[PASS] DUSHIMIMANA exact retained
+[PASS] attendance success retained
+[PASS] static HTML IDs unique
+[PASS] CSS brace balance — 7192 open/7192 close
+[PASS] R186.70 marker at EOF authority — position=1846970/1865835
+[PASS] no service-role secret marker
+
+CONFLICT / STACK AUDIT
+- Shared GSM_printReport assignments found in legacy source: 5.
+- R186.70 is deliberately loaded last and is the final shared print authority; no later view or print override follows it.
+- Direct window.print call sites: 42; R186.70 intercepts same-window direct prints and applies unified settings/header/footer.
+- Popup window.open call sites: 8; R186.70 wraps popup print windows and removed the noopener return-handle conflict.
+- Older service-specific code is retained for compatibility; the final authority normalizes output instead of deleting working services.
+
+PRINT STANDARD
+- School profile: bold, vertical, left-starting with logo.
+- Academic Year, Term and Date: all left-aligned.
+- Application/system name is sanitized from normalized printed document content.
+- Print Settings: print type label, paper, orientation, fit, margins, colour, editable header title/date/footer.
+- Timetable AUTO: landscape + one-page fit; Marks: fit-width/multipage with readable rows and repeating headers.
+- Prepared By / Verified By / Approved By appended to normalized official output.
+
+KNOWN LIVE-DATA BLOCKER OUTSIDE THIS FRONTEND PACKAGE
+- JULIETTE/LIBRARIAN profile previously had no Auth user link. R186.70 does not fabricate or directly insert auth.users credentials. Provision/reset must be done through a controlled Supabase Auth admin path.

@@ -1,0 +1,25 @@
+GS MUSUMBA R186.70 — DEPLOYMENT STEPS
+
+1. Use only the clean clone folder: D:\WEBSITE\GS MUSUMBA FINAL DEPLOY
+2. Keep the existing hidden .git folder and Google Search Console verification HTML file already in that clone.
+3. Extract this ZIP to a temporary folder.
+4. Copy all ZIP contents into GS MUSUMBA FINAL DEPLOY and choose Replace files in destination.
+5. Do not delete google*.html.
+6. Run local Live Server and test: Login, My Timetable, Class Attendance, Subject Attendance, Marks & Assessments, Student cards/report-card printing, Print Settings.
+7. In Chrome print preview, set browser "Headers and footers" OFF. R186.70 provides its own official header/footer.
+8. In VS Code Terminal run: git status --short
+9. Remove the old public test page if still present: Remove-Item r185-test.html
+10. Run: git add -A
+11. Run: git commit -m "R186.70 global print authority professional final"
+12. Run: git push origin main
+13. GitHub -> Actions -> wait for green deployment.
+14. Open https://gsmusumba.github.io/ and Ctrl+Shift+R.
+15. Search Console -> URL Inspection -> Test Live URL -> Request Indexing; Sitemap -> sitemap.xml -> Submit.
+
+R186.70 print defaults:
+- School profile bold + vertical + left-starting.
+- Academic Year, Term, Date all left-aligned.
+- Timetable AUTO -> landscape + one-page fit.
+- Marks -> readable screen, fit-width/multipage print.
+- Prepared / Verified / Approved included.
+- System/application name removed from normalized printed document content.
