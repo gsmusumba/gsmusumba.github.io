@@ -1779,13 +1779,13 @@ async function enterApp(){
  const id=firstId(),it=findItem(id);
  if(it){prevId=STATE.currentId;STATE.currentId=id;STATE.currentItem=it;$('crumb').textContent=it.label;}
  renderMenu();if(it)highlightMobile(it);
- /* R186.76: do not render an obsolete dashboard while the final workspace bundle is arriving. */
+ /* R186.77: do not render an obsolete dashboard while the final workspace bundle is arriving. */
  if(mount)mount.innerHTML='<div class="gsm-r18675-instant-shell" aria-hidden="true"><i></i><i></i><i></i></div>';
  const ready=(typeof window.GSM_loadAppExtensions==='function')?window.GSM_loadAppExtensions():Promise.resolve(true);
  ready.then(()=>{
    try{document.documentElement.setAttribute('data-gsm-full-workspace','ready')}catch(_){}
-   try{renderMenu($('sideMenuSearch').value||'');if(STATE.currentItem)renderView(STATE.currentItem,{})}catch(e){console.error('R186.76 dashboard refresh failed',e)}
- }).catch(e=>{console.error('R186.76 full workspace load failed',e);if(it)renderView(it,{});try{GSM_UTIL.toast('Some advanced services could not load. Retry when the connection improves.')}catch(_){}});
+   try{renderMenu($('sideMenuSearch').value||'');if(STATE.currentItem)renderView(STATE.currentItem,{})}catch(e){console.error('R186.77 dashboard refresh failed',e)}
+ }).catch(e=>{console.error('R186.77 full workspace load failed',e);if(it)renderView(it,{});try{GSM_UTIL.toast('Some advanced services could not load. Retry when the connection improves.')}catch(_){}});
 }
 function firstId(){const menu=window.GSM_MENUS[STATE.role]||window.GSM_MENUS.SUPER_ADMIN;return menu?.[0]?.items?.[0]?.id||''}
 function fillContext(){
@@ -1801,7 +1801,7 @@ function renderMenu(filter=''){const menu=window.GSM_MENUS[STATE.role]||[],$m=$(
 function findItem(id){for(const sec of (window.GSM_MENUS[STATE.role]||[])){for(const it of (sec.items||[])){if(it.id===id)return it}}return null}
 let prevId='';function ctx(){return{state:STATE,prevId,navigateToId:navigate,navigateCustom:(view,params)=>renderView({id:'custom_'+view,label:titleRole(view),view},params),doLogout:logout}}
 function navigate(id){const it=findItem(id);if(!it)return;prevId=STATE.currentId;STATE.currentId=id;STATE.currentItem=it;renderMenu($('sideMenuSearch').value||'');$('crumb').textContent=it.label;renderView(it,{});closeSidebar();highlightMobile(it)}
-function renderView(it,params){const mount=$('main');mount.innerHTML='<div class="gsm-route-progress" aria-hidden="true"></div>';try{const ui=ctx();if(typeof window.GSM_FINAL_VIEW_RESOLVER==='function'&&window.GSM_FINAL_VIEW_RESOLVER(mount,ui,it,params)===true)return;const fn=window.GSM_VIEWS[it.view];if(typeof fn==='function'){if(it.view==='register')fn(mount,ui,it);else fn(mount,ui,params);try{document.dispatchEvent(new CustomEvent('gsm:view-rendered',{detail:{view:it.view,id:it.id}}))}catch(_){}}else fallbackView(mount,it)}catch(e){console.error(e);mount.innerHTML=`<div class="card"><div class="card-b"><div class="empty-state"><div class="big">!</div><b>Screen could not render.</b><br>${GSM_UTIL.esc(e.message||e)}</div></div></div>`}}
+function renderView(it,params){const mount=$('main');mount.innerHTML='<div class="gsm-route-progress" aria-hidden="true"></div>';try{const ui=ctx();if(typeof window.GSM_FINAL_VIEW_RESOLVER==='function'&&window.GSM_FINAL_VIEW_RESOLVER(mount,ui,it,params)===true){try{document.dispatchEvent(new CustomEvent('gsm:view-rendered',{detail:{view:it.view,id:it.id}}))}catch(_){}return;}const fn=window.GSM_VIEWS[it.view];if(typeof fn==='function'){if(it.view==='register')fn(mount,ui,it);else fn(mount,ui,params);try{document.dispatchEvent(new CustomEvent('gsm:view-rendered',{detail:{view:it.view,id:it.id}}))}catch(_){}}else fallbackView(mount,it)}catch(e){console.error(e);mount.innerHTML=`<div class="card"><div class="card-b"><div class="empty-state"><div class="big">!</div><b>Screen could not render.</b><br>${GSM_UTIL.esc(e.message||e)}</div></div></div>`}}
 function fallbackView(mount,it){mount.innerHTML=window.GSM_pageHead(it.label,'Operational service screen')+`<div class="card"><div class="card-b"><div class="empty-state">This service is not available from this screen. Use the Report Center or contact the System Administrator.</div></div></div>`}
 function highlightMobile(it){qa('.mobile-bottom button').forEach(b=>b.classList.remove('active'));const v=it.view;if(v==='dashboard')q('[data-mobile="dashboard"]')?.classList.add('active');else if(v==='reportcenter')q('[data-mobile="reports"]')?.classList.add('active');else if(/student/.test(v))q('[data-mobile="students"]')?.classList.add('active');else if(/attendance/.test(v))q('[data-mobile="attendance"]')?.classList.add('active')}
 function closeSidebar(){$('sidebar').classList.remove('open');$('sidebar-overlay').classList.remove('show')}

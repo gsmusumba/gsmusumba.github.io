@@ -1,13 +1,13 @@
-/* GS MUSUMBA — R186.76 STUDENT ACCESS / LOGIN / UI PERFORMANCE SHELL.
+/* GS MUSUMBA — R186.77 STUDENT ACCESS / LOGIN / UI PERFORMANCE SHELL.
    Returning navigation uses cached shell immediately and refreshes in background.
    Supabase/API/auth responses are NEVER cached. */
 const CACHE='gsm-r186-76-student-access-login-ui-v1';
-const V='R186.76';
+const V='R186.77';
 const SHELL=[
   './index.html',
   './GS_MUSUMBA_LOGO_FAST.jpg',
   './r18661-login.css?v='+V,
-  './r18676-critical.css?v='+V,
+  './r18677-critical.css?v='+V,
   './r18661-loader.js?v='+V,
   './r186-core.js?v='+V
 ];

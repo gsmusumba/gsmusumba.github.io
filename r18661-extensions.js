@@ -4124,9 +4124,9 @@ V.teacherstudentidentification=function(mount,ctx){
  $('#t166SIDPrint',mount).onclick=()=>printRows('STUDENTS IDENTIFICATION REPORT','Class Teacher student directory',cols,rows,true);
  $('#t166SIDDownload',mount).onclick=()=>downloadCsv('GS_MUSUMBA_STUDENTS_IDENTIFICATION.csv',cols,rows);
  $('#t166SIDTemplate',mount).onclick=()=>downloadCsv('GS_MUSUMBA_STUDENT_IDENTIFICATION_UPDATE_TEMPLATE.csv',[
-  {key:'sdms_code',label:'sdms_code'},{key:'date_of_birth',label:'date_of_birth'},{key:'father_guardian_name',label:'father_guardian_name'},{key:'father_guardian_id',label:'father_guardian_id'},{key:'father_guardian_phone',label:'father_guardian_phone'},{key:'mother_guardian_name',label:'mother_guardian_name'},{key:'mother_guardian_id',label:'mother_guardian_id'},{key:'mother_guardian_phone',label:'mother_guardian_phone'},{key:'sector',label:'sector'},{key:'cell',label:'cell'},{key:'village',label:'village'},{key:'has_disease',label:'has_disease'},{key:'disease_type',label:'disease_type'},{key:'disease_details',label:'disease_details'},{key:'has_special_need',label:'has_special_need'},{key:'special_need_type',label:'special_need_type'},{key:'impairment_type',label:'impairment_type'},{key:'severity',label:'severity'},{key:'care_notes',label:'care_notes'}],[{sdms_code:'',date_of_birth:'',father_guardian_name:'',father_guardian_id:'',father_guardian_phone:'',mother_guardian_name:'',mother_guardian_id:'',mother_guardian_phone:'',sector:'',cell:'',village:'',has_disease:'',disease_type:'',disease_details:'',has_special_need:'',special_need_type:'',impairment_type:'',severity:'',care_notes:''}]);
+  {key:'sdms_code',label:'sdms_code'},{key:'full_name',label:'full_name'},{key:'date_of_birth',label:'date_of_birth'},{key:'reported_age',label:'reported_age'},{key:'boarding_type',label:'boarding_type'},{key:'father_guardian_name',label:'father_guardian_name'},{key:'father_guardian_id',label:'father_guardian_id'},{key:'father_guardian_phone',label:'father_guardian_phone'},{key:'mother_guardian_name',label:'mother_guardian_name'},{key:'mother_guardian_id',label:'mother_guardian_id'},{key:'mother_guardian_phone',label:'mother_guardian_phone'},{key:'district',label:'district'},{key:'sector',label:'sector'},{key:'cell',label:'cell'},{key:'village',label:'village'},{key:'has_disease',label:'has_disease'},{key:'disease_type',label:'disease_type'},{key:'disease_details',label:'disease_details'},{key:'has_special_need',label:'has_special_need'},{key:'special_need_type',label:'special_need_type'},{key:'impairment_type',label:'impairment_type'},{key:'severity',label:'severity'},{key:'care_notes',label:'care_notes'}],[{sdms_code:'',full_name:'',date_of_birth:'',reported_age:'',boarding_type:'',father_guardian_name:'',father_guardian_id:'',father_guardian_phone:'',mother_guardian_name:'',mother_guardian_id:'',mother_guardian_phone:'',district:'',sector:'',cell:'',village:'',has_disease:'',disease_type:'',disease_details:'',has_special_need:'',special_need_type:'',impairment_type:'',severity:'',care_notes:''}]);
  $('#t166SIDUpload',mount).onclick=()=>$('#t166SIDFile',mount).click();
- $('#t166SIDFile',mount).onchange=async e=>{const f=e.target.files&&e.target.files[0];if(!f)return;try{const parsed=parseCsv(await f.text());if(!parsed.length)throw new Error('CSV contains no data rows.');const clean=parsed.map(x=>{const y={...x};if('has_disease'in y)y.has_disease=yesNo(y.has_disease);if('has_special_need'in y)y.has_special_need=yesNo(y.has_special_need);return y});if(!clean.every(x=>x.sdms_code))throw new Error('Every upload row must contain SDMS code.');if(!confirm('Upload '+clean.length+' student profile update row(s)? Student names are not editable and incomplete rows are allowed.'))return;const d=await rpc('r166_teacher_bulk_profile_update',{p_rows:clean,p_submit:false});alert(`Processed ${d.processed||0}; updated ${d.updated||0}; failed ${d.failed||0}.`);load()}catch(err){alert(String(err&&err.message||err))}finally{e.target.value=''}};
+ $('#t166SIDFile',mount).onchange=async e=>{const f=e.target.files&&e.target.files[0];if(!f)return;try{const parsed=parseCsv(await f.text());if(!parsed.length)throw new Error('CSV contains no data rows.');const clean=parsed.map(x=>{const y={...x};if('has_disease'in y)y.has_disease=yesNo(y.has_disease);if('has_special_need'in y)y.has_special_need=yesNo(y.has_special_need);return y});if(!clean.every(x=>x.sdms_code&&(x.full_name||x.student_name)))throw new Error('Every upload row must contain both SDMS code and Student Name. Both must match the master record.');if(!confirm('Upload '+clean.length+' student profile update row(s)? SDMS CODE + STUDENT NAME will be matched together. Name mismatches are rejected; student names are never overwritten.'))return;const d=await rpc('r166_teacher_bulk_profile_update',{p_rows:clean,p_submit:false});alert(`Processed ${d.processed||0}; updated ${d.updated||0}; failed ${d.failed||0}.`);load()}catch(err){alert(String(err&&err.message||err))}finally{e.target.value=''}};
 };
 
 /* Full Student Profile — lifetime identity + annual history. */
@@ -4148,10 +4148,10 @@ V.studentprofile=function(mount,ctx,params){
    if(tab==='identity'){
     box.innerHTML=`<div class="t166-panel"><div class="t166-panel-h"><div><h3>STUDENT IDENTIFICATION</h3><small>${canI?'Editable because you are the authorized Class Teacher / admin.':'Read-only in your current role/scope.'}</small></div><div class="t166-actions t166-no-print"><button class="t166-btn purple" id="t166ProfPrint">PRINT PROFILE</button>${canI?'<button class="t166-btn gold" id="t166ProfDraft">SAVE DRAFT</button><button class="t166-btn green" id="t166ProfSubmit">SUBMIT</button>':''}</div></div><div class="t166-panel-b"><div class="t166-profile-grid">
      ${inputField('t166PSdms','SDMS CODE',s.sdms_code,'text',true)}${inputField('t166PName','STUDENT NAME',s.full_name,'text',true)}${inputField('t166PSex','SEX',s.sex,'text',true)}
-     ${inputField('t166PDob','DATE OF BIRTH',s.date_of_birth,'date',!canI)}${inputField('t166PClass','CURRENT CLASS',cur.class_code||'NO CURRENT CLASS','text',true)}${inputField('t166PStatus','PROFILE STATUS',s.identification_status,'text',true)}
+     ${inputField('t166PDob','DATE OF BIRTH',s.date_of_birth,'date',!canI)}${inputField('t166PAge','REPORTED AGE',s.reported_age,'number',!canI)}${inputField('t166PBoard','BOARDING / DAY',s.boarding_type,'text',!canI)}${inputField('t166PClass','CURRENT CLASS',cur.class_code||'NO CURRENT CLASS','text',true)}${inputField('t166PStatus','PROFILE STATUS',s.identification_status,'text',true)}
      ${inputField('t166PFName','FATHER / GUARDIAN NAME',s.father_guardian_name,'text',!canI)}${inputField('t166PFId','FATHER / GUARDIAN ID',s.father_guardian_id,'text',!canI)}${inputField('t166PFPhone','FATHER / GUARDIAN PHONE',s.father_guardian_phone,'tel',!canI)}
      ${inputField('t166PMName','MOTHER / GUARDIAN NAME',s.mother_guardian_name,'text',!canI)}${inputField('t166PMId','MOTHER / GUARDIAN ID',s.mother_guardian_id,'text',!canI)}${inputField('t166PMPhone','MOTHER / GUARDIAN PHONE',s.mother_guardian_phone,'tel',!canI)}
-     ${inputField('t166PSector','SECTOR',s.sector,'text',!canI)}${inputField('t166PCell','CELL',s.cell,'text',!canI)}${inputField('t166PVillage','VILLAGE',s.village,'text',!canI)}
+     ${inputField('t166PDistrict','DISTRICT',s.district,'text',!canI)}${inputField('t166PSector','SECTOR',s.sector,'text',!canI)}${inputField('t166PCell','CELL',s.cell,'text',!canI)}${inputField('t166PVillage','VILLAGE',s.village,'text',!canI)}
     </div></div></div>`;
     const pr=$('#t166ProfPrint',box); if(pr)pr.onclick=printProfile;
     if(canI){const dr=$('#t166ProfDraft',box),su=$('#t166ProfSubmit',box);if(dr)dr.onclick=()=>saveIdentity(false);if(su)su.onclick=()=>saveIdentity(true)}
@@ -4189,15 +4189,15 @@ V.studentprofile=function(mount,ctx,params){
   $$('.t166-tab',mount).forEach(b=>b.onclick=()=>{$$('.t166-tab',mount).forEach(x=>x.classList.remove('active'));b.classList.add('active');show(b.dataset.tab)});
   show('identity');
  }
- async function saveIdentity(submit){const s=data.student||{};const payload={sdms_code:s.sdms_code,full_name:s.full_name,date_of_birth:$('#t166PDob',mount).value||null,father_guardian_name:$('#t166PFName',mount).value.trim(),father_guardian_id:$('#t166PFId',mount).value.trim(),father_guardian_phone:$('#t166PFPhone',mount).value.trim(),mother_guardian_name:$('#t166PMName',mount).value.trim(),mother_guardian_id:$('#t166PMId',mount).value.trim(),mother_guardian_phone:$('#t166PMPhone',mount).value.trim(),sector:$('#t166PSector',mount).value.trim(),cell:$('#t166PCell',mount).value.trim(),village:$('#t166PVillage',mount).value.trim()};try{data=await rpc('r165_save_student_identification',{p_student_id:s.id,p_payload:payload,p_submit:submit});alert(submit?'Student identification submitted. Missing fields, if any, remain open for future update.':'Student identification draft saved.');draw()}catch(e){alert(String(e&&e.message||e))}}
+ async function saveIdentity(submit){const s=data.student||{};const payload={sdms_code:s.sdms_code,full_name:s.full_name,date_of_birth:$('#t166PDob',mount).value||null,reported_age:$('#t166PAge',mount).value.trim(),boarding_type:$('#t166PBoard',mount).value.trim(),father_guardian_name:$('#t166PFName',mount).value.trim(),father_guardian_id:$('#t166PFId',mount).value.trim(),father_guardian_phone:$('#t166PFPhone',mount).value.trim(),mother_guardian_name:$('#t166PMName',mount).value.trim(),mother_guardian_id:$('#t166PMId',mount).value.trim(),mother_guardian_phone:$('#t166PMPhone',mount).value.trim(),district:$('#t166PDistrict',mount).value.trim(),sector:$('#t166PSector',mount).value.trim(),cell:$('#t166PCell',mount).value.trim(),village:$('#t166PVillage',mount).value.trim()};try{data=await rpc('r165_save_student_identification',{p_student_id:s.id,p_payload:payload,p_submit:submit});alert(submit?'Student identification submitted. Missing fields, if any, remain open for future update.':'Student identification draft saved.');draw()}catch(e){alert(String(e&&e.message||e))}}
  async function saveHealth(submit){const s=data.student||{};const payload={has_disease:$('#t166HDisease',mount).value==='true',disease_type:$('#t166HDiseaseType',mount).value.trim(),disease_details:$('#t166HDiseaseDetails',mount).value.trim(),has_special_need:$('#t166HSN',mount).value==='true',special_need_type:$('#t166HSNType',mount).value.trim(),impairment_type:$('#t166HImpair',mount).value.trim(),severity:$('#t166HSeverity',mount).value.trim(),care_notes:$('#t166HNotes',mount).value.trim()};try{data=await rpc('r165_save_student_health',{p_student_id:s.id,p_payload:payload,p_submit:submit});alert(submit?'Health / Special Needs information submitted.':'Health / Special Needs draft saved.');draw();const hb=$('.t166-tab[data-tab="health"]',mount);if(hb){$$('.t166-tab',mount).forEach(x=>x.classList.remove('active'));hb.classList.add('active');const ev=new Event('click');hb.dispatchEvent(ev)}}catch(e){alert(String(e&&e.message||e))}}
  function printProfile(){const s=data.student||{},cur=data.current_enrolment||{},h=data.health||{},area=$('#printArea');if(!area)return window.print();area.innerHTML=(window.GSM_buildLetterhead?window.GSM_buildLetterhead('STUDENT IDENTIFICATION PROFILE',s.full_name+' — SDMS '+s.sdms_code,context().ay,context().term):'')+`<h2 style="text-align:center;margin:8px 0">STUDENT IDENTIFICATION PROFILE</h2><table><tbody>
   <tr><td><b>SDMS CODE</b></td><td>${esc(s.sdms_code||'')}</td><td><b>STUDENT NAME</b></td><td>${esc(s.full_name||'')}</td></tr>
   <tr><td><b>SEX</b></td><td>${esc(s.sex||'')}</td><td><b>CURRENT CLASS</b></td><td>${esc(cur.class_code||'NO CURRENT CLASS')}</td></tr>
-  <tr><td><b>DATE OF BIRTH</b></td><td>${esc(s.date_of_birth||'—')}</td><td><b>PROFILE COMPLETE</b></td><td>${esc(s.completion_percent||0)}%</td></tr>
+  <tr><td><b>DATE OF BIRTH</b></td><td>${esc(s.date_of_birth||'—')}</td><td><b>REPORTED AGE</b></td><td>${esc(s.reported_age||'—')}</td></tr><tr><td><b>BOARDING / DAY</b></td><td>${esc(s.boarding_type||'—')}</td><td><b>PROFILE COMPLETE</b></td><td>${esc(s.completion_percent||0)}%</td></tr>
   <tr><td><b>FATHER / GUARDIAN</b></td><td>${esc(s.father_guardian_name||'—')}</td><td><b>PHONE</b></td><td>${esc(s.father_guardian_phone||'—')}</td></tr>
   <tr><td><b>MOTHER / GUARDIAN</b></td><td>${esc(s.mother_guardian_name||'—')}</td><td><b>PHONE</b></td><td>${esc(s.mother_guardian_phone||'—')}</td></tr>
-  <tr><td><b>ADDRESS</b></td><td colspan="3">${esc([s.sector,s.cell,s.village].filter(Boolean).join(' / ')||'—')}</td></tr>
+  <tr><td><b>ADDRESS</b></td><td colspan="3">${esc([s.district,s.sector,s.cell,s.village].filter(Boolean).join(' / ')||'—')}</td></tr>
   ${h.redacted?'':`<tr><td><b>DISEASE</b></td><td>${h.has_disease?'YES · '+esc(h.disease_type||''):'NO / NOT RECORDED'}</td><td><b>SPECIAL NEED</b></td><td>${h.has_special_need?'YES · '+esc(h.special_need_type||''):'NO / NOT RECORDED'}</td></tr>`}
   </tbody></table>`+(window.GSM_buildSignatures?window.GSM_buildSignatures():'');window.print()}
  load();
@@ -6500,7 +6500,7 @@ V.datavault=function(mount){top('DATA VAULT');mount.innerHTML='<div class="r183-
 /* Prevent stale release labels from confusing users. */
 function fixLabels(){Array.from(document.querySelectorAll('small,span,p,div')).forEach(function(el){if(el.children.length===0&&el.textContent&&el.textContent.indexOf('GS MUSUMBA SCHOOL MANAGEMENT SYSTEM · R170')>=0)el.textContent=el.textContent.replace('GS MUSUMBA SCHOOL MANAGEMENT SYSTEM · R170','GS MUSUMBA SCHOOL MANAGEMENT SYSTEM')})}
 setTimeout(fixLabels,0);setTimeout(fixLabels,500);
-window.addEventListener('error',function(ev){try{if(document.getElementById('gsmCompatError'))return;var d=document.createElement('div');d.id='gsmCompatError';d.style.cssText='position:fixed;left:8px;right:8px;bottom:8px;z-index:99999;background:#fff1f0;border:2px solid #b42318;padding:8px;font:700 11px Arial;color:#7a1b13';d.textContent='GS MUSUMBA SCHOOL MANAGEMENT SYSTEM ERROR: '+(ev.message||'Browser compatibility/runtime error')+'. Refresh the official URL or use a current Chrome, Edge or Firefox.';document.body.appendChild(d)}catch(_){}});
+window.addEventListener('error',function(ev){try{var msg=String(ev&&ev.message||'').trim(),src=String(ev&&ev.filename||'').trim();if(!msg||/^Script error\.?$/i.test(msg))return;if(src&&/^https?:/i.test(src)&&!src.startsWith(location.origin))return;if(document.getElementById('gsmCompatError'))return;var d=document.createElement('div');d.id='gsmCompatError';d.style.cssText='position:fixed;left:8px;right:8px;bottom:8px;z-index:99999;background:#fff1f0;border:2px solid #b42318;padding:8px;font:700 11px Arial;color:#7a1b13';d.textContent='GS MUSUMBA ERROR: '+msg;document.body.appendChild(d)}catch(_){}});
 window.GSM_R183={release:'R183-PRODUCTION-STABILIZATION',backend:'SUPABASE',frontend:'GITHUB_PAGES',teacher_dashboard:'CLEAN_SINGLE_IMPLEMENTATION',legacy_workbook_data:'REMOVED'};
 try{document.documentElement.setAttribute('data-gsm-component-release','R183');document.documentElement.setAttribute('data-gsm-backend','SUPABASE')}catch(_){}
 })();
@@ -6957,7 +6957,7 @@ function retireImportedArchive(){const M=window.GSM_MENUS||{};Object.keys(M).for
 function focusOpenedServices(){const main=document.getElementById('main');if(!main)return;const apply=()=>{$$('.r132-page',main).forEach(p=>{const v=p.querySelector('#r132Viewer');if(v&&v.textContent.trim().length>20)p.classList.add('r186-service-focus')});const marks=main.querySelector('.r159-marks-shell,[class*="marks-shell"]');main.classList.toggle('r186-marks-page',!!marks)};apply();document.addEventListener('click',()=>setTimeout(apply,35),true)}
 function networkBadge(){const b=document.createElement('div');b.className='r186-net';b.textContent='NETWORK IS OFFLINE — unsaved work may not reach Supabase.';document.body.appendChild(b);const f=()=>b.classList.toggle('show',!navigator.onLine);addEventListener('online',f);addEventListener('offline',f);f()}
 function printSettingsButton(){const b=document.createElement('button');b.type='button';b.className='r186-print-settings';b.textContent='PRINT SETTINGS';b.onclick=editPrint;document.body.appendChild(b);const f=()=>b.style.display=canEditPrint()?'block':'none';[0,300,1200,3500].forEach(ms=>setTimeout(f,ms));document.addEventListener('click',f,true);window.addEventListener('focus',f,{passive:true});f()}
-function serviceWorker(){if(!('serviceWorker'in navigator)||!/^https?:$/.test(location.protocol))return;const local=/^(127\.0\.0\.1|localhost)$/.test(location.hostname);if(local){navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{});return}navigator.serviceWorker.register('./sw.js?v=R186.76').catch(()=>{})}
+function serviceWorker(){if(!('serviceWorker'in navigator)||!/^https?:$/.test(location.protocol))return;const local=/^(127\.0\.0\.1|localhost)$/.test(location.hostname);if(local){navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{});return}navigator.serviceWorker.register('./sw.js?v=R186.77').catch(()=>{})}
 function enforceDashboardAuthority(){return renderCurrentDashboardNow()}
 function cleanInternalBranding(){
  const app=document.getElementById('app'); if(!app)return;
@@ -9852,12 +9852,12 @@ function xlsxButton(root=document){
 function polish(root=document){hideOperationalNoise(root);focusEditor(root);xlsxButton(root)}
 let raf=0;const schedule=()=>{if(raf)return;raf=(window.requestAnimationFrame||setTimeout)(()=>{raf=0;polish(document)},24)};
 polish(document);new MutationObserver(schedule).observe(document.documentElement,{childList:true,subtree:true});
-window.GSM_R18673={release:'R186.76-COMPATIBILITY-LAYER',productionUrl:'https://musumba.pages.dev/',shellBeforeHeavyWorkspace:true,emailLoginDirect:true,parallelWorkspaceLoad:true,attendanceDesktopColumns:12,strongAttendanceRed:true,noiseReduced:true,editAutoFocus:true,genericTableExportAssist:true};
-/* R186.76: obsolete release attribute write suppressed; compatibility object retained. */
+window.GSM_R18673={release:'R186.77-COMPATIBILITY-LAYER',productionUrl:'https://musumba.pages.dev/',shellBeforeHeavyWorkspace:true,emailLoginDirect:true,parallelWorkspaceLoad:true,attendanceDesktopColumns:12,strongAttendanceRed:true,noiseReduced:true,editAutoFocus:true,genericTableExportAssist:true};
+/* R186.77: obsolete release attribute write suppressed; compatibility object retained. */
 })();
 
 /* ==========================================================================
-   R186.76 — DISTRICT DASHBOARD / TEACHER NAVIGATION FINAL
+   R186.77 — DISTRICT DASHBOARD / TEACHER NAVIGATION FINAL
    Competition-focused dashboards. Existing RPC/write/print authorities stay intact.
    Reports remain inside their owning services; no standalone Reports menu is added.
    ========================================================================== */
@@ -9940,12 +9940,12 @@ function renderExecutiveDashboard(mount,ctx,kind){const c=context(),isDOS=kind==
 function finalDashboard(mount,ctx){const r=role();if(r==='TEACHER')return renderTeacherDashboard(mount,ctx);if(r==='SUPER_ADMIN')return renderExecutiveDashboard(mount,ctx,'SUPER_ADMIN');if(r==='DOS')return renderExecutiveDashboard(mount,ctx,'DOS');return typeof PREV_DASH==='function'?PREV_DASH(mount,ctx):undefined}
 V.dashboard=finalDashboard;
 window.GSM_R1865_DASHBOARD=finalDashboard;
-window.GSM_R18675_DASHBOARD={release:'R186.76-DISTRICT-DASHBOARD-POLISH',reports:'INSIDE_EACH_SERVICE',teacherMenu:['Dashboard','My Timetable','Student Identification','My Students','Attendance','Marks & Assessments','Student Performance','My Club','Lesson Plans','Account'],teacherAttendance:['CLASS ATTENDANCE','SUBJECT ATTENDANCE','ABSENTEES / FOLLOW-UP'],dashboards:['SUPER_ADMIN','DOS','TEACHER'],performance:'TOP5_AND_NEED_SUPPORT5_PRIMARY_SECONDARY_ON_DEMAND',histogram:'ALL_AUTHORISED_CLASSES_BOYS_GIRLS',red:'#c93434'};
-try{document.documentElement.setAttribute('data-gsm-release','R186.76');document.documentElement.setAttribute('data-gsm-component-release','R186.76')}catch(_){}
+window.GSM_R18675_DASHBOARD={release:'R186.77-DISTRICT-DASHBOARD-POLISH',reports:'INSIDE_EACH_SERVICE',teacherMenu:['Dashboard','My Timetable','Student Identification','My Students','Attendance','Marks & Assessments','Student Performance','My Club','Lesson Plans','Account'],teacherAttendance:['CLASS ATTENDANCE','SUBJECT ATTENDANCE','ABSENTEES / FOLLOW-UP'],dashboards:['SUPER_ADMIN','DOS','TEACHER'],performance:'TOP5_AND_NEED_SUPPORT5_PRIMARY_SECONDARY_ON_DEMAND',histogram:'ALL_AUTHORISED_CLASSES_BOYS_GIRLS',red:'#c93434'};
+try{document.documentElement.setAttribute('data-gsm-release','R186.77');document.documentElement.setAttribute('data-gsm-component-release','R186.77')}catch(_){}
 })();
 
 
-/* ===== R186.76 FINAL COMPACT TABLE SEMANTICS / OLD-UI CLEANUP ===== */
+/* ===== R186.77 FINAL COMPACT TABLE SEMANTICS / OLD-UI CLEANUP ===== */
 (function(){'use strict';
  if(window.__GSM_R18675_TABLE_QA__)return;window.__GSM_R18675_TABLE_QA__=true;
  function classify(root){try{(root||document).querySelectorAll('table').forEach(function(t){
@@ -9956,18 +9956,18 @@ try{document.documentElement.setAttribute('data-gsm-release','R186.76');document
   })}catch(_){}}
  document.addEventListener('gsm:view-rendered',function(){setTimeout(function(){classify(document.getElementById('main'))},0)},{passive:true});
  classify(document.getElementById('main'));
- window.GSM_R18675={release:'R186.76-FINAL-COMPACT-CONTRAST',oldDashboardFlash:false,globalFontCompact:true,semanticColorsRestored:true,noColumnCm:1,desktopFitTables:true};
- try{document.documentElement.setAttribute('data-gsm-release','R186.76');document.documentElement.setAttribute('data-gsm-component-release','R186.76')}catch(_){}
+ window.GSM_R18675={release:'R186.77-FINAL-COMPACT-CONTRAST',oldDashboardFlash:false,globalFontCompact:true,semanticColorsRestored:true,noColumnCm:1,desktopFitTables:true};
+ try{document.documentElement.setAttribute('data-gsm-release','R186.77');document.documentElement.setAttribute('data-gsm-component-release','R186.77')}catch(_){}
 })();
 
 
-/* R186.76 PRINT HOTFIX QA MARKER — print stage visibility is restored in final CSS. */
-window.GSM_R186751_PRINT={release:'R186.76-PRINT-VISIBILITY-HOTFIX',blankPrintFixed:true,printStage:'#r18671PrintStage',legacyPrintAreaSupported:true};
-try{document.documentElement.setAttribute('data-gsm-release','R186.76');document.documentElement.setAttribute('data-gsm-component-release','R186.76')}catch(_){}
+/* R186.77 PRINT HOTFIX QA MARKER — print stage visibility is restored in final CSS. */
+window.GSM_R186751_PRINT={release:'R186.77-PRINT-VISIBILITY-HOTFIX',blankPrintFixed:true,printStage:'#r18671PrintStage',legacyPrintAreaSupported:true};
+try{document.documentElement.setAttribute('data-gsm-release','R186.77');document.documentElement.setAttribute('data-gsm-component-release','R186.77')}catch(_){}
 
 
 /* ============================================================================
-   R186.76 — STUDENT ACCESS / LOGIN READINESS / DIRECTORY FINAL AUTHORITY
+   R186.77 — STUDENT ACCESS / LOGIN READINESS / DIRECTORY FINAL AUTHORITY
    Full-school directory: SUPER_ADMIN, HEADTEACHER, DOS, DOD, SECRETARY,
    BURSAR, LIBRARIAN. Teachers remain scoped to taught/class-teacher classes.
    Bursar/Librarian receive service-needed student identifiers only, not private
@@ -10026,6 +10026,34 @@ V.r18676_students=function(mount){
 const priorAccounts=V.r146_accounts;
 if(typeof priorAccounts==='function')V.r146_accounts=function(mount,c){const out=priorAccounts(mount,c);setTimeout(async()=>{if($('#r18676LoginAudit',mount))return;const anchor=$('#r146ACStatus',mount);if(!anchor)return;const box=document.createElement('div');box.id='r18676LoginAudit';box.className='r18676-login-audit';box.innerHTML='<b>LOGIN QA</b><span>Checking active staff account linkage…</span>';anchor.insertAdjacentElement('afterend',box);try{const d=await rpc('r135_admin_user_accounts',{}),rs=(d&&d.rows)||[],active=rs.filter(x=>up(x.status)==='ACTIVE'),ready=active.filter(x=>x.auth_user_id),never=ready.filter(x=>!x.last_login_at),missing=active.filter(x=>!x.auth_user_id);box.innerHTML='<b>LOGIN QA · '+ready.length+'/'+active.length+' READY</b><span>'+missing.length+' missing Auth login · '+never.length+' linked but never signed in. Use <strong>SYNC / UPDATE ALL USERS</strong> for missing Auth only; reset one user from MANAGE when a password is the problem.</span>'}catch(err){box.innerHTML='<b>LOGIN QA</b><span>Live readiness count could not load: '+esc(err&&err.message||err)+'</span>'}},50);return out};
 
-window.GSM_R18676={release:'R186.76-STUDENT-ACCESS-LOGIN-UI',allStudentRoles:['SUPER_ADMIN','HEADTEACHER','DOS','DOD','SECRETARY','BURSAR','LIBRARIAN'],teacherScope:'TAUGHT_CLASSES_PLUS_CLASS_TEACHER',classTeacher:'FULL_PERMITTED_STUDENT_PROFILE_OPERATIONS',bursar:'ALL_STUDENT_SEARCH_SELECT_FILTER_PRINT_PAYMENT',librarian:'ALL_STUDENT_SEARCH_SELECT_BOOK_ISSUE',loginQA:true};
-try{document.documentElement.setAttribute('data-gsm-release','R186.76');document.documentElement.setAttribute('data-gsm-component-release','R186.76')}catch(_){}
+window.GSM_R18676={release:'R186.77-STUDENT-ACCESS-LOGIN-UI',allStudentRoles:['SUPER_ADMIN','HEADTEACHER','DOS','DOD','SECRETARY','BURSAR','LIBRARIAN'],teacherScope:'TAUGHT_CLASSES_PLUS_CLASS_TEACHER',classTeacher:'FULL_PERMITTED_STUDENT_PROFILE_OPERATIONS',bursar:'ALL_STUDENT_SEARCH_SELECT_FILTER_PRINT_PAYMENT',librarian:'ALL_STUDENT_SEARCH_SELECT_BOOK_ISSUE',loginQA:true};
+try{document.documentElement.setAttribute('data-gsm-release','R186.77');document.documentElement.setAttribute('data-gsm-component-release','R186.77')}catch(_){}
+})();
+
+
+/* ============================================================================
+   R186.77 — FULL-SCREEN SERVICE / MOBILE / ERROR / PRINT AUTHORITY
+   ========================================================================== */
+(function(){'use strict';
+ if(window.__GSM_R18677_SERVICE_AUTH__)return;window.__GSM_R18677_SERVICE_AUTH__=true;
+ const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+ const clean=t=>String(t||'').replace(/^(MT)(?=MY TIMETABLE)/i,'').replace(/^(MS)(?=MY STUDENTS)/i,'').replace(/^(MA)(?=MARKS)/i,'').replace(/^(SI)(?=STUDENT)/i,'').replace(/^(AT)(?=ATTENDANCE)/i,'').trim();
+ let routeHistory=[],currentRoute='';
+ function dashboardLink(){return $$('.side-link').find(x=>/^DASHBOARD$/i.test(String(x.textContent||'').trim()))||$('.mobile-bottom [data-mobile="dashboard"]')}
+ function goDashboard(){const d=dashboardLink();if(d&&d.click)d.click()}
+ function normalizeCrumb(){const c=$('#crumb');if(c){const n=clean(c.textContent);if(n&&n!==c.textContent.trim())c.textContent=n;return n}return''}
+ function ensureBar(){let b=$('#gsm77ServiceBar');if(b)return b;b=document.createElement('div');b.id='gsm77ServiceBar';b.innerHTML='<button type="button" data-gsm77-back>← BACK</button><strong data-gsm77-title>SERVICE</strong><button type="button" data-gsm77-close>CLOSE ×</button>';const content=$('#content');if(content){const main=$('#main');content.insertBefore(b,main)};b.querySelector('[data-gsm77-back]').onclick=()=>{let id=routeHistory.length>1?routeHistory[routeHistory.length-2]:'';const el=id&&$('.side-link[data-id="'+CSS.escape(id)+'"]');if(el)el.click();else goDashboard()};b.querySelector('[data-gsm77-close]').onclick=goDashboard;return b}
+ function routeIsDashboard(detail,title){return /DASHBOARD/i.test(String(title||''))||/dashboard/i.test(String(detail&&detail.view||''))||/dashboard/i.test(String(detail&&detail.id||''))}
+ function syncRoute(detail){const title=normalizeCrumb()||'SERVICE';currentRoute=String(detail&&detail.id||currentRoute||'');if(currentRoute&&routeHistory[routeHistory.length-1]!==currentRoute){routeHistory.push(currentRoute);if(routeHistory.length>12)routeHistory.shift()}const dash=routeIsDashboard(detail,title);document.body.classList.toggle('gsm77-service-focus',!dash);const b=ensureBar();b.hidden=dash;const t=b.querySelector('[data-gsm77-title]');if(t)t.textContent=title.length>34?title.slice(0,31)+'…':title;window.scrollTo({top:0,left:0,behavior:'instant'})}
+ document.addEventListener('gsm:view-rendered',e=>syncRoute(e.detail||{}));
+ const crumb=$('#crumb');if(crumb)new MutationObserver(()=>{const t=normalizeCrumb();const b=$('#gsm77ServiceBar [data-gsm77-title]');if(b&&t)b.textContent=t.length>34?t.slice(0,31)+'…':t}).observe(crumb,{childList:true,subtree:true,characterData:true});
+ /* Nested service viewers become a real screen instead of appending below cards. */
+ const nestedSel='#r132Viewer,#r132Nested,#r144SystemViewer,#r145SystemViewer,#r136bAttViewer,#r136bMarksViewer,#rLiveViewer';
+ function closeNested(v){v.classList.remove('gsm77-nested-focus');const bar=$(':scope > .gsm77-nestedbar',v);if(bar)bar.remove();v.innerHTML='';document.body.classList.remove('gsm77-nested-open')}
+ function promote(v){if(!v||v.classList.contains('gsm77-nested-focus')||!v.textContent.trim())return;v.classList.add('gsm77-nested-focus');const bar=document.createElement('div');bar.className='gsm77-nestedbar';bar.innerHTML='<button type="button">← BACK</button><strong>'+clean($('#crumb')?.textContent||'SERVICE')+'</strong><button type="button">CLOSE ×</button>';bar.children[0].onclick=()=>closeNested(v);bar.children[2].onclick=()=>closeNested(v);v.prepend(bar);document.body.classList.add('gsm77-nested-open');v.scrollTop=0}
+ const main=$('#main');if(main)new MutationObserver(()=>{$$(nestedSel,main).forEach(v=>{if(v.children.length&&v.textContent.trim())promote(v)})}).observe(main,{childList:true,subtree:true});
+ /* Generic opaque cross-origin "Script error." is logged, never shown as a false fatal banner. */
+ const rm=()=>{const d=$('#gsmCompatError');if(d&&/Script error/i.test(d.textContent||''))d.remove()};setInterval(rm,1200);
+ window.GSM_R18677={release:'R186.77-FULL-SCREEN-SERVICE-PRINT-MOBILE-UPLOAD',serviceFocus:true,uploadMatch:'SDMS_CODE_PLUS_STUDENT_NAME',genericScriptErrorSuppressed:true};
+ try{document.documentElement.setAttribute('data-gsm-release','R186.77');document.documentElement.setAttribute('data-gsm-component-release','R186.77')}catch(_){ }
 })();
