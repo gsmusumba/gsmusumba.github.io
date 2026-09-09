@@ -1,0 +1,67 @@
+GS MUSUMBA R186.73 — DISTRICT ACCEPTANCE CHECKLIST
+
+ENTRY / AUTH
+[ ] Login by registered email
+[ ] Login by username
+[ ] Login by staff code
+[ ] Login by registered telephone
+[ ] Wrong password gives controlled error
+[ ] Forgot Password sends reset request and reset page opens
+[ ] Logout clears protected session; browser Back does not reactivate it
+
+ROLES
+[ ] SUPER ADMIN/DOD authority
+[ ] HEADTEACHER dashboard + approvals
+[ ] DOS dashboard + academic services
+[ ] DOD dashboard + student affairs
+[ ] SECRETARY admin/student/staff services
+[ ] BURSAR available routes and no unsupported finance-write claim
+[ ] LIBRARIAN borrowing links student/class records
+[ ] TEACHER assigned timetable/students/attendance/marks
+
+DATA / WORKFLOW
+[ ] Student search and identification by SDMS/name
+[ ] Move students service previews and applies only after confirmation
+[ ] Two active class teachers both have class-attendance authority where configured
+[ ] Conduct records resolve to student identity
+[ ] Librarian borrower selection resolves students/classes
+[ ] Staff/post configuration allows new role/job-title records without code where the management service supports it
+[ ] Upload/import validates before write
+
+ATTENDANCE / MARKS
+[ ] Class Attendance save at bottom-left + confirmed success
+[ ] Subject Attendance save at bottom-left + confirmed success
+[ ] Daily/Weekly/Monthly/Termly monitoring
+[ ] Nursery/Primary/Secondary/Whole-School boys/girls summaries
+[ ] Strong red NOT CALLED rows remain readable
+[ ] Marks blanks do not become zero
+[ ] Marks limits/formulas/workflow remain correct
+
+TABLES / UI
+[ ] Same font family throughout
+[ ] Title > heading > label hierarchy clear
+[ ] No. column approximately 1cm where applicable
+[ ] Names and SDMS are not clipped
+[ ] Major laptop tables do not show unnecessary horizontal scroll
+[ ] Phone uses controlled horizontal scrolling only where dense data genuinely requires it
+[ ] Edit/Update/Correct takes evaluator to editable controls
+[ ] No white screen; errors have human-readable state
+
+REPORT / PRINT / EXPORT
+[ ] School profile/header correct
+[ ] AY/Term/Date correct and left aligned where required
+[ ] Prepared By / Verified By / Approved By present on official print
+[ ] Timetable one-page landscape where applicable
+[ ] Print/PDF works
+[ ] XLSX download works on timetable/attendance/marks and table pages where exporter is available
+
+PERFORMANCE / RESILIENCE
+[ ] First visit tested on weak mobile data
+[ ] Repeat visit tested with service-worker cache
+[ ] Rapidly open 20 read-only services and verify browser remains responsive
+[ ] Save actions are not double-submitted
+[ ] Browser console has no uncaught application error during the tested route journey
+[ ] Test Chrome/Edge/Firefox desktop and Chrome Android
+
+FINAL GATE
+Do not declare a checked item PASS from static code alone when it requires a live authenticated write, role authorization, external email delivery or concurrent-user measurement.

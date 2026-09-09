@@ -1,25 +1,29 @@
-GS MUSUMBA SCHOOL MANAGEMENT SYSTEM — R186.72 COMPETITION & PRODUCTION POLISH
+GS MUSUMBA SCHOOL MANAGEMENT SYSTEM — R186.74 DISTRICT DASHBOARD POLISH FINAL
 
 OFFICIAL PRODUCTION URL
 https://musumba.pages.dev/
 
-DEPLOY ALL FILES TOGETHER. DO NOT MIX WITH OLDER R186.71 ASSETS.
+DEPLOY THE FULL PACKAGE TOGETHER. DO NOT MIX R186.74 JS/CSS WITH AN OLDER RELEASE.
 
-R186.72 FINALIZES
-- Competition-clean compact UI while preserving the approved R186.71 working architecture.
-- Reduced repetitive status/authority text and removed floating PRINT SETTINGS button; Print Settings remains inside System Management.
-- Protected student names and SDMS codes from truncation; controlled horizontal scrolling on narrow screens.
-- Softer red attendance monitoring and compact cards/fonts without sacrificing readability.
-- Class + Subject Attendance Monitoring periods: DAILY, WEEKLY, MONTHLY, TERMLY.
-- Level summaries: Nursery, Primary, Secondary and Whole School — Present Boys/Girls and percentages.
-- Attendance CSV/Excel + Print/PDF outputs. Timetable CSV/Excel button added where a timetable table is available.
-- Attendance save actions remain at the lower-left after the roster with blue success confirmation.
-- Marks bottom save/submit area preserved and visually standardized.
-- 2G/Save-Data-aware heavy asset loading with one retry on flaky mobile networks.
-- Production SEO/canonical/sitemap moved to https://musumba.pages.dev/.
+R186.74 FINALIZES
+- Competition/district-focused Super Admin, DOS and Teacher dashboards.
+- Teacher visible menu: Dashboard, My Timetable, Student Identification, My Students, Attendance, Marks & Assessments, Student Performance, My Club, Lesson Plans, Account.
+- One Teacher Attendance menu with Class Attendance, Subject Attendance and Absentees / Follow-Up on the same desktop row.
+- Reports remain inside each owning service; there is no standalone Teacher Reports menu.
+- All-class Boys/Girls compact histogram for Super Admin and DOS; Teacher gets the same pattern within authorised student scope.
+- Daily attendance Boys/Girls/% summary for Nursery, Primary, Secondary and Whole School.
+- Student Performance supports Primary Top 5, Secondary Top 5, Need Support 5 and subject selection; heavy performance analysis is on-demand to protect slow networks.
+- Compact cards, tables, font hierarchy and 1366px-laptop-safe dashboard grids.
+- Strong critical red (#c93434) restored for NOT CALLED / critical states with white readable text.
+- Existing R186.73 fast authenticated shell, Save-Data/2G-aware loading, Supabase/RLS authority and centralized print/export logic are preserved.
+- Active asset/cache version advanced to R186.74.
 
 IMPORTANT
-- Supabase/API responses are never service-worker cached.
-- R186.72 does not alter database schema or production data.
-- <1 second cannot be certified for remote Supabase calls without live p50/p95 measurements on the target networks.
-- Perform authenticated browser QA for saves and role permissions before calling the competition build final.
+- Supabase/Auth/API responses are never service-worker cached.
+- R186.74 does not alter the database schema or production data.
+- Static QA validates package syntax/structure but cannot certify live 33-user concurrency, real 2G latency, write permissions or printer/browser behavior. Perform authenticated acceptance testing before district handover.
+
+SEE
+- docs/R186.74_CHANGELOG.txt
+- docs/R186.74_FINAL_STATIC_QA.txt
+- docs/R186.74_DEPLOYMENT_STEPS.txt
