@@ -1,0 +1,25 @@
+R186.76 ACCESS / LOGIN ACCEPTANCE
+
+BACKEND VERIFIED
+PASS — students RLS all-school READ includes SUPER_ADMIN/HEADTEACHER/DOS/DOD/SECRETARY/BURSAR/LIBRARIAN.
+PASS — enrollments RLS all-school READ includes same roles.
+PASS — teacher_has_class includes active teacher assignment OR class teacher mapping.
+PASS — BURSAR/LIBRARIAN student master WRITE was not granted.
+PASS — r126_find_students includes BURSAR/LIBRARIAN and preserves TEACHER class scope.
+PASS — r18676_student_directory is role-aware and returns safe identifiers/current class only.
+
+LOGIN LIVE AUDIT
+Active staff: 33
+Active user profiles: 33
+Auth-linked: 32
+Missing Auth link: 1 (IRADUKUNDA JULIETTE / LIBRARIAN)
+Unconfirmed linked Auth accounts: 0
+Currently banned linked Auth accounts: 0
+Duplicate active username/staff-code/email/normalized-phone identifiers: 0
+Auth-linked but never signed in: 15
+MANIRAHO CLEMENTINE: active profile; Auth linked; email confirmed; not banned; identifier resolution PASS for username/staff code/email/phone; last sign-in absent.
+
+SAFE REMEDIATION
+- Run SYNC / UPDATE ALL USERS once: creates only missing Auth login(s), preserves existing passwords.
+- For MANIRAHO only: MANAGE -> Generate or set temporary password -> SAVE / UPDATE ACCOUNT -> test login.
+- Do not bulk-reset all passwords unless the school explicitly intends to distribute new credentials to everyone.

@@ -1,10 +1,10 @@
-/* GS MUSUMBA R186.74 district-performance loader.
+/* GS MUSUMBA R186.76 final compact/contrast loader.
    Heavy workspace CSS/JS load in parallel AFTER authenticated shell becomes visible.
    No speculative prefetch on Save-Data/2G. */
 (function(){'use strict';
  if(window.GSM_loadAppExtensions)return;
  let promise=null;const started=performance.now();
- const APP_CSS='./r18661-app.css?v=R186.74',APP_JS='./r18661-extensions.js?v=R186.74';
+ const APP_CSS='./r18661-app.css?v=R186.76',APP_JS='./r18661-extensions.js?v=R186.76';
  const conn=()=>navigator.connection||navigator.mozConnection||navigator.webkitConnection||null;
  const slow=()=>{try{const c=conn();return !!(c&&(c.saveData||/slow-2g|2g/i.test(c.effectiveType||'')))}catch(_){return false}};
  function css(href){return new Promise((ok,bad)=>{if(document.querySelector('link[data-r18661-app]'))return ok();const l=document.createElement('link');l.rel='stylesheet';l.href=href;l.dataset.r18661App='1';l.onload=ok;l.onerror=()=>{l.remove();bad(new Error('APP_CSS_LOAD_FAILED'))};document.head.appendChild(l)})}

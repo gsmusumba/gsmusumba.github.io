@@ -5897,7 +5897,7 @@ html body .r123-close{position:absolute!important;right:12px!important;top:10px!
 
 
 /* ==========================================================================
-   R186.74 — DISTRICT COMPETITION FINAL VISUAL AUTHORITY
+   LEGACY COMPATIBILITY VISUAL LAYER — retained only for older service selectors
    Consistent typography, compact dashboards/forms, readable colors, desktop-fit monitoring.
    ========================================================================== */
 :root{--r73-navy:#0b3e66;--r73-blue:#0a76b5;--r73-gold:#d5b000;--r73-green:#176d49;--r73-red:#c93434;--r73-red-border:#a92323;--r73-ink:#132f43;--r73-muted:#5a7080;--r73-line:#aec4d2;--r73-bg:#f4f8fb}
@@ -5959,7 +5959,7 @@ html,body,#appShell,#appShell *{font-family:"Segoe UI",Arial,sans-serif}
 @media(max-width:600px){#appShell #main .r18638-card-grid,#appShell #main .r186x-actions{grid-template-columns:1fr!important}#appShell #main .r18672-att-summary{grid-template-columns:1fr 1fr!important}}
 
 /* ==========================================================================
-   R186.74 — DISTRICT DASHBOARD / TEACHER NAVIGATION VISUAL AUTHORITY
+   R186.76 — DISTRICT DASHBOARD / TEACHER NAVIGATION VISUAL AUTHORITY
    Compact, readable, laptop-safe. Strong colors are reserved for meaning.
    ========================================================================== */
 :root{
@@ -6041,6 +6041,175 @@ html,body,#appShell,#appShell *{font-family:"Segoe UI",Arial,sans-serif}
 /* Hidden compatibility routes preserve old internal navigation IDs without showing duplicate Teacher menu items. */
 .side-link[data-id="tc_classatt"],.side-link[data-id="tc_subjatt"],.side-link[data-id="tc_absentee"],.side-link[data-id="tc_marksentry"]{display:none!important}
 .side-sec:empty{display:none!important}
-/* R186.74 dashboard table semantics: only an actual NO. column is ~1 cm. */
+/* R186.76 dashboard table semantics: only an actual NO. column is ~1 cm. */
 .r18674-table th:first-child,.r18674-table td:first-child{width:90px!important;max-width:90px!important;text-align:left}
 .r18674-table.performance th:first-child,.r18674-table.performance td:first-child{width:38px!important;max-width:38px!important;text-align:center}
+
+/* ============================================================================
+   R186.76 — FINAL SYSTEM-WIDE COMPACT / CONTRAST AUTHORITY
+   Neutralises obsolete 15px/white-background reset rules without changing data,
+   permissions, saves, formulas, reports, printing or Supabase RPC authority.
+   ========================================================================== */
+:root{--r75-navy:#0b2f4f;--r75-blue:#0b78b8;--r75-blue-soft:#eaf5fc;--r75-green:#1f6b43;--r75-green-soft:#eaf6ef;--r75-gold:#c99b00;--r75-gold-soft:#fff6d6;--r75-red:#c93434;--r75-red-soft:#fff0f0;--r75-ink:#102f48;--r75-muted:#587184;--r75-line:#a9bdcb;--r75-bg:#f3f7fa;--r75-card:#fff}
+#appShell,#appShell #content,#appShell #main{font-family:"Segoe UI",Arial,sans-serif!important;color:var(--r75-ink)!important}
+#appShell #content,#appShell #main{min-width:0!important;max-width:100%!important;background:var(--r75-bg)!important}
+#appShell #main{overflow-x:hidden!important;font-size:10.5px!important}
+#appShell #main :is(p,span,label,input,select,textarea,button,td,th,li,a){font-family:"Segoe UI",Arial,sans-serif!important;font-size:10.5px!important;line-height:1.18!important}
+#appShell #main h1{font-size:19px!important;line-height:1.12!important}#appShell #main h2{font-size:16.5px!important;line-height:1.12!important}#appShell #main h3{font-size:13.5px!important;line-height:1.12!important}#appShell #main h4{font-size:12px!important;line-height:1.12!important}
+#appShell #main :is(input,select,textarea){min-height:34px!important;padding:5px 7px!important;font-size:10.5px!important;background:#fff!important;color:#102f48!important;border:1px solid #9cb2c2!important;border-radius:6px!important}
+#appShell #main button{min-height:30px!important;font-size:9.5px!important;line-height:1.1!important}
+#appShell #topbar{min-height:50px!important;height:auto!important;padding:4px 8px!important;background:#fff!important;border-bottom:1px solid #c7d5df!important}
+#appShell #topbar :is(button,input,select,.crumb,#tbUserName,#tbUserRole,.connection-pill){font-family:"Segoe UI",Arial,sans-serif!important;font-size:9.5px!important;line-height:1.1!important}
+#appShell #topbar .crumb{max-width:220px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;font-weight:900!important;color:#075c92!important}
+#appShell #topbar .ctx-select{height:34px!important;min-height:34px!important;max-width:150px!important;padding:4px 24px 4px 7px!important}
+#appShell #sidebar{font-family:"Segoe UI",Arial,sans-serif!important}
+#appShell #sidebar .side-link{min-height:36px!important;padding:6px 10px!important;gap:8px!important}
+#appShell #sidebar .side-link span:last-child{font-size:10.5px!important;line-height:1.1!important;font-weight:850!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+#appShell #sidebar .side-sec{font-size:8px!important;line-height:1.1!important;margin:6px 10px 3px!important}
+#appShell #sidebar .ico{font-size:9px!important;min-width:23px!important;width:23px!important;height:23px!important}
+
+/* Final dashboard colors/spacing — high specificity beats old global reset blocks. */
+#appShell #main.r18674-page,#appShell #main.r18675-page{background:var(--r75-bg)!important;padding:7px!important}
+#appShell #main .r18674-page-head{background:#0b78b8!important;background-image:none!important;color:#fff!important;border-color:#075983!important;padding:8px 10px!important;min-height:56px!important;margin-bottom:6px!important}
+#appShell #main .r18674-page-head :is(small,h2,p){color:#fff!important;-webkit-text-fill-color:#fff!important;background:transparent!important}
+#appShell #main .r18674-page-head small{font-size:8px!important}#appShell #main .r18674-page-head h2{font-size:15.5px!important}#appShell #main .r18674-page-head p{font-size:9px!important}
+#appShell #main .r18674-kpis{gap:5px!important;margin-bottom:6px!important}
+#appShell #main .r18674-kpi{min-height:58px!important;padding:6px 8px!important;border:1px solid var(--r75-line)!important;border-left-width:4px!important;box-shadow:none!important;background:#fff!important;background-image:none!important}
+#appShell #main .r18674-kpi.blue{background:var(--r75-blue-soft)!important;border-left-color:var(--r75-blue)!important}
+#appShell #main .r18674-kpi.navy{background:#edf3f8!important;border-left-color:var(--r75-navy)!important}
+#appShell #main .r18674-kpi.gold{background:var(--r75-gold-soft)!important;border-left-color:var(--r75-gold)!important}
+#appShell #main .r18674-kpi.green{background:var(--r75-green-soft)!important;border-left-color:var(--r75-green)!important}
+#appShell #main .r18674-kpi.amber{background:#fff3ca!important;border-left-color:var(--r75-gold)!important}
+#appShell #main .r18674-kpi.red{background:var(--r75-red)!important;border-color:#a62424!important;border-left-color:#8f1f1f!important}
+#appShell #main .r18674-kpi :is(b,span,small){background:transparent!important;color:var(--r75-ink)!important;-webkit-text-fill-color:var(--r75-ink)!important}
+#appShell #main .r18674-kpi.red :is(b,span,small){color:#fff!important;-webkit-text-fill-color:#fff!important}
+#appShell #main .r18674-kpi b{font-size:19px!important;line-height:1!important}#appShell #main .r18674-kpi span{font-size:9px!important;line-height:1.08!important;margin-top:3px!important}#appShell #main .r18674-kpi small{font-size:8px!important}
+#appShell #main .r18674-two{gap:6px!important;margin-bottom:6px!important}
+#appShell #main .r18674-panel{background:#fff!important;border:1px solid var(--r75-line)!important;border-radius:7px!important;margin-bottom:6px!important;box-shadow:none!important}
+#appShell #main .r18674-panel-head{min-height:37px!important;padding:5px 7px!important;background:#f8fbfd!important;border-bottom:1px solid #cbd8e1!important}
+#appShell #main .r18674-panel-head b{font-size:11.5px!important;color:var(--r75-navy)!important;-webkit-text-fill-color:var(--r75-navy)!important}#appShell #main .r18674-panel-head span{font-size:8.5px!important;color:var(--r75-muted)!important;-webkit-text-fill-color:var(--r75-muted)!important}
+#appShell #main .r18674-panel-body{padding:6px!important;background:#fff!important;color:var(--r75-ink)!important}
+#appShell #main .r18674-mini,#appShell #main .r18674-perf-controls button{min-height:27px!important;height:27px!important;padding:3px 7px!important;font-size:8.5px!important;background:#fff!important;color:#075581!important;border-color:#7da4bd!important}
+#appShell #main .r18674-gender-legend,#appShell #main .r18674-gender-legend *{font-size:8.5px!important;color:#304e65!important;-webkit-text-fill-color:#304e65!important}
+#appShell #main .r18674-gender-row{min-height:25px!important;grid-template-columns:35px minmax(0,1fr) 28px!important;gap:4px!important}
+#appShell #main .r18674-gender-row>strong,#appShell #main .r18674-gender-row>b{font-size:9px!important;color:#123d5d!important;-webkit-text-fill-color:#123d5d!important}
+#appShell #main .r18674-dual>div{height:8px!important;background:#edf3f7!important}#appShell #main .r18674-dual i.boys{background:#0b78b8!important}#appShell #main .r18674-dual i.girls{background:#c99b00!important}#appShell #main .r18674-dual em{font-size:7px!important;line-height:8px!important;color:#082a43!important;-webkit-text-fill-color:#082a43!important}
+#appShell #main .r18674-table-wrap{max-width:100%!important;min-width:0!important;overflow-x:hidden!important;background:#fff!important}
+#appShell #main .r18674-table{width:100%!important;min-width:0!important;max-width:100%!important;table-layout:fixed!important;border-collapse:collapse!important;background:#fff!important;color:var(--r75-ink)!important;font-size:9.2px!important}
+#appShell #main .r18674-table th{background:#0b6ea8!important;color:#fff!important;-webkit-text-fill-color:#fff!important;font-size:8.3px!important;line-height:1.05!important;padding:4px 2px!important;border-color:#8da8ba!important;white-space:normal!important}
+#appShell #main .r18674-table td{background:#fff!important;color:#183a53!important;-webkit-text-fill-color:#183a53!important;font-size:9.2px!important;line-height:1.08!important;padding:4px 3px!important;border-color:#c9d8e2!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+#appShell #main .r18674-table tbody tr:nth-child(even) td{background:#f5f9fc!important}
+#appShell #main .r18674-table:not(.performance) th:first-child,#appShell #main .r18674-table:not(.performance) td:first-child{width:auto!important;max-width:none!important;text-align:left!important}
+#appShell #main .r18674-table.performance th:first-child,#appShell #main .r18674-table.performance td:first-child,#appShell #main table.gsm-r75-no-first th:first-child,#appShell #main table.gsm-r75-no-first td:first-child{width:38px!important;max-width:38px!important;min-width:38px!important;text-align:center!important}
+#appShell #main .r18674-compact-list>div{min-height:27px!important;padding:3px 5px!important;grid-template-columns:minmax(92px,1.15fr) minmax(0,2fr) 34px!important}#appShell #main .r18674-compact-list b{font-size:9px!important}#appShell #main .r18674-compact-list span{font-size:8.3px!important}#appShell #main .r18674-compact-list strong{font-size:9.5px!important}
+#appShell #main .r18674-perf-controls label{font-size:8px!important}#appShell #main .r18674-perf-controls select{height:28px!important;min-height:28px!important;font-size:9px!important}#appShell #main .r18674-perf-box h4{font-size:9.5px!important;background:#0b557f!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+#appShell #main .r18674-empty{font-size:9px!important;min-height:36px!important;background:#f8fbfd!important;color:#536d80!important;-webkit-text-fill-color:#536d80!important}
+
+/* Restore semantic colors in older services that were washed white by legacy resets. */
+#appShell #main :is(.btn-primary,button.primary,.r18661-btn:not(.light),.r18636-btn-blue,.r169-btn.primary,.r171-btn.primary){background:#0b6fae!important;color:#fff!important;-webkit-text-fill-color:#fff!important;border-color:#07527f!important}
+#appShell #main :is(button.green,.r18636-btn-green,.r18661-btn.green){background:var(--r75-green)!important;color:#fff!important;-webkit-text-fill-color:#fff!important;border-color:#185b38!important}
+#appShell #main :is(button.red,.danger,.r18636-btn-red){background:var(--r75-red)!important;color:#fff!important;-webkit-text-fill-color:#fff!important;border-color:#9f2424!important}
+#appShell #main :is(.r1869-kpi.red,.r18674-critical-red){background:var(--r75-red)!important;color:#fff!important;-webkit-text-fill-color:#fff!important;border-color:#9f2424!important}
+#appShell #main .r1869-table tbody tr.r1869-notdone>td{background:#ffe9e9!important;color:#6d2020!important;-webkit-text-fill-color:#6d2020!important;border-color:#e1aaaa!important}
+#appShell #main .r1869-table tbody tr.r1869-notdone>td *{color:#6d2020!important;-webkit-text-fill-color:#6d2020!important;background:transparent!important}
+
+/* Global compact tables: <=8 columns fit desktop; NO. column is exactly ~1 cm. */
+#appShell #main table.gsm-r75-fit-table{width:100%!important;max-width:100%!important;min-width:0!important;table-layout:fixed!important}
+#appShell #main table.gsm-r75-fit-table th{font-size:8.7px!important;line-height:1.05!important;padding:4px 3px!important;white-space:normal!important}
+#appShell #main table.gsm-r75-fit-table td{font-size:9.5px!important;line-height:1.1!important;padding:4px 4px!important;overflow:hidden!important;text-overflow:ellipsis!important}
+#appShell #main .gsm-r75-fit-host{overflow-x:hidden!important;max-width:100%!important}
+
+/* No obsolete Quick Actions dashboard flash while final bundle is loading. */
+#appShell #main .gsm-r18675-instant-shell{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px!important;padding:7px!important;background:var(--r75-bg)!important;min-height:180px!important}
+#appShell #main .gsm-r18675-instant-shell i{display:block!important;height:54px!important;border:1px solid #d5e1e9!important;border-radius:7px!important;background:#f8fbfd!important}
+@media (min-width:1100px){#appShell #main .r18674-two{grid-template-columns:minmax(0,1.2fr) minmax(0,.95fr)!important}}
+@media (max-width:1099px){#appShell #main{overflow-x:hidden!important}#appShell #main .r18674-table-wrap{overflow-x:auto!important}#appShell #main .r18674-table{min-width:560px!important}#appShell #topbar .crumb{max-width:150px!important}}
+@media (max-width:700px){#appShell #main{font-size:10px!important;padding:5px!important}#appShell #main .r18674-kpis{grid-template-columns:repeat(2,minmax(0,1fr))!important}#appShell #main .r18674-kpi{min-height:54px!important}#appShell #main .r18674-kpi b{font-size:17px!important}#appShell #main .r18674-kpi span{font-size:8.5px!important}#appShell #main .r18674-two{grid-template-columns:1fr!important}#appShell #main .r18674-gender-grid{grid-template-columns:1fr!important}#appShell #main .r18674-performance-grid{grid-template-columns:1fr!important}#appShell #main .gsm-r18675-instant-shell{grid-template-columns:1fr!important}}
+
+
+/* ============================================================================
+   R186.76 — SYSTEM-WIDE PRINT VISIBILITY HOTFIX
+   Root cause fixed: an early legacy print rule hides body descendants with
+   visibility:hidden. R186.71 prints through #r18671PrintStage, so the final
+   stage and every descendant must explicitly restore visibility.
+   ========================================================================== */
+@media print{
+  #r18671PrintStage,
+  #r18671PrintStage *{
+    visibility:visible!important;
+  }
+  #r18671PrintStage{
+    display:block!important;
+    opacity:1!important;
+    position:static!important;
+    width:100%!important;
+    max-width:100%!important;
+    min-height:1px!important;
+    overflow:visible!important;
+    background:#fff!important;
+    color:#000!important;
+  }
+  #r18671PrintStage .r18671-print-header,
+  #r18671PrintStage .r18671-print-body,
+  #r18671PrintStage .r18671-signatures{
+    display:block!important;
+    visibility:visible!important;
+    opacity:1!important;
+  }
+  #r18671PrintStage .r18671-signatures{
+    display:grid!important;
+  }
+  #r18671PrintStage table,
+  #r18671PrintStage thead,
+  #r18671PrintStage tbody,
+  #r18671PrintStage tr,
+  #r18671PrintStage th,
+  #r18671PrintStage td{
+    visibility:visible!important;
+    opacity:1!important;
+  }
+  /* Legacy #printArea remains supported for reports that print directly. */
+  #printArea,
+  #printArea *{
+    visibility:visible!important;
+  }
+}
+
+
+/* ============================================================================
+   R186.76 — FINAL COMPACT / CONTRAST / STUDENT DIRECTORY AUTHORITY
+   ========================================================================== */
+:root{--r76-navy:#073f72;--r76-blue:#0b70aa;--r76-green:#196b43;--r76-gold:#b98c00;--r76-red:#b92f35;--r76-ink:#102f46;--r76-muted:#526c7f;--r76-line:#afc2d0;--r76-bg:#f3f7fa;--r76-soft:#f8fbfd}
+#appShell #main{font-size:10.5px!important;line-height:1.25!important;color:var(--r76-ink)!important;background:var(--r76-bg)!important}
+#appShell #main :is(h1,h2,h3,h4,h5,h6){font-family:"Segoe UI",Arial,sans-serif!important;line-height:1.12!important}
+#appShell #main h1{font-size:16px!important}#appShell #main h2{font-size:15px!important}#appShell #main h3{font-size:12px!important}#appShell #main h4{font-size:10.5px!important}
+#appShell #main :is(input,select,textarea,button){font-family:"Segoe UI",Arial,sans-serif!important;font-size:9.5px!important}
+#appShell #main :is(input:not([type="checkbox"]):not([type="radio"]),select,button){min-height:29px!important}
+#appShell #main :is(.card,.panel,[class*="-card"],[class*="-panel"]){color:var(--r76-ink)}
+#appShell #main table{color:var(--r76-ink)!important;background:#fff!important}
+#appShell #main table th{font-size:8.6px!important;line-height:1.06!important;font-weight:900!important}
+#appShell #main table td{font-size:9.3px!important;line-height:1.1!important}
+#appShell .side-link{font-size:10.5px!important;min-height:36px!important;padding-top:6px!important;padding-bottom:6px!important}
+#appShell .side-link .ico{width:22px!important;height:22px!important;flex-basis:22px!important}
+#appShell #topbar{min-height:45px!important}#appShell .crumb{font-size:10.5px!important}#appShell .ctx-select{height:31px!important;font-size:9px!important}#appShell #tbUserName{font-size:9.5px!important}#appShell #tbUserRole{font-size:7.5px!important}
+/* Never allow white text on pale status/table backgrounds. */
+#appShell #main :is(.warn,.warning,.amber,.yellow):not(button):not(.r18674-kpi):not(.r1869-kpi){color:#5d4600!important;-webkit-text-fill-color:#5d4600!important}
+#appShell #main :is(.bad,.error,.danger,.red):not(button):not(.r18674-kpi):not(.r1869-kpi){color:#781f24!important;-webkit-text-fill-color:#781f24!important}
+#appShell #main :is(.good,.success,.green):not(button):not(.r18674-kpi):not(.r1869-kpi){color:#155638!important;-webkit-text-fill-color:#155638!important}
+#appShell #main button.red,#appShell #main button.danger,#appShell #main .r18674-kpi.red,#appShell #main .r1869-kpi.red{color:#fff!important;-webkit-text-fill-color:#fff!important}
+/* Desktop page never owns horizontal overflow; only explicit wide-table containers may scroll. */
+@media(min-width:901px){html,body,#appShell,#content,#main{max-width:100%!important;overflow-x:hidden!important}#appShell #main .r18676-tablewrap{overflow-x:hidden!important}}
+
+.r18676-students{min-width:0;color:var(--r76-ink)}
+.r18676-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 10px;margin:0 0 6px;background:#0b6da5;color:#fff;border:1px solid #07537f;border-bottom:3px solid #d0a900;border-radius:7px}.r18676-head>div:first-child{min-width:0}.r18676-head small{display:block;font-size:8px;font-weight:850;letter-spacing:.05em;color:#e6f5ff}.r18676-head h2{margin:1px 0 2px!important;font-size:15px!important;color:#fff!important}.r18676-head p{margin:0;font-size:9px;color:#f2f9fd;font-weight:600}.r18676-head-actions{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}.r18676-head-actions button,.r18676-tools button,.r18676-pager button,.r18676-profile button{height:29px;border:1px solid #6e94ad;border-radius:5px;background:#fff;color:#07466e;font-size:8.5px!important;font-weight:900;padding:4px 7px;cursor:pointer;white-space:nowrap}.r18676-head-actions button.green{background:#196b43;color:#fff;border-color:#135435}
+.r18676-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin-bottom:6px}.r18676-kpis article{min-width:0;background:#fff;border:1px solid var(--r76-line);border-left:3px solid var(--r76-blue);border-radius:6px;padding:5px 7px;min-height:48px}.r18676-kpis b{display:block;font-size:16px;line-height:1;font-weight:900;color:#082f4c}.r18676-kpis span{display:block;margin-top:4px;font-size:7.8px;font-weight:900;color:#4f697a}
+.r18676-tools{display:grid;grid-template-columns:minmax(180px,1.7fr) 105px 105px 80px 105px 72px auto;gap:5px;align-items:end;padding:6px;background:#fff;border:1px solid var(--r76-line);border-radius:6px;margin-bottom:6px}.r18676-tools label{display:grid;gap:2px;min-width:0;font-size:7.8px;font-weight:900;color:#31536a}.r18676-tools input,.r18676-tools select{height:29px;min-width:0;width:100%;border:1px solid #8eacbf;border-radius:5px;background:#fff;color:#123b58;padding:3px 6px;font-size:9px!important}.r18676-state{padding:5px 7px;border:1px solid #a9c1d0;background:#eef7fc;color:#164a6b;border-radius:5px;margin-bottom:5px;font-size:8.7px;font-weight:800}.r18676-state.bad{background:#ffeded;border-color:#d79c9f;color:#7d2227!important;-webkit-text-fill-color:#7d2227!important}
+.r18676-tablewrap{max-width:100%;min-width:0;background:#fff;border:1px solid #9db4c4;border-radius:6px;overflow:hidden}.r18676-student-table{width:100%!important;min-width:0!important;max-width:100%!important;table-layout:fixed!important;border-collapse:collapse!important}.r18676-student-table th{background:#0b6398!important;color:#fff!important;-webkit-text-fill-color:#fff!important;border:1px solid #87a4b7!important;padding:4px 3px!important;white-space:normal!important}.r18676-student-table td{background:#fff!important;color:#173d57!important;-webkit-text-fill-color:#173d57!important;border:1px solid #c9d7e0!important;padding:4px 4px!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}.r18676-student-table tbody tr:nth-child(even) td{background:#f5f9fc!important}.r18676-student-table th:nth-child(1),.r18676-student-table td:nth-child(1){width:38px!important;text-align:center}.r18676-student-table th:nth-child(2),.r18676-student-table td:nth-child(2){width:106px!important}.r18676-student-table th:nth-child(3),.r18676-student-table td:nth-child(3){width:auto!important;text-align:left}.r18676-student-table th:nth-child(4),.r18676-student-table td:nth-child(4){width:45px!important;text-align:center}.r18676-student-table th:nth-child(5),.r18676-student-table td:nth-child(5){width:78px!important}.r18676-student-table th:nth-child(6),.r18676-student-table td:nth-child(6){width:55px!important;text-align:center}.r18676-student-table th:nth-child(7),.r18676-student-table td:nth-child(7){width:67px!important}.r18676-student-table th:nth-child(8),.r18676-student-table td:nth-child(8){width:92px!important}.r18676-student-table th:nth-child(9),.r18676-student-table td:nth-child(9){width:82px!important;text-align:center}.r18676-student-table td:nth-child(3) b{white-space:normal;display:block;line-height:1.1}.r18676-student-table button{height:24px!important;min-height:24px!important;padding:2px 5px!important;border:1px solid #6e97b1;background:#fff;color:#07517d;border-radius:4px;font-size:7.8px!important;font-weight:900}.r18676-pill{display:inline-flex;padding:2px 4px;border-radius:99px;font-size:7.5px;font-weight:900}.r18676-pill.good{background:#e5f4eb;color:#155d3a!important;-webkit-text-fill-color:#155d3a!important}
+.r18676-pager{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:5px 2px;font-size:8.5px;font-weight:800;color:#49677b}.r18676-pager>div{display:flex;gap:4px}.r18676-pager button:disabled{opacity:.4;cursor:not-allowed}.r18676-empty{text-align:center!important;padding:14px!important;color:#607687!important;-webkit-text-fill-color:#607687!important}
+.r18676-profile{margin-top:7px;background:#fff;border:1px solid var(--r76-line);border-radius:7px;padding:7px}.r18676-profile-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;border-bottom:1px solid #d5e0e7;padding-bottom:5px;margin-bottom:6px}.r18676-profile-head small{font-size:7.5px;color:#5a7384;font-weight:900}.r18676-profile-head h3{margin:1px 0!important;color:var(--r76-navy)!important}.r18676-profile-head p{margin:0;font-size:8.5px}.r18676-profile-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}.r18676-profile-grid>div{border:1px solid #d2dee6;border-radius:5px;padding:4px;min-width:0}.r18676-profile-grid b{display:block;font-size:7.4px;color:#49687b}.r18676-profile-grid span{display:block;font-size:9px;font-weight:800;color:#133a55;white-space:normal;overflow-wrap:anywhere;margin-top:2px}.r18676-profile-actions{display:flex;justify-content:flex-end;padding-top:6px}
+/* Librarian: search and select a student instead of memorising SDMS. */
+.r18676-lib-student-find{grid-column:1/-1;border:1px solid #a9bfce;background:#f4f9fc;border-radius:6px;padding:5px}.r18676-findline{display:grid;grid-template-columns:minmax(180px,1fr) auto minmax(240px,1.6fr);gap:5px;align-items:end}.r18676-findline label{display:grid;gap:2px;font-size:7.8px;font-weight:900;color:#31566e}.r18676-findline input,.r18676-findline select{width:100%;min-width:0;height:29px;border:1px solid #8caabd;border-radius:5px;background:#fff;padding:3px 5px}.r18676-inline-state{font-size:8px;color:#526d7f;font-weight:750;margin-top:4px}
+.r18676-login-audit{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:5px 0;padding:6px 8px;border:1px solid #9fbdcf;border-left:4px solid #0b70aa;border-radius:6px;background:#f1f8fc;color:#153f5b}.r18676-login-audit b{font-size:9.5px}.r18676-login-audit span{font-size:8.5px;font-weight:700}.r18676-login-audit strong{color:#074a75}
+@media(max-width:1150px) and (min-width:901px){.r18676-tools{grid-template-columns:minmax(160px,1.5fr) 92px 92px 66px 92px 66px auto}.r18676-student-table th:nth-child(8),.r18676-student-table td:nth-child(8){display:none}.r18676-student-table th:nth-child(2),.r18676-student-table td:nth-child(2){width:96px!important}.r18676-student-table th:nth-child(5),.r18676-student-table td:nth-child(5){width:70px!important}.r18676-student-table th:nth-child(9),.r18676-student-table td:nth-child(9){width:72px!important}}
+@media(max-width:900px){.r18676-head{align-items:flex-start;flex-direction:column}.r18676-head-actions{width:100%;justify-content:flex-start}.r18676-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.r18676-tools{grid-template-columns:repeat(2,minmax(0,1fr))}.r18676-tools .search{grid-column:1/-1}.r18676-tablewrap{overflow-x:auto!important}.r18676-student-table{min-width:720px!important;table-layout:fixed!important}.r18676-profile-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.r18676-findline{grid-template-columns:1fr}.r18676-findline button{width:max-content}}
+@media(max-width:520px){#appShell #main{font-size:10px!important}.r18676-kpis{grid-template-columns:1fr 1fr}.r18676-tools{grid-template-columns:1fr}.r18676-tools .search{grid-column:auto}.r18676-profile-grid{grid-template-columns:1fr}}
