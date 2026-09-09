@@ -1,4 +1,4 @@
-/* GS MUSUMBA R186.77 — CRITICAL AUTHENTICATED SHELL
+/* GS MUSUMBA R186.79 — CRITICAL AUTHENTICATED SHELL
    Small first-paint CSS so the role dashboard becomes usable before the full workspace bundle finishes loading. */
 :root{--gsm73-navy:#0b3e66;--gsm73-blue:#0878b8;--gsm73-gold:#d5b100;--gsm73-green:#1d6b49;--gsm73-red:#c93434;--gsm73-ink:#142d40;--gsm73-muted:#5b7180;--gsm73-line:#b9cbd8;--gsm73-bg:#f4f8fb;--gsm73-sidebar:238px}
 html,body{margin:0;min-height:100%;font-family:"Segoe UI",Arial,sans-serif;color:var(--gsm73-ink);background:var(--gsm73-bg)}
@@ -41,7 +41,7 @@ html[data-gsm-network-busy="1"]::before{content:"";position:fixed;left:0;top:0;h
 @media(max-width:900px){:root{--gsm73-sidebar:232px}#appShell #burger{display:inline-grid;place-items:center}#appShell #sidebar{transform:translateX(-100%);transition:transform .15s ease}#appShell #sidebar.open{transform:translateX(0)}#appShell #content{margin-left:0}#appShell .tb-user .user-copy{display:none}#appShell .live-status-card,#appShell .kpi-row{grid-template-columns:repeat(3,minmax(0,1fr))}.quick-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.grid2{grid-template-columns:1fr}}
 @media(max-width:600px){#appShell #main{padding:5px}#appShell #topbar{padding:4px}#appShell .crumb{max-width:120px;font-size:10.5px}#appShell .ctx-select{min-width:92px;max-width:104px;font-size:9px}#appShell .live-status-card,#appShell .kpi-row{grid-template-columns:repeat(2,minmax(0,1fr))}.quick-grid{grid-template-columns:1fr}.hero-badges{display:none}}
 
-/* R186.77 authenticated-dashboard critical paint. Full detail continues in app CSS. */
+/* R186.79 authenticated-dashboard critical paint. Full detail continues in app CSS. */
 :root{--r74-red:#c93434;--r74-blue:#0b78b8;--r74-green:#197447;--r74-gold:#c99500;--r74-navy:#073f72}
 #main.r18674-page{font-family:"Segoe UI",Arial,sans-serif;background:#f2f7fb;padding:8px;overflow-x:hidden}
 .r18674-kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}.r18674-kpi{min-width:0;min-height:62px;background:#fff;border:1px solid #9bb1c2;border-left:4px solid var(--r74-blue);border-radius:8px;padding:7px}.r18674-kpi b{display:block;font-size:21px;line-height:1;font-weight:900}.r18674-kpi span{display:block;font-size:10px;font-weight:900;margin-top:5px}.r18674-two{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:7px;min-width:0}.r18674-panel{min-width:0;background:#fff;border:1px solid #a4b8c8;border-radius:8px;overflow:hidden}.r18674-attendance-hub{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.r18674-attendance-hub>button{min-width:0;background:#fff;border:1px solid #8daac0;border-top:3px solid var(--r74-blue);border-radius:8px;padding:8px;text-align:left}.r18674-attendance-hub>button:nth-child(2){border-top-color:var(--r74-green)}.r18674-attendance-hub>button:nth-child(3){border-top-color:var(--r74-red)}
@@ -49,7 +49,7 @@ html[data-gsm-network-busy="1"]::before{content:"";position:fixed;left:0;top:0;h
 
 
 /* ============================================================================
-   R186.77 — FINAL COMPACT / CONTRAST / STUDENT DIRECTORY AUTHORITY
+   R186.79 — FINAL COMPACT / CONTRAST / STUDENT DIRECTORY AUTHORITY
    ========================================================================== */
 :root{--r76-navy:#073f72;--r76-blue:#0b70aa;--r76-green:#196b43;--r76-gold:#b98c00;--r76-red:#b92f35;--r76-ink:#102f46;--r76-muted:#526c7f;--r76-line:#afc2d0;--r76-bg:#f3f7fa;--r76-soft:#f8fbfd}
 #appShell #main{font-size:10.5px!important;line-height:1.25!important;color:var(--r76-ink)!important;background:var(--r76-bg)!important}
@@ -88,7 +88,7 @@ html[data-gsm-network-busy="1"]::before{content:"";position:fixed;left:0;top:0;h
 
 
 /* ============================================================================
-   R186.77 — FULL-SCREEN SERVICES + MOBILE FIT + PRINT ACCEPTANCE
+   R186.79 — FULL-SCREEN SERVICES + MOBILE FIT + PRINT ACCEPTANCE
    ========================================================================== */
 #gsm77ServiceBar{display:none}
 body.gsm77-service-focus #sidebar{display:none!important}
@@ -146,3 +146,98 @@ body.gsm77-nested-open{overflow:hidden!important}
  html[data-r18671-kind="timetable"] .r18671-print-body th,html[data-r18671-kind="timetable"] .r18671-print-body td{font-size:7.3pt!important;padding:2px 3px!important;line-height:1.05!important}
  html[data-r18671-kind="timetable"] .r18671-signatures{font-size:6.5pt!important;margin-top:6px!important;gap:8px!important}
 }
+
+
+/* ============================================================================
+   R186.79 — READABILITY / MOBILE / FULL-SCREEN SERVICE / PERFORMANCE AUTHORITY
+   ========================================================================== */
+:root{--r79-navy:#073f72;--r79-blue:#0b70aa;--r79-green:#176b43;--r79-red:#c93434;--r79-gold:#d2aa00;--r79-ink:#102f46;--r79-muted:#526b7c;--r79-line:#aebfca;--r79-bg:#f3f7fa}
+/* Compact means less wasted space, not microscopic text. */
+#appShell #main{font-size:12px!important;line-height:1.34!important;color:var(--r79-ink)!important}
+#appShell #main :is(p,li,td,th,input,select,textarea,button,label,small,span){text-rendering:optimizeLegibility}
+#appShell #main :is(input,select,textarea,button){font-size:11px!important;line-height:1.2!important}
+#appShell #main :is(input,select){min-height:32px!important}
+#appShell #main textarea{min-height:58px!important}
+#appShell #main label{font-size:9.5px!important;line-height:1.18!important;font-weight:850!important}
+#appShell #main table{font-size:11.5px!important;line-height:1.22!important}
+#appShell #main table th{font-size:10.5px!important;line-height:1.15!important}
+#appShell #main h1{font-size:17px!important}#appShell #main h2{font-size:15px!important}#appShell #main h3{font-size:12.5px!important}#appShell #main h4{font-size:11.5px!important}
+/* Accessible contrast on semantic cards/statuses. */
+#appShell #main :is(.r78-kpi.red,.r78-kpi.green,.r78-kpi.navy,.r18674-kpi.red,.r18674-kpi.green,.r18674-kpi.navy,.r1869-kpi.red,.r18674-critical-red){color:#fff!important;-webkit-text-fill-color:#fff!important}
+#appShell #main :is(.r78-kpi.red,.r78-kpi.green,.r78-kpi.navy,.r18674-kpi.red,.r18674-kpi.green,.r18674-kpi.navy,.r1869-kpi.red,.r18674-critical-red) *{color:#fff!important;-webkit-text-fill-color:#fff!important}
+#appShell #main :is(.r78-kpi.gold,.r18674-kpi.gold,.r18674-kpi.amber){color:#17212b!important;-webkit-text-fill-color:#17212b!important}
+#appShell #main :is(.r78-kpi.gold,.r18674-kpi.gold,.r18674-kpi.amber) *{color:#17212b!important;-webkit-text-fill-color:#17212b!important}
+/* Keep the global bar short but readable. */
+#appShell #topbar{min-height:42px!important;padding:4px 7px!important}
+#appShell #topbar .crumb{font-size:10.5px!important;max-width:190px!important;line-height:1.1!important}
+#appShell #topbar .ctx-select{height:31px!important;min-width:102px!important;max-width:136px!important;font-size:9.5px!important}
+#appShell #topbar button{min-height:30px!important;height:30px!important;font-size:9.5px!important;padding:3px 7px!important}
+#appShell #tbUserName{font-size:10.5px!important}#appShell #tbUserRole{font-size:8.5px!important}
+/* One service = one workspace. Parent dashboard/sidebar cannot compete with the active task. */
+body.gsm77-service-focus #sidebar{display:none!important}
+body.gsm77-service-focus #content{margin-left:0!important;width:100%!important;max-width:100%!important}
+body.gsm77-service-focus #main{width:100%!important;max-width:none!important;min-width:0!important;padding:6px!important}
+body.gsm77-service-focus #main> :first-child{margin-top:0!important}
+body.gsm77-service-focus .credit-footer{display:none!important}
+body.gsm77-nested-open #main>*:not(.gsm77-nested-focus){visibility:hidden!important;pointer-events:none!important}
+.gsm77-nested-focus{visibility:visible!important;pointer-events:auto!important}
+#gsm77ServiceBar strong,.gsm77-nestedbar strong{font-size:10.5px!important;letter-spacing:.01em!important}
+#gsm77ServiceBar button,.gsm77-nestedbar button{font-size:9.5px!important;min-height:30px!important}
+/* Service headers should identify the task, not consume a third of a phone screen. */
+#appShell #main :is(.r18629-pagehead,.r18676-head,.r18674-page-head,.r18638-role-head,.r18638-service-head,.r18661-hero,.r18663-id-hero){padding:7px 9px!important;min-height:0!important;margin-bottom:6px!important}
+#appShell #main :is(.r18629-pagehead,.r18676-head,.r18674-page-head,.r18638-role-head,.r18638-service-head,.r18661-hero,.r18663-id-hero) p{font-size:10.5px!important;line-height:1.25!important;margin:2px 0 0!important}
+/* My Students: identity stays readable; nonessential columns may collapse on phones. */
+.r18676-student-table th:nth-child(1),.r18676-student-table td:nth-child(1){width:44px!important;min-width:44px!important}
+.r18676-student-table th:nth-child(2),.r18676-student-table td:nth-child(2){min-width:118px!important}
+.r18676-student-table th:nth-child(3),.r18676-student-table td:nth-child(3){min-width:220px!important}
+/* Timetable first column: never stack PERIOD into individual letters. */
+#main :is(.t166-week,.r18628-week,.r176-week,.r1869-table) th:first-child,#main :is(.t166-week,.r18628-week,.r176-week,.r1869-table) td:first-child{min-width:92px!important;width:92px!important;word-break:normal!important;overflow-wrap:normal!important;white-space:normal!important}
+#main :is(.t166-week,.r18628-week) th{font-size:10px!important}#main :is(.t166-week,.r18628-week) td{font-size:10.5px!important}
+/* Keep forms fit-to-content on desktop; use full width where the task needs it. */
+#appShell #main :is(.r18629-formgrid,.r176-student-editor,.r18676-profile-grid){gap:7px!important}
+#appShell #main :is(.r18629-formgrid,.r176-student-editor,.r18676-profile-grid) :is(input,select,textarea){width:100%!important;min-width:0!important;box-sizing:border-box!important}
+/* Avoid accidental horizontal page overflow; only the explicit table wrapper scrolls. */
+#appShell #main{overflow-x:hidden!important}
+#appShell #main :is(.tbl-wrap,.table-wrap,.r18676-tablewrap,.r176-table-wrap,.t166-table-wrap,.r18674-table-wrap,.r18638-table-wrap,.r1869-tablewrap){max-width:100%!important;overflow-x:auto!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior-inline:contain!important}
+/* Print stage only: hide application chrome and preserve report content. */
+@media print{
+ body>*:not(#r18671PrintStage):not(#printArea){visibility:hidden!important}
+ #r18671PrintStage,#r18671PrintStage *,#printArea,#printArea *{visibility:visible!important}
+ #r18671PrintStage,#printArea{position:absolute!important;left:0!important;top:0!important;width:100%!important;margin:0!important}
+}
+@media(max-width:900px){
+ #appShell #main{font-size:13px!important;line-height:1.38!important;padding:5px!important}
+ #appShell #main :is(input,select,textarea,button){font-size:12.5px!important}
+ #appShell #main :is(input,select){min-height:40px!important}
+ #appShell #main button{min-height:40px!important}
+ #appShell #main label{font-size:10.5px!important}
+ #appShell #main table{font-size:12px!important}
+ #appShell #main table th{font-size:11px!important}
+ #appShell #topbar{min-height:44px!important;flex-wrap:nowrap!important;overflow:hidden!important}
+ #appShell #topbar .crumb{font-size:11px!important;max-width:110px!important}
+ #appShell #topbar .ctx-select{height:38px!important;min-width:104px!important;max-width:126px!important;font-size:11px!important}
+ #appShell #topbar button{height:38px!important;min-height:38px!important;font-size:10.5px!important}
+ #gsm77ServiceBar{min-height:42px!important;padding:4px 6px!important}
+ #gsm77ServiceBar strong{font-size:11.5px!important}
+ #gsm77ServiceBar button{min-height:34px!important;height:34px!important;font-size:10px!important}
+ #main :is(.t166-week,.r18628-week){min-width:720px!important}
+ #main :is(.t166-week,.r18628-week) th:first-child,#main :is(.t166-week,.r18628-week) td:first-child{min-width:98px!important;width:98px!important}
+}
+@media(max-width:600px){
+ #appShell #main{font-size:13.5px!important}
+ #appShell #main :is(.r18629-formgrid,.r176-student-editor,.r18676-profile-grid,.r18676-tools,.r18629-summary){grid-template-columns:1fr!important}
+ #appShell #main :is(.r18629-pagehead,.r18676-head,.r18674-page-head,.r18638-role-head,.r18638-service-head,.r18661-hero,.r18663-id-hero) h2{font-size:15px!important}
+ #appShell #main :is(.r18629-pagehead,.r18676-head,.r18674-page-head,.r18638-role-head,.r18638-service-head,.r18661-hero,.r18663-id-hero) p{font-size:11px!important}
+ .r18676-student-table{min-width:560px!important}
+ .r18676-student-table th:nth-child(4),.r18676-student-table td:nth-child(4),
+ .r18676-student-table th:nth-child(5),.r18676-student-table td:nth-child(5),
+ .r18676-student-table th:nth-child(7),.r18676-student-table td:nth-child(7),
+ .r18676-student-table th:nth-child(8),.r18676-student-table td:nth-child(8){display:none!important}
+ .r18676-student-table th:nth-child(3),.r18676-student-table td:nth-child(3){min-width:190px!important}
+ .r18676-student-table th:nth-child(6),.r18676-student-table td:nth-child(6){min-width:64px!important}
+ .r18676-student-table th:nth-child(9),.r18676-student-table td:nth-child(9){min-width:92px!important}
+ /* Two-column teacher dashboard cards on normal phones; one column on very narrow screens. */
+ .r18630-quickgrid,.r78-shortcuts{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
+ .r18630-quickcard,.r78-shortcuts>button{min-height:92px!important;padding:10px!important}
+}
+@media(max-width:390px){.r18630-quickgrid,.r78-shortcuts{grid-template-columns:1fr!important}}
