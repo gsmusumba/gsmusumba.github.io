@@ -1,4 +1,4 @@
-/* GS MUSUMBA R186.84 — LEAN TEACHER PORTAL
+/* GS MUSUMBA R186.85 — LEAN TEACHER PORTAL
    Teacher-only authenticated UI. Heavy legacy workspace bundles are not loaded for TEACHER.
    Contrast authority: colored backgrounds => white text; white/light backgrounds => dark navy text. */
 :root{
@@ -17,8 +17,8 @@
 .t83-page input:focus,.t83-page select:focus,.t83-page textarea:focus{border-color:var(--t83-blue);box-shadow:0 0 0 2px rgba(11,112,170,.12)}
 .t83-page input[readonly],.t83-page select:disabled{background:#eef3f6;color:#425c6d}
 
-.t83-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 6px;min-width:0}
-.t83-head-copy{min-width:0}.t83-head small{display:block;color:#5b7485;font-size:8px;font-weight:900;letter-spacing:.2px;text-transform:uppercase}.t83-head h2{margin:1px 0 0!important;color:var(--t83-navy)!important;font-size:16px!important;white-space:normal}.t83-head p{margin:2px 0 0;font-size:9px;color:var(--t83-muted);font-weight:700}
+.t83-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 6px;min-width:0;padding:7px 9px;border-radius:8px;background:linear-gradient(90deg,var(--t83-navy),var(--t83-blue));border-bottom:3px solid #d5a900;color:#fff!important}
+.t83-head-copy{min-width:0}.t83-head small{display:block;color:#e8f6ff!important;font-size:8px;font-weight:900;letter-spacing:.2px;text-transform:uppercase}.t83-head h2{margin:1px 0 0!important;color:#fff!important;-webkit-text-fill-color:#fff!important;font-size:16px!important;white-space:normal}.t83-head p{margin:2px 0 0;font-size:9px;color:#f1f8fc!important;-webkit-text-fill-color:#f1f8fc!important;font-weight:700}
 .t83-actions{display:flex;gap:4px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
 .t83-btn{min-height:30px;border:0;border-radius:6px;padding:5px 9px;font-weight:900!important;white-space:nowrap;box-shadow:none}
 #appShell #main .t83-btn.blue{background:var(--t83-blue)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}#appShell #main .t83-btn.navy{background:var(--t83-navy)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}#appShell #main .t83-btn.green{background:var(--t83-green)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}#appShell #main .t83-btn.red{background:var(--t83-red)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}#appShell #main .t83-btn.purple{background:var(--t83-purple)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}#appShell #main .t83-btn.gold{background:var(--t83-gold)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}#appShell #main .t83-btn.black{background:var(--t83-black)!important;color:#fff!important;-webkit-text-fill-color:#fff!important}#appShell #main .t83-btn.light{background:#fff!important;color:var(--t83-navy)!important;-webkit-text-fill-color:var(--t83-navy)!important;border:1px solid #8faabb!important}
@@ -26,7 +26,6 @@
 
 .t83-flash{display:none;margin:0 0 6px;border-radius:6px;padding:6px 8px;font-size:9px;font-weight:850;border:1px solid transparent}
 .t83-flash.show{display:block}.t83-flash.success{background:#e7f6ed;color:#145c3b;border-color:#86c5a5}.t83-flash.error{background:#fdeced;color:#9d2028;border-color:#e3a4aa}.t83-flash.info{background:#edf6fb;color:#0b5782;border-color:#9bc3d9}.t83-flash.warn{background:#fff7d6;color:#6d5100;border-color:#d9bd55}
-.t83-skeleton{min-height:54px;border-radius:7px;background:linear-gradient(90deg,#eaf1f5 25%,#f8fbfd 45%,#eaf1f5 65%);background-size:250% 100%;animation:t83shimmer 1s linear infinite}@keyframes t83shimmer{to{background-position:-250% 0}}
 
 /* Compact equal KPI cards: four on one phone row whenever possible. */
 .t83-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin:0 0 6px}
@@ -82,7 +81,7 @@
  .t83-kpis{grid-template-columns:repeat(4,minmax(0,1fr));gap:3px}.t83-kpi{height:64px;padding:5px 2px;border-radius:6px}.t83-kpi strong{font-size:16px}.t83-kpi span{font-size:6.7px;letter-spacing:-.1px}.t83-kpi small{display:none}
  .t83-quick{grid-template-columns:repeat(4,minmax(0,1fr));gap:3px}.t83-quick button{min-height:43px;font-size:7px;padding:3px}
  .t83-toolbar{grid-template-columns:repeat(3,minmax(0,1fr));gap:3px}.t83-toolbar .t83-search{grid-column:1/-1}.t83-toolbar input,.t83-toolbar select{min-height:29px;font-size:8px}
- .t83-status-tabs{gap:3px;flex-wrap:nowrap;overflow-x:auto;padding-bottom:2px}.t83-status-tabs button{flex:0 0 auto;font-size:7px;padding:3px 6px}
+ .t83-status-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px;overflow:visible;padding:0}.t83-status-tabs button{min-width:0;width:100%;font-size:6.8px;padding:3px 3px;white-space:normal}
  .t83-desktop-only{display:none!important}.t83-mobile-list{display:block}
  .t83-form-grid,.t83-form-grid.two{grid-template-columns:repeat(2,minmax(0,1fr));gap:4px}.t83-span2,.t83-span4{grid-column:1/-1}.t83-profile-summary{grid-template-columns:1fr}.t83-profile-summary .score{text-align:left}
  .t83-class-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:4px}.t83-class-card{padding:6px}.t83-class-card .actions .t83-btn{flex:1 1 auto}
@@ -92,7 +91,7 @@
 }
 @media(max-width:360px){.t83-kpis{grid-template-columns:repeat(4,minmax(0,1fr))}.t83-kpi{height:60px}.t83-kpi strong{font-size:14px}.t83-kpi span{font-size:6px}.t83-form-grid,.t83-form-grid.two{grid-template-columns:1fr}.t83-class-grid{grid-template-columns:1fr 1fr}}
 
-/* R186.84 SHELL + CONTRAST AUTHORITY — teacher services keep the normal navigation shell. */
+/* R186.85 SHELL + CONTRAST AUTHORITY — teacher services keep the normal navigation shell. */
 body[data-t83-view] #appShell #sidebar{visibility:visible!important}
 @media(min-width:901px){
  body[data-t83-view] #appShell #sidebar{display:block!important;transform:none!important;width:var(--gsm73-sidebar)!important}
@@ -110,3 +109,99 @@ body[data-t83-view] #appShell #sidebar{visibility:visible!important}
  #content{margin:0!important}.t83-page{padding:0!important;background:#fff!important}.t83-panel{border-color:#777}.t83-mobile-list{display:none!important}.t83-desktop-only{display:block!important}.t83-table{font-size:7pt}.t83-table th{background:#e7edf1!important;color:#000!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
  .t83-tt-cell{color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
+
+/* ================= R186.85 DEEP-AUDIT AUTHORITY =================
+   Loaded after r18679-critical.css. These selectors intentionally outrank
+   legacy global !important rules for the authenticated TEACHER workspace only. */
+html[data-gsm-auth-state="APP"] body[data-t83-view] #appShell #main.t83-page{
+  font-family:"Segoe UI",Arial,sans-serif!important;
+  min-width:0!important;
+}
+html[data-gsm-auth-state="APP"] body[data-t83-view] #appShell #main.t83-page :is(button,input,select,textarea){
+  font-family:"Segoe UI",Arial,sans-serif!important;
+  font-size:10px!important;
+  line-height:1.15!important;
+}
+html[data-gsm-auth-state="APP"] body[data-t83-view] #appShell #main.t83-page button{
+  min-height:30px!important;height:auto!important;
+}
+html[data-gsm-auth-state="APP"] body[data-t83-view] #appShell #main.t83-page :is(input:not([type="checkbox"]):not([type="radio"]),select){
+  min-height:31px!important;height:auto!important;
+}
+html[data-gsm-auth-state="APP"] body[data-t83-view] #appShell #main.t83-page table.t83-table{
+  width:100%!important;max-width:100%!important;font-size:8.8px!important;line-height:1.15!important;
+}
+html[data-gsm-auth-state="APP"] body[data-t83-view] #appShell #main.t83-page table.t83-table th{
+  font-size:8px!important;line-height:1.08!important;color:#fff!important;-webkit-text-fill-color:#fff!important;
+}
+html[data-gsm-auth-state="APP"] body[data-t83-view] #appShell #main.t83-page table.t83-table td{
+  font-size:8.8px!important;line-height:1.15!important;color:var(--t83-ink)!important;-webkit-text-fill-color:var(--t83-ink)!important;
+}
+html[data-gsm-auth-state="APP"] body[data-t83-view] #appShell #main.t83-page .t83-head :is(small,h2,p){
+  color:#fff!important;-webkit-text-fill-color:#fff!important;
+}
+/* Mandatory user contrast rule: every strong color has white text. */
+html[data-gsm-auth-state="APP"] body[data-t83-view] #appShell #main.t83-page :is(
+ .t83-kpi.blue,.t83-kpi.green,.t83-kpi.red,.t83-kpi.purple,.t83-kpi.navy,.t83-kpi.gold,.t83-kpi.black,
+ .t83-btn.blue,.t83-btn.green,.t83-btn.red,.t83-btn.purple,.t83-btn.navy,.t83-btn.gold,.t83-btn.black,
+ .t83-quick button,.t83-pill.complete,.t83-pill.incomplete,.t83-pill.notstarted,.t83-pill.ready,.t83-pill.verified,
+ .t83-subj-math,.t83-subj-eng,.t83-subj-kin,.t83-subj-fre,.t83-subj-swa,.t83-subj-sci,.t83-subj-hist,.t83-subj-geo,.t83-subj-sre,.t83-subj-ent,.t83-subj-ict,.t83-subj-pes,.t83-subj-art,.t83-subj-other
+){color:#fff!important;-webkit-text-fill-color:#fff!important}
+html[data-gsm-auth-state="APP"] body[data-t83-view] #appShell #main.t83-page :is(
+ .t83-kpi.blue,.t83-kpi.green,.t83-kpi.red,.t83-kpi.purple,.t83-kpi.navy,.t83-kpi.gold,.t83-kpi.black,
+ .t83-quick button
+) *{color:#fff!important;-webkit-text-fill-color:#fff!important}
+/* Light surfaces always retain dark readable text. */
+html[data-gsm-auth-state="APP"] body[data-t83-view] #appShell #main.t83-page :is(.t83-panel,.t83-mobile-card,.t83-mini-kpi,.t83-class-card,.t83-profile-summary,.t83-empty,.t85-inline-state,.t85-count){
+  color:var(--t83-ink)!important;-webkit-text-fill-color:var(--t83-ink)!important;
+}
+.t85-inline-state,.t85-profile-opening,.t85-count{
+  border:1px solid #b8cad5;border-radius:7px;background:#fff;padding:9px;color:var(--t83-ink);font-size:8.8px;font-weight:800;
+}
+.t85-inline-error{border:1px solid #e1a7ac;border-radius:7px;background:#fdeced;padding:8px;color:#92242b!important;font-size:8.5px;font-weight:850}
+.t85-profile-opening{display:flex;align-items:center;justify-content:space-between;gap:8px;border-left:4px solid var(--t83-blue)}
+.t85-profile-opening b{color:var(--t83-navy)!important;font-size:10px}.t85-profile-opening span{color:var(--t83-muted)!important;font-size:8px}
+.t85-count{display:flex;align-items:center;justify-content:center;min-height:31px;padding:5px 7px;color:var(--t83-navy)!important;font-weight:950}
+.t85-global-notice{position:fixed;top:10px;left:50%;transform:translate(-50%,-14px);z-index:9999;max-width:min(620px,92vw);opacity:0;pointer-events:none;border-radius:7px;padding:8px 11px;background:#0b4f7a;color:#fff!important;font:850 9px/1.25 "Segoe UI",Arial,sans-serif;box-shadow:0 4px 18px rgba(0,0,0,.18);transition:.14s ease}
+.t85-global-notice.show{opacity:1;transform:translate(-50%,0)}.t85-global-notice.error{background:var(--t83-red)}.t85-global-notice.warn{background:var(--t83-gold)}.t85-global-notice.success{background:var(--t83-green)}
+.t83-roster-tools{grid-template-columns:minmax(240px,1fr) 150px}
+.t83-table-wrap .t83-table col{min-width:0}
+.t83-table thead th{position:sticky;top:0;z-index:2}
+.t83-roster-table td:nth-child(1),.t83-roster-table td:nth-child(4),.t83-roster-table td:nth-child(5),
+.t83-ident-table td:nth-child(2),.t83-ident-table td:nth-child(3),.t83-ident-table td:nth-child(5),.t83-ident-table td:nth-child(6),
+.t83-att-table td:nth-child(1),.t83-att-table td:nth-child(4){text-align:center}
+.t83-roster-table td:nth-child(2),.t83-ident-table td:nth-child(4),.t83-att-table td:nth-child(6){overflow-wrap:anywhere}
+
+/* Never allow an old service-focus class to remove teacher navigation. */
+body[data-t83-view].gsm77-service-focus #appShell #sidebar,
+body[data-t83-view].gsm77-nested-open #appShell #sidebar{display:block!important;visibility:visible!important}
+@media(min-width:901px){
+ html[data-gsm-auth-state="APP"] body[data-t83-view] #appShell #sidebar{display:block!important;visibility:visible!important;transform:none!important}
+ html[data-gsm-auth-state="APP"] body[data-t83-view] #appShell #content{margin-left:var(--gsm73-sidebar)!important;width:auto!important;min-width:0!important}
+ html[data-gsm-auth-state="APP"] body[data-t83-view] #appShell #topbar{display:flex!important}
+}
+@media(max-width:900px){
+ html[data-gsm-auth-state="APP"] body[data-t83-view] #appShell #sidebar{display:block!important;visibility:visible!important}
+ html[data-gsm-auth-state="APP"] body[data-t83-view] #appShell #content{margin-left:0!important;width:100%!important;min-width:0!important}
+}
+@media(max-width:700px){
+ html[data-gsm-auth-state="APP"] body[data-t83-view] #appShell #main.t83-page{padding:4px!important}
+ html[data-gsm-auth-state="APP"] body[data-t83-view] #appShell #main.t83-page button{min-height:34px!important;font-size:8px!important;padding:4px 6px!important}
+ html[data-gsm-auth-state="APP"] body[data-t83-view] #appShell #main.t83-page :is(input:not([type="checkbox"]):not([type="radio"]),select){min-height:34px!important;font-size:8.5px!important}
+ .t83-kpis{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:3px!important}
+ .t83-kpi{height:61px!important;min-height:61px!important;padding:4px 2px!important}
+ .t83-kpi strong{font-size:15px!important}.t83-kpi span{font-size:6.3px!important;line-height:1.05!important}
+ .t83-status-tabs{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:3px!important;overflow:visible!important}
+ .t83-status-tabs button{width:100%!important;min-width:0!important;white-space:normal!important;min-height:31px!important}
+ .t83-toolbar{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:3px!important}.t83-toolbar .t83-search{grid-column:1/-1!important}
+ .t83-roster-tools{grid-template-columns:minmax(0,1fr) 100px!important}.t83-roster-tools .t83-search{grid-column:auto!important}
+ .t85-count{min-height:34px!important;font-size:7px!important;padding:3px!important}
+ .t83-head{padding:6px!important}.t83-head h2{font-size:13px!important}.t83-head p{font-size:7.6px!important}.t83-head small{font-size:6.8px!important}
+ .t83-mobile-card{padding:6px!important;margin-bottom:4px!important}.t83-mobile-card b{font-size:9.2px!important}.t83-mobile-card .meta{font-size:7.5px!important}
+ .t83-form-tabs{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important}.t83-form-tabs button{width:100%!important}
+}
+@media(max-width:360px){
+ .t83-kpi{height:58px!important;min-height:58px!important}.t83-kpi strong{font-size:14px!important}.t83-kpi span{font-size:5.8px!important}
+ .t83-roster-tools{grid-template-columns:1fr!important}.t83-roster-tools .t83-search{grid-column:1!important}
+}
+

@@ -1825,6 +1825,13 @@ function login(id,pw){REMEMBER_SESSION=!!($('rememberMe')&&$('rememberMe').check
 function localPreview(){STATE.preview=true;STATE.live=false;STATE.role='SUPER_ADMIN';STATE.backendRole='SUPER_ADMIN';STATE.ay=GSM_REF.activeYearName();STATE.term=GSM_REF.activeTermName(STATE.ay);const me=GSM_REF.REF.staff.find(s=>String(s.ROLE_OR_POSITION).toUpperCase()==='DOD')||GSM_REF.REF.staff[0];STATE.user={name:me?me.FULL_NAME:'GS MUSUMBA SCHOOL MANAGEMENT SYSTEM ADMIN',staffId:me?String(me.STAFF_ID):'',email:me?me.EMAIL:''};enterApp()}
 async function enterApp(){
  const login=$('loginScreen'),app=$('appShell'),msg=$('loginMessage'),mount=$('main');
+ const isTeacher=STATE.role==='TEACHER';
+ /* R186.85: TEACHER must load its lean CSS + JS before the authenticated shell paints.
+    This removes the legacy-dashboard/menu race and the flash of broken styles. */
+ if(isTeacher&&typeof window.GSM_loadAppExtensions==='function'&&!window.__GSM_R18685_TEACHER__){
+   try{await window.GSM_loadAppExtensions()}
+   catch(e){console.error('R186.85 teacher workspace load failed',e);throw new Error('TEACHER_WORKSPACE_LOAD_FAILED')}
+ }
  try{document.documentElement.setAttribute('data-gsm-auth-state','APP')}catch(_){}
  if(msg){msg.textContent='';msg.style.display='none';}
  if(login){login.style.setProperty('display','none','important');login.setAttribute('aria-hidden','true');}
@@ -1834,10 +1841,13 @@ async function enterApp(){
  const id=firstId(),it=findItem(id);
  if(it){prevId=STATE.currentId;STATE.currentId=id;STATE.currentItem=it;$('crumb').textContent=it.label;}
  renderMenu();if(it)highlightMobile(it);
- /* R186.81 SPEED AUTHORITY: paint the canonical core dashboard immediately after auth.
-    Heavy service CSS/JS loads in the background and must not delay sign-in. */
- if(it){try{renderView(it,{})}catch(e){console.error('R186.81 immediate dashboard render failed',e)}}
- else if(mount)mount.innerHTML='<div class="gsm-r18675-instant-shell" aria-hidden="true"><i></i><i></i><i></i></div>';
+ if(it){try{renderView(it,{})}catch(e){console.error('R186.85 immediate view render failed',e)}}
+ else if(mount)mount.innerHTML='<div class="empty-state"><b>No authorised service is available.</b></div>';
+ if(isTeacher){
+   try{document.documentElement.setAttribute('data-gsm-full-workspace','ready')}catch(_){}
+   return true;
+ }
+ /* Non-teacher roles keep their existing background workspace loading behavior. */
  const ready=(typeof window.GSM_loadAppExtensions==='function')?window.GSM_loadAppExtensions():Promise.resolve(true);
  ready.then(()=>{
    try{document.documentElement.setAttribute('data-gsm-full-workspace','ready')}catch(_){}
@@ -1845,8 +1855,9 @@ async function enterApp(){
      const keepId=STATE.currentId;renderMenu($('sideMenuSearch').value||'');
      const fresh=findItem(keepId)||findItem(STATE.currentItem&&STATE.currentItem.id)||findItem(firstId());
      if(fresh){STATE.currentItem=fresh;STATE.currentId=fresh.id;$('crumb').textContent=fresh.label;renderMenu($('sideMenuSearch').value||'');renderView(fresh,{})}
-   }catch(e){console.error('R186.81 workspace refresh failed',e)}
- }).catch(e=>{console.error('R186.81 full workspace load failed',e);try{GSM_UTIL.toast('Advanced services are still loading. Core dashboard remains available.')}catch(_){}});
+   }catch(e){console.error('R186.85 workspace refresh failed',e)}
+ }).catch(e=>{console.error('R186.85 full workspace load failed',e);try{GSM_UTIL.toast('Advanced services are unavailable. Retry after checking the network.')}catch(_){}});
+ return true;
 }
 function firstId(){const menu=window.GSM_MENUS[STATE.role]||window.GSM_MENUS.SUPER_ADMIN;return menu?.[0]?.items?.[0]?.id||''}
 function fillContext(){
@@ -1862,7 +1873,7 @@ function renderMenu(filter=''){const menu=window.GSM_MENUS[STATE.role]||[],$m=$(
 function findItem(id){for(const sec of (window.GSM_MENUS[STATE.role]||[])){for(const it of (sec.items||[])){if(it.id===id)return it}}return null}
 let prevId='';function ctx(){return{state:STATE,prevId,navigateToId:navigate,navigateCustom:(view,params)=>renderView({id:'custom_'+view,label:titleRole(view),view},params),doLogout:logout}}
 function navigate(id){const it=findItem(id);if(!it)return;prevId=STATE.currentId;STATE.currentId=id;STATE.currentItem=it;renderMenu($('sideMenuSearch').value||'');$('crumb').textContent=it.label;renderView(it,{});closeSidebar();highlightMobile(it)}
-function renderView(it,params){const mount=$('main');mount.innerHTML=STATE.role==='TEACHER'?'':'<div class="gsm-route-progress" aria-hidden="true"></div>';try{const ui=ctx();if(String(it&&it.view||'').toLowerCase()==='dashboard'&&STATE.role==='TEACHER'&&!window.__GSM_R18684_TEACHER__){mount.innerHTML='<div class="gsm-r18675-instant-shell" aria-hidden="true"><i></i><i></i><i></i></div>';return;}if(String(it&&it.view||'').toLowerCase()==='dashboard'&&typeof window.GSM_R18678_DASHBOARD_RENDER==='function'&&window.GSM_R18678_DASHBOARD_RENDER(mount,ui)===true){try{document.dispatchEvent(new CustomEvent('gsm:view-rendered',{detail:{view:it.view,id:it.id,authority:'R186.81'}}))}catch(_){}return;}if(typeof window.GSM_FINAL_VIEW_RESOLVER==='function'&&window.GSM_FINAL_VIEW_RESOLVER(mount,ui,it,params)===true){try{document.dispatchEvent(new CustomEvent('gsm:view-rendered',{detail:{view:it.view,id:it.id}}))}catch(_){}return;}const fn=window.GSM_VIEWS[it.view];if(typeof fn==='function'){if(it.view==='register')fn(mount,ui,it);else fn(mount,ui,params);try{document.dispatchEvent(new CustomEvent('gsm:view-rendered',{detail:{view:it.view,id:it.id}}))}catch(_){}}else fallbackView(mount,it)}catch(e){console.error(e);mount.innerHTML=`<div class="card"><div class="card-b"><div class="empty-state"><div class="big">!</div><b>Screen could not render.</b><br>${GSM_UTIL.esc(e.message||e)}</div></div></div>`}}
+function renderView(it,params){const mount=$('main');mount.innerHTML=STATE.role==='TEACHER'?'':'<div class="gsm-route-progress" aria-hidden="true"></div>';try{const ui=ctx();if(String(it&&it.view||'').toLowerCase()==='dashboard'&&STATE.role==='TEACHER'&&!window.__GSM_R18685_TEACHER__){mount.innerHTML='<div class="gsm-r18675-instant-shell" aria-hidden="true"><i></i><i></i><i></i></div>';return;}if(String(it&&it.view||'').toLowerCase()==='dashboard'&&typeof window.GSM_R18678_DASHBOARD_RENDER==='function'&&window.GSM_R18678_DASHBOARD_RENDER(mount,ui)===true){try{document.dispatchEvent(new CustomEvent('gsm:view-rendered',{detail:{view:it.view,id:it.id,authority:'R186.81'}}))}catch(_){}return;}if(typeof window.GSM_FINAL_VIEW_RESOLVER==='function'&&window.GSM_FINAL_VIEW_RESOLVER(mount,ui,it,params)===true){try{document.dispatchEvent(new CustomEvent('gsm:view-rendered',{detail:{view:it.view,id:it.id}}))}catch(_){}return;}const fn=window.GSM_VIEWS[it.view];if(typeof fn==='function'){if(it.view==='register')fn(mount,ui,it);else fn(mount,ui,params);try{document.dispatchEvent(new CustomEvent('gsm:view-rendered',{detail:{view:it.view,id:it.id}}))}catch(_){}}else fallbackView(mount,it)}catch(e){console.error(e);mount.innerHTML=`<div class="card"><div class="card-b"><div class="empty-state"><div class="big">!</div><b>Screen could not render.</b><br>${GSM_UTIL.esc(e.message||e)}</div></div></div>`}}
 function fallbackView(mount,it){mount.innerHTML=window.GSM_pageHead(it.label,'Operational service screen')+`<div class="card"><div class="card-b"><div class="empty-state">This service is not available from this screen. Use the Report Center or contact the System Administrator.</div></div></div>`}
 function highlightMobile(it){qa('.mobile-bottom button').forEach(b=>b.classList.remove('active'));const v=it.view;if(v==='dashboard')q('[data-mobile="dashboard"]')?.classList.add('active');else if(v==='reportcenter')q('[data-mobile="reports"]')?.classList.add('active');else if(/student/.test(v))q('[data-mobile="students"]')?.classList.add('active');else if(/attendance/.test(v))q('[data-mobile="attendance"]')?.classList.add('active')}
 function closeSidebar(){$('sidebar').classList.remove('open');$('sidebar-overlay').classList.remove('show')}

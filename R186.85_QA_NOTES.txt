@@ -1,0 +1,51 @@
+GS MUSUMBA R186.85 — TEACHER PORTAL DEEP AUDIT / BUG / CALL / LOADING CORRECTION
+
+PRIMARY CORRECTIONS
+- Teacher authenticated shell loads the lean Teacher CSS/JS before first dashboard paint, preventing old-dashboard flicker and menu/sidebar races.
+- Teacher no longer loads the large legacy r18661-app.css / r18661-extensions.js bundles. Other roles remain on the existing legacy workspace.
+- Asset loader has timeout + one retry and fail-visible errors instead of endless loading.
+- Duplicate concurrent read RPCs are deduplicated inside the Teacher portal; write calls are never deduplicated.
+- Dashboard first paint uses bootstrap/cache immediately; secondary metrics load after the page is usable.
+- Sidebar/topbar stay visible across Teacher services; old service-focus classes cannot remove navigation.
+- Strong BLUE/GREEN/YELLOW(GOLD)/PURPLE/RED/NAVY/BLACK surfaces enforce WHITE text; light surfaces retain dark text.
+- Teacher dashboard keeps 4 compact equal cards and clickable actions.
+- Students Identification uses R186.85 class-teacher-scoped directory and a combined profile save RPC.
+- Class Attendance selector now reuses the fast bootstrap and exposes ONLY class-teacher classes, removing the extra r161 scope call and eliminating dead class-attendance routes from subject-only classes.
+- My Classes shows Identification/Class Attendance actions only where the teacher is the class teacher. Subject-only rosters are view-only for profile editing.
+- Class Attendance and Subject Attendance Save use the save RPC response directly; no redundant reload call after save.
+- Marks browser remains display/entry only. CAMIS / Exam / Total / Final % / Grade / Rank are returned by the server formula engine and are not recalculated in JavaScript.
+- My Club and Lesson Plans are present in the lean Teacher menu.
+- Service operations provide busy/success/error feedback; global unhandled errors are surfaced instead of failing silently.
+- Service worker uses a new R186.85 cache and does not cache Supabase/API requests.
+
+LIVE SUPABASE DEPENDENCIES USED BY THIS FRONTEND
+- r174_teacher_fast_bootstrap
+- r18683_teacher_dashboard_metrics
+- r18685_teacher_identification_directory
+- r18683_teacher_student_profile
+- r18685_teacher_save_student_profile
+- r174_teacher_class_roster
+- r174_teacher_class_attendance_entry / save_class_attendance
+- r174_teacher_subject_attendance_entry / save_subject_attendance
+- r174_teacher_marks_workspace / r174_teacher_marks_entry_data / r174_teacher_open_assessment / r174_teacher_save_marks
+- r136_teacher_timetable
+- r166_teacher_reports
+- r166_teacher_club_workspace
+- get_imihigo_workspace / save_teacher_lesson_plan
+
+REGRESSION SAFETY
+- Non-Teacher menus and workspace bundles were not intentionally redesigned in R186.85.
+- Server-side permissions remain the authority; hiding a Teacher button is not treated as authorization.
+- Marks formulas were not moved to the browser.
+- Timetable data remains live Supabase published timetable data.
+
+STATIC QA
+- node --check: r186-core.js PASS
+- node --check: r18661-loader.js PASS
+- node --check: teacher-portal.js PASS
+- node --check: r18680-recovery.js PASS
+- node --check: r18681-final.js PASS
+- index.html HTML parse PASS
+- CSS brace balance PASS
+- R186.85 asset/version references verified
+- ZIP integrity test PASS (generated after these checks)
