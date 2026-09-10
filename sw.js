@@ -1,8 +1,8 @@
-/* GS MUSUMBA — R186.83 GLOBAL UI / LIVE TIMETABLE CACHE.
+/* GS MUSUMBA — R186.84 GLOBAL UI / LIVE TIMETABLE CACHE.
    Navigation and executable UI assets are network-first so a normal refresh
    cannot resurrect an older dashboard from a stale cache. Supabase is never cached. */
-const CACHE='gsm-r186-83-teacher-fast-v1';
-const V='R186.83';
+const CACHE='gsm-r186-84-teacher-fast-v1';
+const V='R186.84';
 const SHELL=[
   './index.html',
   './GS_MUSUMBA_LOGO_FAST.jpg',

@@ -1,10 +1,10 @@
-/* GS MUSUMBA R186.83 conditional authenticated workspace loader.
+/* GS MUSUMBA R186.84 conditional authenticated workspace loader.
    TEACHER gets a lean dedicated portal and does NOT load the historical heavy workspace bundles.
    Other roles keep the proven R186.82 workspace until they are migrated one role at a time. */
 (function(){'use strict';
  if(window.GSM_loadAppExtensions)return;
  let promise=null;const started=performance.now();
- const V='R186.83';
+ const V='R186.84';
  const APP_CSS='./r18661-app.css?v='+V,APP_JS='./r18661-extensions.js?v='+V,FINAL_CSS='./r18681-final.css?v='+V,FINAL_JS='./r18681-final.js?v='+V;
  const TEACHER_CSS='./teacher-portal.css?v='+V,TEACHER_JS='./teacher-portal.js?v='+V;
  const conn=()=>navigator.connection||navigator.mozConnection||navigator.webkitConnection||null;
@@ -16,14 +16,14 @@
  window.GSM_loadAppExtensions=function(){
   if(promise)return promise;const t=performance.now(),r=role();
   if(r==='TEACHER'){
-    promise=Promise.all([retry(addCss,TEACHER_CSS,'teacher83'),retry(addJs,TEACHER_JS,'teacher83js','__GSM_R18683_TEACHER__')])
-      .then(()=>{window.GSM_R18683_LOAD_METRICS={role:r,loaderReadyMs:Math.round(t-started),appLoadMs:Math.round(performance.now()-t),slowNetwork:slow(),leanTeacher:true,legacyTeacherBundlesLoaded:false};return true})
+    promise=Promise.all([retry(addCss,TEACHER_CSS,'teacher84'),retry(addJs,TEACHER_JS,'teacher84js','__GSM_R18684_TEACHER__')])
+      .then(()=>{window.GSM_R18684_LOAD_METRICS={role:r,loaderReadyMs:Math.round(t-started),appLoadMs:Math.round(performance.now()-t),slowNetwork:slow(),leanTeacher:true,legacyTeacherBundlesLoaded:false};return true})
       .catch(e=>{promise=null;throw e});
     return promise;
   }
   promise=Promise.all([retry(addCss,APP_CSS,'app82'),retry(addJs,APP_JS,'app82js','__GSM_R18661_EXTENSIONS_LOADED__')])
     .then(()=>{window.__GSM_R18661_EXTENSIONS_LOADED__=true;return Promise.all([retry(addCss,FINAL_CSS,'final82'),retry(addJs,FINAL_JS,'final82js','__GSM_R18681_FINAL__')])})
-    .then(()=>{window.GSM_R18683_LOAD_METRICS={role:r,loaderReadyMs:Math.round(t-started),appLoadMs:Math.round(performance.now()-t),slowNetwork:slow(),leanTeacher:false,legacyOtherRoles:true};return true})
+    .then(()=>{window.GSM_R18684_LOAD_METRICS={role:r,loaderReadyMs:Math.round(t-started),appLoadMs:Math.round(performance.now()-t),slowNetwork:slow(),leanTeacher:false,legacyOtherRoles:true};return true})
     .catch(e=>{promise=null;throw e});
   return promise;
  };
