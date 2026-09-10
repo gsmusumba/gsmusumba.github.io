@@ -163,10 +163,10 @@ body.gsm77-nested-open{overflow:hidden!important}
 #appShell #main table th{font-size:10.5px!important;line-height:1.15!important}
 #appShell #main h1{font-size:17px!important}#appShell #main h2{font-size:15px!important}#appShell #main h3{font-size:12.5px!important}#appShell #main h4{font-size:11.5px!important}
 /* Accessible contrast on semantic cards/statuses. */
-#appShell #main :is(.r78-kpi.red,.r78-kpi.green,.r78-kpi.navy,.r18674-kpi.red,.r18674-kpi.green,.r18674-kpi.navy,.r1869-kpi.red,.r18674-critical-red){color:#fff!important;-webkit-text-fill-color:#fff!important}
-#appShell #main :is(.r78-kpi.red,.r78-kpi.green,.r78-kpi.navy,.r18674-kpi.red,.r18674-kpi.green,.r18674-kpi.navy,.r1869-kpi.red,.r18674-critical-red) *{color:#fff!important;-webkit-text-fill-color:#fff!important}
-#appShell #main :is(.r78-kpi.gold,.r18674-kpi.gold,.r18674-kpi.amber){color:#17212b!important;-webkit-text-fill-color:#17212b!important}
-#appShell #main :is(.r78-kpi.gold,.r18674-kpi.gold,.r18674-kpi.amber) *{color:#17212b!important;-webkit-text-fill-color:#17212b!important}
+#appShell #main :is(.r78-kpi.red,.r78-kpi.green,.r18674-kpi.red,.r18674-kpi.green,.r18674-kpi.navy,.r1869-kpi.red,.r18674-critical-red){color:#fff!important;-webkit-text-fill-color:#fff!important}
+#appShell #main :is(.r78-kpi.red,.r78-kpi.green,.r18674-kpi.red,.r18674-kpi.green,.r18674-kpi.navy,.r1869-kpi.red,.r18674-critical-red) *{color:#fff!important;-webkit-text-fill-color:#fff!important}
+#appShell #main :is(.r78-kpi.gold,.r18674-kpi.gold,.r18674-kpi.amber){color:#fff!important;-webkit-text-fill-color:#fff!important}
+#appShell #main :is(.r78-kpi.gold,.r18674-kpi.gold,.r18674-kpi.amber) *{color:#fff!important;-webkit-text-fill-color:#fff!important}
 /* Keep the global bar short but readable. */
 #appShell #topbar{min-height:42px!important;padding:4px 7px!important}
 #appShell #topbar .crumb{font-size:10.5px!important;max-width:190px!important;line-height:1.1!important}

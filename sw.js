@@ -1,8 +1,8 @@
-/* GS MUSUMBA — R186.80 AUTH / UI CONSISTENCY CACHE.
+/* GS MUSUMBA — R186.81 GLOBAL UI / LIVE TIMETABLE CACHE.
    Navigation and executable UI assets are network-first so a normal refresh
    cannot resurrect an older dashboard from a stale cache. Supabase is never cached. */
-const CACHE='gsm-r186-80-auth-ui-consistency-v1';
-const V='R186.80';
+const CACHE='gsm-r186-81-global-ui-live-tt-v1';
+const V='R186.81';
 const SHELL=[
   './index.html',
   './GS_MUSUMBA_LOGO_FAST.jpg',
@@ -10,7 +10,9 @@ const SHELL=[
   './r18679-critical.css?v='+V,
   './r18680-recovery.js?v='+V,
   './r18661-loader.js?v='+V,
-  './r186-core.js?v='+V
+  './r186-core.js?v='+V,
+  './r18681-final.css?v='+V,
+  './r18681-final.js?v='+V
 ];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>Promise.allSettled(SHELL.map(asset=>cache.add(asset)))).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim()))});

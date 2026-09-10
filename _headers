@@ -29,3 +29,12 @@
 
 /r18680-recovery.js
   Cache-Control: public, max-age=0, must-revalidate
+
+/r18681-final.css
+  Cache-Control: public, max-age=0, must-revalidate
+
+/r18681-final.js
+  Cache-Control: public, max-age=0, must-revalidate
+
+/GS_MUSUMBA_STUDENT_IDENTIFICATION_SDMS_990.csv
+  Cache-Control: public, max-age=0, must-revalidate
