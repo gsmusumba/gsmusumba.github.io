@@ -1,4 +1,4 @@
-/* GS MUSUMBA R186.83 — FINAL DASHBOARD + MARKS + TIMETABLE PRINT AUTHORITY */
+/* GS MUSUMBA R186.84 — FINAL DASHBOARD + MARKS + TIMETABLE PRINT AUTHORITY */
 (function(){'use strict';
  if(window.__GSM_R18681_FINAL__)return;window.__GSM_R18681_FINAL__=true;
  const V=window.GSM_VIEWS||{},U=window.GSM_UTIL||{},L=window.GSM_LIVE||{};
@@ -87,7 +87,7 @@
  }
 
 
- /* ---------------- R186.83 OFFICIAL TIMETABLE PRINTING ---------------- */
+ /* ---------------- R186.84 OFFICIAL TIMETABLE PRINTING ---------------- */
  function ctxName(data,key,fallback){const c=(data&&data.context)||((window.BOOT&&BOOT.context)||{});return String(c[key]||fallback||'').trim()}
  function tableOnly(data,filter,mode){const box=document.createElement('div');box.innerHTML=gridFromWorkspace(data,filter,mode,'');const t=box.querySelector('table.r18681-week');return t?t.outerHTML:'<p>No timetable rows available.</p>'}
  function teacherTableOnly(rows,name){const box=document.createElement('div');box.innerHTML=teacherLiveGrid(rows||[],name||'TEACHER');const t=box.querySelector('table.r18681-week');return t?t.outerHTML:'<p>No timetable rows available.</p>'}
@@ -152,9 +152,75 @@
    V.r18612_timetable_manager=liveManager;V.r120_timetable_manager=liveManager;V.r119_timetable_manager=liveManager;V.r171_timetable_workspace=liveManager;
  }
 
- /* Make identification importer use the included R186.83 CSV without stale cache. */
- window.GSM_R18681={release:'R186.83',globalContrast:true,serviceFocusGlobal:true,duplicateTitleAuthority:true,timetableSource:'LIVE_SUPABASE',periodBackground:'DARK_NAVY_WHITE_TEXT',includedIdentificationCsv:'GS_MUSUMBA_STUDENT_IDENTIFICATION_SDMS_990.csv'};
+ /* Make identification importer use the included R186.84 CSV without stale cache. */
+ window.GSM_R18681={release:'R186.84',globalContrast:true,serviceFocusGlobal:true,duplicateTitleAuthority:true,timetableSource:'LIVE_SUPABASE',periodBackground:'DARK_NAVY_WHITE_TEXT',includedIdentificationCsv:'GS_MUSUMBA_STUDENT_IDENTIFICATION_SDMS_990.csv'};
  if(window.GSM_R18628)window.GSM_R18628.currentTimetable='LIVE_SUPABASE';
- try{document.documentElement.setAttribute('data-gsm-release','R186.83');document.documentElement.setAttribute('data-gsm-component-release','R186.83')}catch(_){}
+ try{document.documentElement.setAttribute('data-gsm-release','R186.84');document.documentElement.setAttribute('data-gsm-component-release','R186.84')}catch(_){}
  setTimeout(()=>globalUi(document),120);setTimeout(()=>globalUi(document),700);
+})();
+
+/* ===== R186.84 MOBILE OPERATIONS + MARKS LIVE FORMULA / ALL-MARKS AUDIT ===== */
+(function(){'use strict';
+ if(window.__GSM_R18684_MOBILE_MARKS__)return;window.__GSM_R18684_MOBILE_MARKS__=true;
+ const V=window.GSM_VIEWS||{},U=window.GSM_UTIL||{},L=window.GSM_LIVE||{};
+ const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+ const esc=U.esc||function(v){return String(v==null?'':v).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))};
+ const rpc=(n,p={})=>L&&typeof L.rpc==='function'?L.rpc(n,p):Promise.reject(new Error('LIVE_RPC_UNAVAILABLE'));
+ const up=v=>String(v||'').replace(/\s+/g,' ').trim().toUpperCase();
+ const num=v=>{const n=Number(v);return Number.isFinite(n)?n:null};
+
+ /* Retire the old public GitHub Pages copy if a cached tab is still opened. */
+ try{if(String(location.hostname||'').toLowerCase()==='gsmusumba.github.io'){location.replace('https://musumba.pages.dev'+location.pathname+location.search+location.hash);return}}catch(_){}
+
+ const exceptionStatuses=new Set(['ABSENT','ABSENT_UNEXCUSED','ABSENT_EXCUSED','LATE','EXCUSED','PERMISSION','MEDICAL','SICK','LEFT_EARLY','LEFT_WITH_PERMISSION','SUSPENDED']);
+ function proxyButton(label,source,cls){const b=document.createElement('button');b.type='button';b.className='r18684-save-proxy '+(cls||'');b.textContent=label;b.disabled=!!source.disabled;b.onclick=()=>{if(!source.disabled)source.click()};return b}
+ function syncProxy(dock,sourceButtons){if(!dock)return;sourceButtons.forEach((s,i)=>{const b=dock.querySelectorAll('button')[i];if(b)b.disabled=!!s.disabled})}
+ function makeDock(key,anchor,buttons){if(!anchor||!buttons.length||$('#'+key,anchor.parentElement||document))return;const dock=document.createElement('div');dock.id=key;dock.className='r18684-mobile-save-dock r186-no-print';buttons.forEach(x=>dock.appendChild(proxyButton(x.label,x.source,x.cls)));const spacer=document.createElement('div');spacer.className='r18684-save-spacer';anchor.parentElement.insertBefore(dock,anchor);anchor.parentElement.insertBefore(spacer,anchor);syncProxy(dock,buttons.map(x=>x.source));}
+
+ function updateAttendanceRow(tr,focusReason){const sel=$('.t160-status-select',tr),note=$('.t160-note',tr);if(!sel||!note)return;const st=up(sel.value),need=exceptionStatuses.has(st);tr.classList.toggle('r18684-att-exception',need);tr.classList.toggle('r18684-att-present',st==='PRESENT');note.required=need;note.placeholder=need?'REASON REQUIRED — write the reason here':'Reason / teacher note (optional for present)';if(need&&focusReason){try{note.focus({preventScroll:true})}catch(_){note.focus()}try{note.scrollIntoView({behavior:'smooth',block:'center',inline:'nearest'})}catch(_){}}}
+ function enhanceAttendance(root=document){
+   $$('.r18669-attendance-roster tr[data-t160-student]',root).forEach(tr=>{const sel=$('.t160-status-select',tr),note=$('.t160-note',tr);if(!sel||!note)return;if(!tr.dataset.r18684Attendance){tr.dataset.r18684Attendance='1';const td=sel.parentElement,quick=document.createElement('div');quick.className='r18684-att-quick';[['P','PRESENT'],['A','ABSENT'],['E','EXCUSED'],['L','LATE']].forEach(([lab,val])=>{const b=document.createElement('button');b.type='button';b.textContent=lab;b.title=val;b.dataset.attQuick=val;b.disabled=sel.disabled;b.onclick=()=>{if(sel.disabled)return;sel.value=val;sel.dispatchEvent(new Event('change',{bubbles:true}));updateAttendanceRow(tr,val!=='PRESENT')};quick.appendChild(b)});td.insertBefore(quick,sel);sel.addEventListener('change',()=>updateAttendanceRow(tr,false));note.addEventListener('input',()=>tr.classList.toggle('r18684-reason-filled',!!note.value.trim()))}updateAttendanceRow(tr,false)});
+   $$('.r18669b-att-savebar',root).forEach(bar=>{const draft=$('[data-t160-bottom-draft]',bar),save=$('[data-t160-bottom-save]',bar);if(!draft||!save)return;const panel=bar.closest('.t160-panel-b'),table=panel&&$('.t160-table-wrap',panel);if(table)makeDock('r18684AttDock',table,[{label:'SAVE DRAFT',source:draft,cls:'green'},{label:save.textContent.trim()||'SAVE ATTENDANCE',source:save,cls:'green'}]);const dock=$('#r18684AttDock',panel||document);syncProxy(dock,[draft,save]);draft.classList.add('r18684-green-save');save.classList.add('r18684-green-save')});
+ }
+
+ function enhanceStudentProfile(root=document){
+   ['r58Save','r58Submit','r58SaveNext','r176StuSave','r176StuSubmit','r176StuSaveNext'].forEach(id=>{const b=$('#'+id,root);if(b)b.classList.add('r18684-green-save')});
+   const detail=$('#r58StuDetail',root);if(detail){const page=detail.closest('.r18658-students')||detail.parentElement;page&&page.classList.toggle('r18684-profile-open',!detail.hidden);if(!detail.hidden){const originals=['r58Save','r58Submit','r58SaveNext'].map(id=>$('#'+id,detail)).filter(b=>b&&!b.hidden);const form=$('#r58StuForm',detail);if(form&&originals.length)makeDock('r18684ProfileDock',form,originals.map(b=>({label:b.textContent.trim(),source:b,cls:'green'})));syncProxy($('#r18684ProfileDock',detail),originals)}}
+   const old=$('#r176StuEditor',root);if(old&&old.offsetParent!==null){const originals=['r176StuSave','r176StuSubmit','r176StuSaveNext'].map(id=>$('#'+id,old)).filter(Boolean);if(originals.length)makeDock('r18684OldProfileDock',old,originals.map(b=>({label:b.textContent.trim(),source:b,cls:'green'})));syncProxy($('#r18684OldProfileDock',old.parentElement||root),originals)}
+ }
+
+ function enhanceMarksSave(root=document){const bottom=$('.r18636-marks-bottom',root),host=$('#r18637MxTableHost',root);if(!bottom||!host)return;const draft=$('#r18636MxDraft',bottom),submit=$('#r18636MxSubmit',bottom);if(!draft||!submit)return;draft.classList.add('r18684-green-save');submit.classList.add('r18684-green-save');makeDock('r18684MarksDock',host,[{label:'SAVE DRAFT',source:draft,cls:'green'},{label:'SUBMIT MARKS',source:submit,cls:'green'}]);syncProxy($('#r18684MarksDock',host.parentElement||root),[draft,submit])}
+
+ function exclusiveServices(root=document){
+   const ah=$('#r18674AttendanceHost',root);if(ah){const p=ah.closest('.r18674-page');if(p)p.classList.toggle('r18684-child-open',String(ah.textContent||'').trim().length>20)}
+   const mh=$('#r18629MarksHost',root);if(mh){const p=mh.closest('.r18629-page');if(p)p.classList.toggle('r18684-child-open',String(mh.textContent||'').trim().length>20)}
+ }
+
+ function typeLabel(c){const z=up((c&&c.category_code)||(c&&c.category_name)||'ASSESSMENT').replace(/[\s-]+/g,'_');if(z.includes('END_UNIT'))return'END UNIT';if(z.includes('QUIZ'))return'QUIZ';if(z.includes('HOME'))return'HOMEWORK';if(z.includes('PRACT'))return'PRACTICAL';if(z.includes('MID'))return'MIDTERM';if(z.includes('TEST'))return'TEST';return'ASSESSMENT'}
+ function matrixDisplay(d,row,col){const mm=(d.assessment_matrix||{})[String(row.student_id)]||{},x=mm[String(col.id)]||{};const v=x.display??x.mark??x.status;return v==null||String(v).trim()===''?'—':String(v)}
+ function doneTypeSummary(d,row){const counts={},cols=d.assessment_columns||[];let done=0;cols.forEach(c=>{const v=matrixDisplay(d,row,c);if(v==='—')return;done++;const k=typeLabel(c);counts[k]=(counts[k]||0)+1});return{done,text:Object.entries(counts).map(([k,v])=>k+' '+v).join(' · ')||'—'}}
+ function pctText(a,b){a=num(a);b=num(b);return a!=null&&b!=null&&b>0?(100*a/b).toFixed(2)+'%':'—'}
+ function valText(v){return v==null||v===''?'—':String(v)}
+ function renderFullMarksDetail(box,d,meta){
+   const cols=d.assessment_columns||[],rows=d.rows||[],exam=up((d.config&&d.config.official_exam_type)||'EXAM').replace(/_/g,' '),matrix=d.assessment_matrix||{};
+   const dynamic=cols.map(c=>'<th class="r18684-ass-col">'+esc(c.assessment_name||c.category_name||'ASSESSMENT')+'<small>/ '+esc(c.max_mark??'—')+'</small></th>').join('');
+   const body=rows.map((r,i)=>{const cnt=doneTypeSummary(d,r),m=matrix[String(r.student_id)]||{},assRaw=valText(r.all_ass_obtained)+' / '+valText(r.all_ass_max),assPct=r.assessment_percent!=null?Number(r.assessment_percent).toFixed(2)+'%':pctText(r.all_ass_obtained,r.all_ass_max),eu=r.camis_eu_official??r.camis_eu,examRaw=r.exam_raw==null?'—':valText(r.exam_raw)+' / '+valText(r.exam_raw_max),examPct=pctText(r.exam_raw,r.exam_raw_max),examC=r.camis_exam_official??r.camis_exam,total=r.total_camis_official??r.total_marks,totalMax=r.total_camis_max_official??r.total_marks_max,perf=r.final_percent_official??r.percentage,rank=r.rank??'—';return '<tr><td>'+(i+1)+'</td><td><b>'+esc(r.sdms_code||'')+'</b></td><td class="name">'+esc(r.student_name||'')+'</td>'+cols.map(c=>'<td>'+esc(matrixDisplay(d,r,c))+'</td>').join('')+'<td><b>'+cnt.done+'</b></td><td class="r18684-type-counts">'+esc(cnt.text)+'</td><td>'+esc(assRaw)+'</td><td>'+esc(assPct)+'</td><td><b>'+esc(valText(eu))+'</b></td><td>'+esc(examRaw)+'</td><td>'+esc(examPct)+'</td><td><b>'+esc(valText(examC))+'</b></td><td>'+esc(r.total_raw==null?'—':valText(r.total_raw)+' / '+valText(r.total_raw_max))+'</td><td><b>'+esc(valText(total))+'</b></td><td>'+esc(valText(totalMax))+'</td><td><b>'+esc(perf==null?'—':Number(perf).toFixed(2)+'%')+'</b></td><td><b>'+esc(r.grade||'—')+'</b></td><td><b>'+esc(rank)+'</b></td></tr>'}).join('');
+   box.innerHTML='<section class="t160-panel r18684-full-marks-detail"><div class="t160-panel-h"><div><h3>FULL STUDENT MARKS · '+esc(meta.class_code||'')+' · '+esc(meta.subject_name||meta.subject_code||'')+'</h3><small>Every continuous assessment RAW mark + assessment totals/% + CAMIS E.U + '+esc(exam)+' RAW/% + CAMIS '+esc(exam)+' + live/final result.</small></div><div class="t160-mini-actions"><button class="t160-btn success" id="r18684ContinueMarks">CONTINUE ENTRY</button><button class="t160-btn" id="r18684CloseMarks">CLOSE</button></div></div><div class="r18684-marks-detail-note"><b>'+cols.length+' CONTINUOUS ASSESSMENT(S) CREATED.</b> The “DONE BY TYPE” column shows counts such as QUIZ 10 · END UNIT 3 for each learner when those marks exist.</div><div class="t160-table-wrap r18684-allmarks-wrap"><table class="t160-table r18684-allmarks-table"><thead><tr><th>NO.</th><th>SDMS</th><th>STUDENT</th>'+dynamic+'<th># ASS. DONE</th><th>DONE BY TYPE</th><th>ASS. RAW</th><th>ASS. %</th><th>CAMIS E.U</th><th>'+esc(exam)+' RAW</th><th>EXAM %</th><th>CAMIS '+esc(exam)+'</th><th>TOTAL RAW</th><th>CAMIS TOTAL</th><th>TOTAL MAX</th><th>PERFORMANCE %</th><th>GRADE</th><th>RANK</th></tr></thead><tbody>'+body+'</tbody></table></div></section>';
+   const close=$('#r18684CloseMarks',box);if(close)close.onclick=()=>box.innerHTML='';const cont=$('#r18684ContinueMarks',box);if(cont)cont.onclick=()=>{const tab=document.querySelector('[data-r18629-marktab="entry"]');if(tab)tab.click()};try{box.scrollIntoView({behavior:'smooth',block:'start'})}catch(_){}
+ }
+ function installAllMarks(mount){
+   if(!mount||mount.dataset.r18684AllMarks)return;mount.dataset.r18684AllMarks='1';let busy=false;
+   const bind=()=>{$$('[data-am-action]',mount).forEach(b=>{if(b.dataset.r18684Bound)return;b.dataset.r18684Bound='1';const mode=up(b.dataset.amMode);b.textContent=mode==='CONTINUE'?'VIEW / CONTINUE':'VIEW MARKS';b.onclick=async()=>{if(busy)return;busy=true;const id=b.dataset.amAction,box=$('#t160AMDetail',mount);if(!id||!box){busy=false;return}box.innerHTML='<div class="t160-status info">Loading complete assessment matrix and calculated results…</div>';try{const reg=await rpc('r136_teacher_all_marks',{}),meta=(reg.rows||[]).find(x=>String(x.assessment_id||x.id)===String(id));if(!meta)throw new Error('ASSESSMENT_METADATA_NOT_FOUND');const d=await rpc('r18637_teacher_marks_matrix',{p_class_id:meta.class_id,p_subject_id:meta.subject_id,p_assessment_id:id});renderFullMarksDetail(box,d,meta)}catch(e){box.innerHTML='<div class="t160-status bad"><b>FULL MARKS LOAD FAILED:</b> '+esc(e&&e.message||e)+'</div>'}finally{busy=false}}})};
+   bind();new MutationObserver(()=>bind()).observe(mount,{childList:true,subtree:true});
+ }
+ const baseAllMarks=V.allmarks;if(typeof baseAllMarks==='function')V.allmarks=function(mount,ctx){const out=baseAllMarks(mount,ctx);setTimeout(()=>installAllMarks(mount),0);return out};
+
+ function enhance(root=document){enhanceAttendance(root);enhanceStudentProfile(root);enhanceMarksSave(root);exclusiveServices(root)}
+ let timer=0;function queue(root=document){clearTimeout(timer);timer=setTimeout(()=>enhance(root),35)}
+ document.addEventListener('gsm:view-rendered',()=>{queue(document);setTimeout(()=>enhance(document),250);setTimeout(()=>enhance(document),900)});
+ document.addEventListener('click',()=>setTimeout(()=>enhance(document),90),true);
+ const main=$('#main');if(main)new MutationObserver(()=>queue(main)).observe(main,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden','disabled','class']});
+ window.GSM_R18684={release:'R186.84',mobileAttendance:'CARD_ROSTER_REASON_DIRECT',mobileScroll:'UNFROZEN',studentSave:'VISIBLE_GREEN',marksLiveFormula:'RAW_CAMIS_EXAM_PERCENT_GRADE_RANK',allMarks:'FULL_ASSESSMENT_MATRIX_AND_COUNTS',exclusiveServices:true,canonicalHost:'musumba.pages.dev'};
+ try{document.documentElement.setAttribute('data-gsm-release','R186.84');document.documentElement.setAttribute('data-gsm-component-release','R186.84')}catch(_){}
+ setTimeout(()=>enhance(document),120);setTimeout(()=>enhance(document),700);
 })();
