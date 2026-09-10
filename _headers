@@ -26,3 +26,6 @@
 
 /r18679-critical.css
   Cache-Control: public, max-age=0, must-revalidate
+
+/r18680-recovery.js
+  Cache-Control: public, max-age=0, must-revalidate
