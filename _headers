@@ -10,31 +10,37 @@
   Cache-Control: no-cache, no-store, must-revalidate
 
 /r186-core.js
-  Cache-Control: public, max-age=0, must-revalidate
+  Cache-Control: no-cache, no-store, must-revalidate
 
 /r18661-loader.js
-  Cache-Control: public, max-age=0, must-revalidate
+  Cache-Control: no-cache, no-store, must-revalidate
 
 /r18661-extensions.js
-  Cache-Control: public, max-age=0, must-revalidate
+  Cache-Control: no-cache, no-store, must-revalidate
 
 /r18661-app.css
-  Cache-Control: public, max-age=0, must-revalidate
+  Cache-Control: no-cache, no-store, must-revalidate
 
 /r18661-login.css
-  Cache-Control: public, max-age=0, must-revalidate
+  Cache-Control: no-cache, no-store, must-revalidate
 
 /r18679-critical.css
-  Cache-Control: public, max-age=0, must-revalidate
+  Cache-Control: no-cache, no-store, must-revalidate
 
 /r18680-recovery.js
-  Cache-Control: public, max-age=0, must-revalidate
+  Cache-Control: no-cache, no-store, must-revalidate
 
 /r18681-final.css
-  Cache-Control: public, max-age=0, must-revalidate
+  Cache-Control: no-cache, no-store, must-revalidate
 
 /r18681-final.js
-  Cache-Control: public, max-age=0, must-revalidate
+  Cache-Control: no-cache, no-store, must-revalidate
 
 /GS_MUSUMBA_STUDENT_IDENTIFICATION_SDMS_990.csv
-  Cache-Control: public, max-age=0, must-revalidate
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/r18685-final.css
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/r18685-final.js
+  Cache-Control: no-cache, no-store, must-revalidate
