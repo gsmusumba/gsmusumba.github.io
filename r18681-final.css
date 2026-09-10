@@ -1,4 +1,4 @@
-/* GS MUSUMBA R186.81 — GLOBAL UI / LIVE TIMETABLE / CONTRAST AUTHORITY */
+/* GS MUSUMBA R186.82 — GLOBAL UI / LIVE TIMETABLE / CONTRAST AUTHORITY */
 
 :root{--r18681-navy:#073f72;--r18681-dark:#10283a;--r18681-light:#f7fafc}
 
@@ -42,7 +42,7 @@
 }
 #appShell #main :is(.r18628-week,.r18612-week,.r163-week,.r18681-week) tbody>tr>th:first-child span{opacity:.92!important}
 
-/* 5) R186.81 live timetable browser. */
+/* 5) R186.82 live timetable browser. */
 .r18681-live-tt{background:#fff;border:1px solid #9fb8cc;border-radius:8px;overflow:hidden;margin:7px 0}
 .r18681-live-source{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:7px 9px;background:#0b5d8e;color:#fff;font-size:10px;font-weight:850}
 .r18681-live-source *{color:#fff!important}
@@ -83,8 +83,109 @@
 }
 @media(max-width:560px){.r18681-live-tools{grid-template-columns:1fr}.r18681-week{min-width:680px}}
 
+
+
+/* R186.82 HOTFIX — timetable subject backgrounds must outrank the legacy global table td !important rules. */
+@media screen{
+  #appShell #main table.r18681-week tbody tr td.r18681-tt-math{background:#6d28d9!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+  #appShell #main table.r18681-week tbody tr td.r18681-tt-english{background:#005eb8!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+  #appShell #main table.r18681-week tbody tr td.r18681-tt-kiny{background:#08783e!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+  #appShell #main table.r18681-week tbody tr td.r18681-tt-french{background:#7e22ce!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+  #appShell #main table.r18681-week tbody tr td.r18681-tt-swahili{background:#c2410c!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+  #appShell #main table.r18681-week tbody tr td.r18681-tt-science{background:#b42318!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+  #appShell #main table.r18681-week tbody tr td.r18681-tt-history{background:#854d0e!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+  #appShell #main table.r18681-week tbody tr td.r18681-tt-geography{background:#0f766e!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+  #appShell #main table.r18681-week tbody tr td.r18681-tt-sre{background:#8a6b00!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+  #appShell #main table.r18681-week tbody tr td.r18681-tt-ent{background:#9b3a59!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+  #appShell #main table.r18681-week tbody tr td.r18681-tt-ict{background:#334155!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+  #appShell #main table.r18681-week tbody tr td.r18681-tt-pes{background:#15803d!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+  #appShell #main table.r18681-week tbody tr td.r18681-tt-home{background:#be185d!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+  #appShell #main table.r18681-week tbody tr td.r18681-tt-arts{background:#5b21b6!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+  #appShell #main table.r18681-week tbody tr td.r18681-tt-assembly{background:#00695c!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+  #appShell #main table.r18681-week tbody tr td.r18681-tt-break{background:#37474f!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+  #appShell #main table.r18681-week tbody tr td.r18681-tt-activity{background:#1b5e20!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+  #appShell #main table.r18681-week tbody tr td.r18681-tt-general{background:#0b5d8e!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+  #appShell #main table.r18681-week tbody tr td[class*="r18681-tt-"] :is(b,strong,span,small,em){color:#fff!important;-webkit-text-fill-color:#fff!important}
+  #appShell #main table.r18681-week tbody tr>th:first-child{background:#073f72!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+  #appShell #main table.r18681-week tbody tr>th:first-child *{color:#fff!important;-webkit-text-fill-color:#fff!important}
+  /* User color policy: yellow warning surfaces use white text, not dark text. */
+  #appShell #main .r18628-state.warn{background:#d6a900!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+  #appShell #main .r18628-state.warn *{color:#fff!important;-webkit-text-fill-color:#fff!important}
+}
+
 @media print{
  .r18681-live-tools,.r18681-live-source{display:none!important}.r18681-week-wrap{overflow:visible!important;padding:0!important}.r18681-week{min-width:0!important;table-layout:fixed!important}
  .r18681-week th,.r18681-week td{font-size:7pt!important;padding:2px 3px!important;color:#000!important;background:#fff!important;border:1px solid #000!important;text-shadow:none!important}
  .r18681-week th *,.r18681-week td *{color:#000!important;-webkit-text-fill-color:#000!important}
+}
+
+/* ===== R186.83 FINAL QA PATCH — dashboard, marks compactness, timetable period labels & print controls ===== */
+
+/* Dashboard: topbar is the title authority; remove duplicate dashboard title + internal release tag. */
+#appShell #main.r78-dashboard .r78-head h2,
+#appShell #main.r78-dashboard .r78-head .r78-tag{display:none!important}
+#appShell #main.r78-dashboard .r78-head{grid-template-columns:1fr!important;min-height:48px!important;padding:7px 10px!important}
+#appShell #main.r78-dashboard .r78-head>div{min-width:0!important}
+#appShell #main.r78-dashboard .r78-head small{font-size:10px!important;color:#5c7487!important}
+#appShell #main.r78-dashboard .r78-head p{font-size:9px!important;margin:2px 0 0!important;color:#29465d!important}
+
+/* GIRLS/other gold KPI: user rule = coloured background + white text, not white-on-white. */
+#appShell #main.r78-dashboard .r78-kpi.gold{background:#a77b00!important;border-color:#7c5b00!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+#appShell #main.r78-dashboard .r78-kpi.gold *{color:#fff!important;-webkit-text-fill-color:#fff!important}
+#appShell #main.r78-dashboard .r78-kpi.navy{background:#fff!important;color:#092a42!important;-webkit-text-fill-color:#092a42!important}
+#appShell #main.r78-dashboard .r78-kpi.navy *{color:#092a42!important;-webkit-text-fill-color:#092a42!important}
+
+/* Timetable: enough room for the complete PERIOD / HOUR label and consistent period column. */
+#appShell #main table.r18681-week thead th:first-child,
+#appShell #main table.r18681-week tbody>tr>th:first-child{width:122px!important;min-width:122px!important;max-width:122px!important}
+#appShell #main table.r18681-week thead th:first-child{background:#073f72!important;color:#fff!important;-webkit-text-fill-color:#fff!important;white-space:nowrap!important}
+#appShell #main table.r18681-week tbody>tr>th:first-child{background:#073f72!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+#appShell #main table.r18681-week tbody>tr>th:first-child b{font-size:10px!important;white-space:nowrap!important}
+#appShell #main table.r18681-week tbody>tr>th:first-child span{font-size:8px!important;white-space:nowrap!important}
+
+/* Official timetable print buttons — available in DOS/Super Admin timetable operations. */
+#appShell #main .r18683-print-tools{display:flex!important;flex-wrap:wrap!important;gap:6px!important;padding:6px 7px!important;background:#eef5fa!important;border-bottom:1px solid #bdd0df!important}
+#appShell #main .r18683-print-tools button{min-height:32px!important;padding:5px 9px!important;border:1px solid #0b5d8e!important;border-radius:5px!important;background:#0b5d8e!important;color:#fff!important;-webkit-text-fill-color:#fff!important;font-size:8.5px!important;font-weight:950!important;cursor:pointer!important}
+#appShell #main .r18683-print-tools button:nth-child(3),#appShell #main .r18683-print-tools button:nth-child(4){background:#17683c!important;border-color:#17683c!important}
+
+/* Marks Entry: exactly two compact control rows on desktop; remove empty full-screen head actions. */
+#appShell #main .r18636-marks-page .r18637-marks-head-actions{display:none!important}
+#appShell #main .r18636-marks-page .r18636-marks-title{padding:6px 9px!important;margin:0 0 5px!important;min-height:0!important}
+#appShell #main .r18636-marks-page>.r18636-form-row{display:grid!important;grid-template-columns:minmax(105px,.75fr) minmax(190px,1.65fr) minmax(175px,1.35fr) 90px 100px!important;gap:4px!important;margin:4px 0!important;padding:4px!important}
+#appShell #main .r18636-marks-page>.r18636-tools-row{display:grid!important;grid-template-columns:72px 82px minmax(115px,.72fr) minmax(125px,.82fr) 50px 55px minmax(160px,1.2fr) 52px 62px!important;gap:4px!important;margin:4px 0!important;padding:4px!important;align-items:end!important}
+#appShell #main .r18636-marks-page :is(.r18636-form-row,.r18636-tools-row) label{font-size:8px!important;gap:2px!important}
+#appShell #main .r18636-marks-page :is(.r18636-form-row,.r18636-tools-row) :is(input,select,button){height:30px!important;min-height:30px!important;padding:2px 5px!important;font-size:8.5px!important;min-width:0!important;max-width:100%!important}
+#appShell #main .r18636-marks-page>.r18636-report-options{grid-template-columns:minmax(190px,1.4fr) minmax(95px,.55fr) minmax(130px,.8fr) 92px!important;gap:4px!important;margin:4px 0!important;padding:5px!important}
+#appShell #main .r18636-marks-page>.r18636-report-options :is(select,button){height:30px!important;min-height:30px!important;font-size:8.5px!important}
+#appShell #main .r18636-marks-page .r18636-btn-yellow{background:#a77b00!important;border-color:#7c5b00!important;color:#fff!important;-webkit-text-fill-color:#fff!important}
+#appShell #main .r18636-marks-page .r18636-btn-yellow *{color:#fff!important;-webkit-text-fill-color:#fff!important}
+
+/* Marks matrix: reduce oversized Student/Assessment columns and keep the full 11-column matrix on desktop. */
+#appShell #main table.r18680-marks-entry{table-layout:fixed!important;width:100%!important;min-width:0!important}
+#appShell #main table.r18680-marks-entry col.c-no{width:3.5%!important}
+#appShell #main table.r18680-marks-entry col.c-sdms{width:10.0%!important}
+#appShell #main table.r18680-marks-entry col.c-name{width:20.0%!important}
+#appShell #main table.r18680-marks-entry col.c-current{width:8.5%!important}
+#appShell #main table.r18680-marks-entry col.c-ass-total{width:10.0%!important}
+#appShell #main table.r18680-marks-entry col.c-eu{width:7.0%!important}
+#appShell #main table.r18680-marks-entry col.c-exam-camis{width:8.0%!important}
+#appShell #main table.r18680-marks-entry col.c-total-camis{width:7.0%!important}
+#appShell #main table.r18680-marks-entry col.c-final-pct{width:6.5%!important}
+#appShell #main table.r18680-marks-entry col.c-grade{width:5.0%!important}
+#appShell #main table.r18680-marks-entry col.c-rank{width:4.5%!important}
+#appShell #main table.r18680-marks-entry th,#appShell #main table.r18680-marks-entry td{padding:4px 4px!important;font-size:8.5px!important;overflow:hidden!important;text-overflow:ellipsis!important}
+#appShell #main table.r18680-marks-entry td.name{white-space:nowrap!important}
+
+@media(max-width:1050px){
+ #appShell #main .r18636-marks-page>.r18636-form-row{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+ #appShell #main .r18636-marks-page>.r18636-tools-row{grid-template-columns:repeat(5,minmax(0,1fr))!important}
+ #appShell #main table.r18680-marks-entry{min-width:920px!important}
+}
+@media(max-width:700px){
+ #appShell #main .r18636-marks-page>.r18636-form-row,#appShell #main .r18636-marks-page>.r18636-tools-row{grid-template-columns:1fr 1fr!important}
+ #appShell #main .r18683-print-tools{display:grid!important;grid-template-columns:1fr 1fr!important}
+}
+
+@media print{
+ #appShell #main .r18683-print-tools{display:none!important}
 }
