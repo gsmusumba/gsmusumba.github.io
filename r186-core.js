@@ -528,16 +528,17 @@ MENUS.DOS = [
 
 MENUS.TEACHER = [
  {title:"Teacher Workspace", items:[
-   {id:'tc_dash',label:'My Dashboard',view:'dashboard'},
-   {id:'tc_timetable',label:'Timetable',view:'myteachertimetable'},
-   {id:'tc_classatt',label:'Class Attendance',view:'classattendance'},
-   {id:'tc_subjatt',label:'Subject Attendance',view:'subjectattendance'},
-   {id:'tc_marksentry',label:'Marks Entry',view:'marksentry'},
-   {id:'tc_allmarks',label:'All Marks Monitoring',view:'allmarks'},
-   {id:'tc_students',label:'Students',view:'teacherstudents'},
-   {id:'tc_studentmgmt',label:'Students Management',view:'teacherstudents'},
+   {id:'tc83_dash',label:'Dashboard',view:'dashboard'},
+   {id:'tc83_timetable',label:'My Timetable',view:'teacherTimetable83'},
+   {id:'tc83_classes',label:'My Classes',view:'teacherClasses83'},
+   {id:'tc83_identification',label:'Students Identification',view:'teacherIdentification83'},
+   {id:'tc83_classatt',label:'Class Attendance',view:'teacherClassAttendance83'},
+   {id:'tc83_subjectatt',label:'Subject Attendance',view:'teacherSubjectAttendance83'},
+   {id:'tc83_marks',label:'Marks & Assessments',view:'teacherMarks83'},
+   {id:'tc83_performance',label:'Student Performance',view:'teacherPerformance83'},
+   {id:'tc83_reports',label:'Reports',view:'teacherReports83'},
  ]},
- {title:"Account", items:[{id:'tc_account',label:'Account',view:'account'}]},
+ {title:"Account", items:[{id:'tc83_account',label:'Account',view:'teacherAccount83'}]},
 ];
 
 MENUS.DOD = [
