@@ -44,3 +44,9 @@
 
 /r18685-final.js
   Cache-Control: no-cache, no-store, must-revalidate
+
+/r18686-final.css
+  Cache-Control: no-cache, no-store, must-revalidate
+
+/r18686-final.js
+  Cache-Control: no-cache, no-store, must-revalidate
