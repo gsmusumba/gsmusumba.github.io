@@ -381,3 +381,21 @@
 
   #appShell #main .r18685-active-service{min-height:calc(100vh - 120px)!important}
 }
+
+/* ===== R186.87 HARDENING PATCH — 2026-09-11 =====
+   Purpose: guarantee horizontal scroll on the "MY STUDENTS" (Student Identification)
+   table on phones, independent of any other stylesheet load order. This block is
+   intentionally the LAST rule in the LAST-loaded stylesheet so it always wins. */
+@media(max-width:760px){
+  #appShell #main .r18658-stu-list{
+    display:block!important;width:100%!important;max-width:100%!important;
+    overflow-x:auto!important;overflow-y:visible!important;max-height:none!important;
+    -webkit-overflow-scrolling:touch!important;touch-action:pan-x pan-y!important;
+  }
+  #appShell #main table.r18658-student-table{
+    width:max-content!important;min-width:820px!important;table-layout:auto!important;
+  }
+  #appShell #main table.r18658-student-table :is(th,td){
+    position:static!important;white-space:nowrap!important;
+  }
+}
