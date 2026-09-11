@@ -399,3 +399,26 @@
     position:static!important;white-space:nowrap!important;
   }
 }
+
+/* ===== R186.88 — FORCE REAL SCROLLABLE TABLES EVERYWHERE (undo card layout on phone) ===== */
+@media(max-width:760px){
+  #appShell #main table.r18669-attendance-roster{
+    display:table!important;width:max-content!important;min-width:900px!important;
+    table-layout:auto!important;border:1px solid #9eb6c8!important;background:#fff!important;
+  }
+  #appShell #main .r18669-attendance-roster thead{display:table-header-group!important}
+  #appShell #main .r18669-attendance-roster tbody{display:table-row-group!important}
+  #appShell #main .r18669-attendance-roster tbody tr{
+    display:table-row!important;width:auto!important;margin:0!important;padding:0!important;
+    border:0!important;background:transparent!important;
+  }
+  #appShell #main .r18669-attendance-roster tbody td{
+    display:table-cell!important;grid-template-columns:none!important;
+    width:auto!important;min-width:0!important;padding:6px 8px!important;
+    border:1px solid #cfdbe6!important;white-space:nowrap!important;
+  }
+  #appShell #main .r18669-attendance-roster tbody td::before{content:none!important}
+  #appShell #main .t160-table-wrap:has(.r18669-attendance-roster){
+    overflow-x:auto!important;-webkit-overflow-scrolling:touch!important;
+  }
+}
