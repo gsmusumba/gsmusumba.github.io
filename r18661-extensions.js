@@ -8952,6 +8952,9 @@ try{document.documentElement.setAttribute('data-gsm-release','R186.79');document
 /* ===== R186.89 DATA RESET TOOLS — permanent delete for marks/attendance/students, SUPER_ADMIN only ===== */
 (function(){
 'use strict';
+const V=window.GSM_VIEWS;
+function q(s,r){return (r||document).querySelector(s)}
+function rpc(n,a){if(window.GSM_LIVE&&typeof window.GSM_LIVE.rpc==='function')return window.GSM_LIVE.rpc(n,a||{});return Promise.reject(new Error('LIVE SUPABASE CONNECTION REQUIRED'))}
 const prevSystem=V.r133_system;
 V.r186_reset_tools=function(mount,ctx){
  mount.innerHTML=`<div class="r132-card" style="border:2px solid #c62828;padding:16px">
