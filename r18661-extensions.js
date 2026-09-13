@@ -8995,9 +8995,12 @@ V.r186_reset_tools=function(mount,ctx){
 };
 V.r133_system=function(mount,ctx){
  prevSystem(mount,ctx);
- setTimeout(()=>{
+ let tries=0;
+ const tryInject=()=>{
+  tries++;
   const grid=q('.r132-card-grid',mount),viewer=q('#r132Viewer',mount);
-  if(!grid||!viewer||q('[data-r186-reset-card]',mount))return;
+  if(!grid||!viewer){if(tries<20)setTimeout(tryInject,150);return}
+  if(q('[data-r186-reset-card]',mount))return;
   const card=document.createElement('article');
   card.className='r132-card';
   card.style.borderColor='#c62828';
@@ -9005,6 +9008,98 @@ V.r133_system=function(mount,ctx){
   card.innerHTML='<div><h3 style="color:#c62828">⚠ DATA RESET TOOLS</h3><p>Permanently delete marks, attendance, or students to start fresh with real data. SUPER_ADMIN only. Cannot be undone.</p></div><span style="color:#c62828;font-weight:800">OPEN TOOL</span>';
   card.onclick=()=>{V.r186_reset_tools(viewer,ctx);viewer.scrollIntoView({behavior:'smooth',block:'start'})};
   grid.appendChild(card);
- },50);
+ };
+ setTimeout(tryInject,50);
+};
+})();
+
+/* ===== R186.91 DISCIPLINE CASES — real form + table, wired to existing r126_save_discipline_case + new r186_discipline_cases_list ===== */
+(function(){
+'use strict';
+const V=window.GSM_VIEWS;
+function q(s,r){return (r||document).querySelector(s)}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function rpc(n,a){if(window.GSM_LIVE&&typeof window.GSM_LIVE.rpc==='function')return window.GSM_LIVE.rpc(n,a||{});return Promise.reject(new Error('LIVE SUPABASE CONNECTION REQUIRED'))}
+
+V.r186_discipline_cases=function(mount,ctx){
+ mount.innerHTML=`<div class="r132-card" style="padding:16px">
+  <h2 style="margin:0 0 4px">DISCIPLINE CASES</h2>
+  <p style="margin:0 0 16px">Record a new case, or review existing ones below.</p>
+  <div id="r186dcForm" style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;border:1px solid #dce4ee;border-radius:8px;padding:14px;margin-bottom:16px">
+   <div><label style="display:block;font-size:12px;font-weight:700">SDMS CODE *</label><input id="r186dcSdms" placeholder="e.g. 280902200108" style="padding:8px;border:1px solid #ccc;border-radius:6px;width:160px"></div>
+   <div><label style="display:block;font-size:12px;font-weight:700">STUDENT</label><div id="r186dcName" style="padding:8px;min-width:160px;color:#65758a">— type SDMS then Tab —</div></div>
+   <div><label style="display:block;font-size:12px;font-weight:700">CASE DATE *</label><input type="date" id="r186dcDate" style="padding:8px;border:1px solid #ccc;border-radius:6px"></div>
+   <div><label style="display:block;font-size:12px;font-weight:700">CATEGORY *</label><input id="r186dcCat" placeholder="e.g. FIGHTING" style="padding:8px;border:1px solid #ccc;border-radius:6px;width:160px"></div>
+   <div><label style="display:block;font-size:12px;font-weight:700">SEVERITY *</label><select id="r186dcSev" style="padding:8px;border:1px solid #ccc;border-radius:6px"><option value="MINOR">MINOR</option><option value="MODERATE">MODERATE</option><option value="SERIOUS">SERIOUS</option><option value="CRITICAL">CRITICAL</option></select></div>
+   <div style="flex:1;min-width:220px"><label style="display:block;font-size:12px;font-weight:700">DESCRIPTION</label><input id="r186dcDesc" style="padding:8px;border:1px solid #ccc;border-radius:6px;width:100%"></div>
+   <div style="flex:1;min-width:220px"><label style="display:block;font-size:12px;font-weight:700">ACTION TAKEN</label><input id="r186dcAction" style="padding:8px;border:1px solid #ccc;border-radius:6px;width:100%"></div>
+   <div><label style="display:block;font-size:12px;font-weight:700">FOLLOW-UP DATE</label><input type="date" id="r186dcFollow" style="padding:8px;border:1px solid #ccc;border-radius:6px"></div>
+   <div><label style="display:block;font-size:12px;font-weight:700"><input type="checkbox" id="r186dcParent"> PARENT CONTACTED</label></div>
+   <div><label style="display:block;font-size:12px;font-weight:700">STATUS</label><select id="r186dcStatus" style="padding:8px;border:1px solid #ccc;border-radius:6px"><option value="OPEN">OPEN</option><option value="FOLLOW_UP">FOLLOW_UP</option><option value="RESOLVED">RESOLVED</option><option value="REFERRED">REFERRED</option><option value="CLOSED">CLOSED</option></select></div>
+   <div><button type="button" id="r186dcSave" style="background:#1264a3;color:#fff;border:0;border-radius:6px;padding:10px 18px;font-weight:800;cursor:pointer">SAVE CASE</button></div>
+  </div>
+  <div id="r186dcMsg" style="margin-bottom:10px;font-size:13px"></div>
+  <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px" id="r186dcTable">
+   <thead><tr style="background:#092b52;color:#fff"><th style="padding:8px;text-align:left">DATE</th><th style="padding:8px;text-align:left">SDMS</th><th style="padding:8px;text-align:left">STUDENT</th><th style="padding:8px;text-align:left">CLASS</th><th style="padding:8px;text-align:left">CATEGORY</th><th style="padding:8px;text-align:left">SEVERITY</th><th style="padding:8px;text-align:left">STATUS</th><th style="padding:8px;text-align:left">ACTION TAKEN</th></tr></thead>
+   <tbody><tr><td colspan="8" style="padding:14px;text-align:center;color:#65758a">Loading…</td></tr></tbody>
+  </table></div>
+ </div>`;
+ let studentId=null;
+ const sdmsInp=q('#r186dcSdms',mount),nameBox=q('#r186dcName',mount);
+ sdmsInp.addEventListener('blur',async()=>{
+  const code=sdmsInp.value.trim();
+  if(!code){nameBox.textContent='— type SDMS then Tab —';studentId=null;return}
+  nameBox.textContent='Looking up…';
+  try{
+   const d=await rpc('r18677_student_identity_details_by_sdms',{p_sdms_code:code});
+   if(d&&d.student_id){studentId=d.student_id;nameBox.textContent=(d.full_name||'')+' — '+(d.class_code||'')}
+   else{studentId=null;nameBox.textContent='NOT FOUND — check SDMS code';nameBox.style.color='#c62828'}
+  }catch(e){studentId=null;nameBox.textContent='LOOKUP FAILED: '+(e.message||e);nameBox.style.color='#c62828'}
+ });
+ async function loadTable(){
+  const tbody=q('#r186dcTable tbody',mount);
+  try{
+   const rows=await rpc('r186_discipline_cases_list',{});
+   if(!rows||!rows.length){tbody.innerHTML='<tr><td colspan="8" style="padding:14px;text-align:center;color:#65758a">No cases recorded yet.</td></tr>';return}
+   tbody.innerHTML=rows.map(r=>'<tr style="border-bottom:1px solid #eee">'+
+    '<td style="padding:8px">'+esc(r.case_date)+'</td>'+
+    '<td style="padding:8px">'+esc(r.sdms_code)+'</td>'+
+    '<td style="padding:8px">'+esc(r.student_name)+'</td>'+
+    '<td style="padding:8px">'+esc(r.class_code)+'</td>'+
+    '<td style="padding:8px">'+esc(r.offence_category)+'</td>'+
+    '<td style="padding:8px">'+esc(r.severity)+'</td>'+
+    '<td style="padding:8px">'+esc(r.status)+'</td>'+
+    '<td style="padding:8px">'+esc(r.action_taken)+'</td></tr>').join('');
+  }catch(e){tbody.innerHTML='<tr><td colspan="8" style="padding:14px;color:#c62828">FAILED TO LOAD: '+esc(e.message||e)+'</td></tr>'}
+ }
+ q('#r186dcSave',mount).addEventListener('click',async()=>{
+  const msg=q('#r186dcMsg',mount);
+  if(!studentId){msg.style.color='#c62828';msg.textContent='Enter a valid SDMS code first.';return}
+  const caseDate=q('#r186dcDate',mount).value,cat=q('#r186dcCat',mount).value.trim(),sev=q('#r186dcSev',mount).value;
+  if(!caseDate||!cat){msg.style.color='#c62828';msg.textContent='Case date and category are required.';return}
+  msg.style.color='#65758a';msg.textContent='Saving…';
+  try{
+   await rpc('r126_save_discipline_case',{
+    p_student_id:studentId,p_category:cat,p_severity:sev,
+    p_description:q('#r186dcDesc',mount).value.trim()||null,
+    p_action_taken:q('#r186dcAction',mount).value.trim()||null,
+    p_follow_up_date:q('#r186dcFollow',mount).value||null,
+    p_parent_contacted:q('#r186dcParent',mount).checked,
+    p_status:q('#r186dcStatus',mount).value,
+    p_case_date:caseDate
+   });
+   msg.style.color='#0f7a4a';msg.textContent='SAVED.';
+   ['r186dcSdms','r186dcCat','r186dcDesc','r186dcAction','r186dcFollow'].forEach(id=>q('#'+id,mount).value='');
+   q('#r186dcParent',mount).checked=false;nameBox.textContent='— type SDMS then Tab —';nameBox.style.color='';studentId=null;
+   loadTable();
+  }catch(e){msg.style.color='#c62828';msg.textContent='SAVE FAILED: '+(e.message||e)}
+ });
+ loadTable();
+};
+const prevOperational=V.r127_operational;
+V.r127_operational=function(m,c,p){
+ const k=String((p&&(p.key||p.serviceKey))||'').toUpperCase();
+ if(k==='DOD_DISCIPLINE')return V.r186_discipline_cases(m,c);
+ return prevOperational(m,c,p);
 };
 })();
