@@ -8948,3 +8948,60 @@ try{document.documentElement.setAttribute('data-gsm-release','R186.79');document
  try{document.documentElement.setAttribute('data-gsm-release','R186.80');document.documentElement.setAttribute('data-gsm-component-release','R186.80')}catch(_){ }
  setTimeout(dedupe,120);
 })();
+
+/* ===== R186.89 DATA RESET TOOLS — permanent delete for marks/attendance/students, SUPER_ADMIN only ===== */
+(function(){
+'use strict';
+const prevSystem=V.r133_system;
+V.r186_reset_tools=function(mount,ctx){
+ mount.innerHTML=`<div class="r132-card" style="border:2px solid #c62828;padding:16px">
+  <h2 style="color:#c62828;margin:0 0 4px">DATA RESET TOOLS</h2>
+  <p style="margin:0 0 16px">Each button below <b>permanently deletes</b> real data from the database. There is no undo. Only SUPER_ADMIN can run these. Type <code>DELETE</code> in the box next to a button to enable it.</p>
+  <div id="r186ResetRows" style="display:flex;flex-direction:column;gap:12px;max-width:640px"></div>
+  <div id="r186ResetLog" style="margin-top:16px;font-family:monospace;font-size:12px;white-space:pre-wrap;background:#f5f5f5;border:1px solid #ccc;padding:10px;border-radius:6px;min-height:40px">Ready.</div>
+ </div>`;
+ const rows=[
+  {id:'marks',label:'DELETE ALL MARKS & ASSESSMENTS',rpc:'r186_reset_delete_marks'},
+  {id:'attendance',label:'DELETE ALL CLASS + SUBJECT ATTENDANCE',rpc:'r186_reset_delete_attendance'},
+  {id:'students',label:'DELETE ALL STUDENTS (full profile, marks, attendance, everything linked to them)',rpc:'r186_reset_delete_students'},
+  {id:'full',label:'FULL RESET — MARKS + ATTENDANCE + STUDENTS (everything above at once)',rpc:'r186_reset_full_profile'}
+ ];
+ const wrap=q('#r186ResetRows',mount);
+ rows.forEach(r=>{
+  const row=document.createElement('div');
+  row.style.cssText='display:flex;gap:8px;align-items:center;border:1px solid #e0b4b4;border-radius:8px;padding:10px;background:#fff6f6';
+  row.innerHTML=`<b style="flex:1">${r.label}</b><input type="text" placeholder="type DELETE" style="width:120px;border:1px solid #c62828;border-radius:6px;padding:6px" id="r186confirm_${r.id}"><button type="button" disabled style="background:#c62828;color:#fff;border:0;border-radius:6px;padding:8px 14px;font-weight:800;cursor:not-allowed" id="r186btn_${r.id}">DELETE</button>`;
+  wrap.appendChild(row);
+  const inp=q('#r186confirm_'+r.id,mount),btn=q('#r186btn_'+r.id,mount);
+  inp.addEventListener('input',()=>{const ok=inp.value.trim()==='DELETE';btn.disabled=!ok;btn.style.cursor=ok?'pointer':'not-allowed';btn.style.opacity=ok?'1':'.6'});
+  btn.addEventListener('click',async()=>{
+   if(!confirm('FINAL CONFIRMATION\n\n'+r.label+'\n\nThis cannot be undone. Continue?'))return;
+   btn.disabled=true;btn.textContent='WORKING…';
+   const log=q('#r186ResetLog',mount);
+   log.textContent='Running '+r.rpc+' ...';
+   try{
+    const result=await rpc(r.rpc,{});
+    log.textContent='DONE — '+r.rpc+'\n'+JSON.stringify(result,null,2);
+    inp.value='';btn.textContent='DELETE';btn.disabled=true;btn.style.cursor='not-allowed';btn.style.opacity='.6';
+   }catch(e){
+    log.textContent='ERROR — '+r.rpc+'\n'+(e&&e.message?e.message:String(e));
+    btn.disabled=false;btn.textContent='DELETE';
+   }
+  });
+ });
+};
+V.r133_system=function(mount,ctx){
+ prevSystem(mount,ctx);
+ setTimeout(()=>{
+  const grid=q('.r132-card-grid',mount),viewer=q('#r132Viewer',mount);
+  if(!grid||!viewer||q('[data-r186-reset-card]',mount))return;
+  const card=document.createElement('article');
+  card.className='r132-card';
+  card.style.borderColor='#c62828';
+  card.setAttribute('data-r186-reset-card','1');
+  card.innerHTML='<div><h3 style="color:#c62828">⚠ DATA RESET TOOLS</h3><p>Permanently delete marks, attendance, or students to start fresh with real data. SUPER_ADMIN only. Cannot be undone.</p></div><span style="color:#c62828;font-weight:800">OPEN TOOL</span>';
+  card.onclick=()=>{V.r186_reset_tools(viewer,ctx);viewer.scrollIntoView({behavior:'smooth',block:'start'})};
+  grid.appendChild(card);
+ },50);
+};
+})();
