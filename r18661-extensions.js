@@ -9096,10 +9096,12 @@ V.r186_discipline_cases=function(mount,ctx){
  });
  loadTable();
 };
-const prevOperational=V.r127_operational;
-V.r127_operational=function(m,c,p){
- const k=String((p&&(p.key||p.serviceKey))||'').toUpperCase();
- if(k==='DOD_DISCIPLINE')return V.r186_discipline_cases(m,c);
- return prevOperational(m,c,p);
-};
+if(typeof V.r127_operational==='function'){
+ const prevOperational=V.r127_operational;
+ V.r127_operational=function(m,c,p){
+  const k=String((p&&(p.key||p.serviceKey))||'').toUpperCase();
+  if(k==='DOD_DISCIPLINE')return V.r186_discipline_cases(m,c);
+  return prevOperational(m,c,p);
+ };
+}
 })();
