@@ -1372,6 +1372,62 @@ async function bindRefs(cfg,p){for(const f of cfg.fields){const [n,,t]=f,id=p+n;
 function payloadFrom(cfg,p){const out={...(cfg.defaults||{})};for(const f of cfg.fields){const [n,,t]=f,el=byId(p+n);if(!el)continue;if(t==='file')continue;if(t==='checkbox')out[n]=!!el.checked;else out[n]=el.value||null}return out}
 function formatField(k,v){if(k==='student_id')return esc(studentLabel(v));if(/staff_id|recorded_by|patron_staff_id|appointed_by|inspected_by|counsellor_id/.test(k))return esc(staffLabel(v));if(k==='club_id')return esc(clubLabel(v));if(/status|decision|follow_up_status|profile_status/.test(k))return statusPill(v);if(typeof v==='boolean')return v?'YES':'NO';if(k==='file_url'&&String(v||'').startsWith('storage://'))return '<span class="r127-sub">Private evidence stored</span>';return esc(val(v))}
 
+// -------------------------------------------------------------------
+// R127 GENERIC OPERATIONAL SERVICE — base implementation consumed by CFG above.
+// NOTE: every later "R14x / R186.9x" patch to V.r127_operational in this codebase
+// is written as `if(typeof V.r127_operational==='function'){ const prev=V.r127_operational; V.r127_operational=function(...){...return prev(...)} }`.
+// Those guards silently no-op unless a base V.r127_operational already exists — this is that base.
+// Without it, invokeActivity()'s `typeof V.r127_operational==='function'` check fails for every
+// {op:'DOD_XXXX'} service (Guidance & Counselling, Clubs, Club Activities, Itorero/Values, Safety,
+// Hygiene, Feeding, Duty Log, Documents, Rewards, Committee, Appeals, etc.) and falls through to
+// genericActivity()'s "Operational data is connected to the canonical service source…" placeholder.
+// -------------------------------------------------------------------
+function resetOperationalForm(cfg,p){for(const f of cfg.fields){const [n,,t]=f,el=byId(p+n);if(!el)continue;if(t==='checkbox')el.checked=false;else if(t==='select')el.selectedIndex=0;else if(t!=='file')el.value=''}}
+V.r127_operational=function(mount,ctx,params){
+ const key=(params&&params.key)||'';
+ const cfg=CFG[key];
+ const title=(params&&params.title)||(cfg&&cfg.title)||key.replace(/^DOD_/,'').replace(/_/g,' ');
+ if(!liveGuard(mount,title))return;
+ if(!cfg){
+  mount.innerHTML=head(title,'This service is not yet configured for direct entry.')+'<div class="production-banner warn"><div>!</div><div>No CRUD configuration exists yet for service key "'+esc(key)+'".</div></div>';
+  return;
+ }
+ const p='r127op_';
+ let rows=[];
+ mount.innerHTML=head(cfg.title,'Live entry and register — Supabase-backed',`<button class="btn btn-outline btn-sm" id="${p}Print">Print / PDF</button>`)+
+  `<div class="r127-grid">
+    <div class="card"><div class="card-h"><h3>New / Update Record</h3></div>
+     <div class="card-b"><div class="r127-form-grid">${cfg.fields.map(f=>fieldHtml(f,p)).join('')}</div>
+      <div class="r127-actions"><button class="btn btn-primary" id="${p}Save">Save Record</button></div>
+     </div>
+    </div>
+    <div class="card"><div class="card-h"><h3>${esc(cfg.title)} Register</h3><button class="btn btn-outline btn-sm" id="${p}Refresh">Refresh</button></div>
+     <div class="card-b" id="${p}Host"><div class="empty-state">Loading…</div></div>
+    </div>
+   </div>`;
+ bindRefs(cfg,p);
+ const cols=(cfg.cols||[]).map(k=>({key:k,label:k.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase()),fmt:v=>formatField(k,v)}));
+ function draw(){byId(p+'Host').innerHTML=simpleTable(rows,cols)}
+ async function load(){
+  byId(p+'Host').innerHTML='<div class="empty-state">Loading '+esc(cfg.title)+'…</div>';
+  try{const d=await service(cfg.service||key);rows=(d&&d.rows)||[];draw()}
+  catch(e){byId(p+'Host').innerHTML=`<div class="production-banner warn"><div>!</div><div>${esc(human(e))}</div></div>`}
+ }
+ byId(p+'Save').onclick=async()=>{
+  const btn=byId(p+'Save');btn.disabled=true;btn.textContent='Saving…';
+  try{
+   const payload=payloadFrom(cfg,p);
+   await rpc(cfg.rpc,{p_payload:payload});
+   notice(cfg.title+' saved.');
+   resetOperationalForm(cfg,p);
+   await load();
+  }catch(e){alert(human(e))}
+  finally{btn.disabled=false;btn.textContent='Save Record'}
+ };
+ byId(p+'Refresh').onclick=load;
+ byId(p+'Print').onclick=()=>printRows(cfg.title+' Report',rows,cols,true);
+ load();
+};
 
 // -------------------------------------------------------------------
 // STAFF LEAVE / OFFICIAL MOVEMENT
