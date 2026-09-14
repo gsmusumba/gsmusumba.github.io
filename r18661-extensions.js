@@ -9519,3 +9519,40 @@ if(typeof V.r127_operational==='function'){
  };
 }
 })();
+
+/* ===== R186.95 ROUTING-PATH FIX — old bespoke view names (r119_discipline, r119_permissions) never pointed
+   at real functions, so those two cards never reached our r127_operational wrapper at all. Also, there are
+   TWO different SYSTEM MANAGEMENT screens in this app (r133_system and r18638_system) — add the DATA RESET
+   TOOLS card to both, so it appears regardless of which menu path the user takes. ===== */
+(function(){
+'use strict';
+if(!window.GSM_VIEWS)return;
+const V=window.GSM_VIEWS;
+function q(s,r){return (r||document).querySelector(s)}
+
+if(typeof V.r186_discipline_cases==='function')V.r119_discipline=function(m,c){return V.r186_discipline_cases(m,c)};
+if(typeof V.r186_svc_DOD_PERMISSIONS==='function')V.r119_permissions=function(m,c){return V.r186_svc_DOD_PERMISSIONS(m,c)};
+
+if(typeof V.r18638_system==='function'&&typeof V.r186_reset_tools==='function'){
+ const prevSys2=V.r18638_system;
+ V.r18638_system=function(mount,ctx){
+  const ret=prevSys2(mount,ctx);
+  let tries=0;
+  const tryInject=()=>{
+   tries++;
+   const grid=q('#r39SysCards',mount),viewer=q('#r38SysView',mount);
+   if(!grid||!viewer){if(tries<20)setTimeout(tryInject,150);return}
+   if(q('[data-r186-reset-card2]',mount))return;
+   const btn=document.createElement('button');
+   btn.className='r18638-card';
+   btn.setAttribute('data-r186-reset-card2','1');
+   btn.style.borderColor='#c62828';
+   btn.innerHTML='<b style="color:#c62828">\u26a0 DATA RESET TOOLS</b><span>Permanently delete marks, attendance or students. SUPER_ADMIN only. Cannot be undone.</span>';
+   btn.onclick=()=>{V.r186_reset_tools(viewer,ctx);viewer.scrollIntoView({behavior:'smooth',block:'start'})};
+   grid.appendChild(btn);
+  };
+  setTimeout(tryInject,80);
+  return ret;
+ };
+}
+})();
