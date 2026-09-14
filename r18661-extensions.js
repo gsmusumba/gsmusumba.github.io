@@ -1,4 +1,4 @@
-/* ===== R186.96 FIXES =====
+/* ===== R186.97 FIXES =====
    1) STUDENT LIST SYNCHRONIZATION: file upload now correctly parses .xlsx / .xls
       (previously any non-CSV/TXT file, including Excel workbooks, was read as raw
       text via FileReader.readAsText, producing garbled binary in the preview).
@@ -10,7 +10,7 @@
    3) VIEW / REPORT drop-down: if the report catalog fails to load (e.g. the browser
       could not reach the backend), the message is now explicit about the cause and
       includes a RETRY button, instead of leaving the drop-down silently disabled.
-===== END R186.96 FIXES ===== */
+===== END R186.97 FIXES ===== */
 
 /* ===== r186-timetable-master.js ===== */
 /* GS MUSUMBA R186.28 — embedded CURRENT teacher timetable master from approved XLSX. Future timetable data is intentionally server-gated. */
@@ -6777,6 +6777,325 @@ window.GSM_R18616={release:'R186.27-GLOBAL-AUTHORITY-COMPAT',coreRenderBridge:tr
 
 ;
 
+/* ===== R186.97 RESTORED TIMETABLE MANAGER / REAL DATA-ENTRY FORM ===== */
+function embeddedTimetableBaselineR120(){
+  try{
+    const A=window.GSM_R18632_AUTHORITY||{}; const out=[];
+    Object.keys(A.class_timetables||{}).forEach(code=>(A.class_timetables[code]||[]).forEach(r=>{
+      const day=r[0],label=r[1],tm=String(r[2]||'').split('–'),activity=String(r[3]||'').trim();
+      if(!day||!label||!activity||/^(BREAK|LUNCH)$/i.test(activity))return;
+      const subject=(activity.match(/^[A-Z][A-Z0-9_-]*/)||[activity])[0];
+      out.push({class_code:code,subject_code:subject,day_of_week:day,period_code:label,lesson_number:(String(label).match(/\d+/)||[''])[0],start_time:tm[0]||'',end_time:tm[1]||'',lesson_type:r[5]||'NORMAL',room:null,status:'PUBLISHED'});
+    }));
+    return out;
+  }catch(_){return [];}
+}
+V.r120_timetable_manager=function(mount){
+  const c=current();
+  let S={periods:[],entries:[],assignments:[],classes:[],subjects:[],staff:[],validation:null};
+  let tab='grid';
+
+  mount.innerHTML=window.GSM_pageHead('Timetable & Configuration','DOS operational editor · '+c.ay+' · '+c.term,
+    `<button class="btn btn-outline" id="r120Validate">Validate</button><button class="btn btn-outline" id="r120Sync">Sync Teacher Changes</button><button class="btn btn-primary" id="r120Publish">Publish</button><button class="btn btn-outline" id="r120Print">Print / PDF</button>`)+
+    `<div id="r120Status"></div><div class="r120-kpis" id="r120Kpis"></div>
+     <div class="r120-tabs"><button data-tab="grid" class="active">Timetable</button><button data-tab="assign">Teacher Assignments</button><button data-tab="periods">Period Configuration</button></div>
+     <div id="r120Body"><div class="empty-state">Loading timetable workspace…</div></div>`;
+
+  function effectiveAssignments(classId,subjectId){
+    const a=S.assignments.filter(x=>String(x.class_id)===String(classId)&&String(x.subject_id)===String(subjectId)&&String(x.status).toUpperCase()==='ACTIVE');
+    const term=a.filter(x=>String(x.scope).toUpperCase()==='TERM');
+    return term.length?term:a.filter(x=>String(x.scope).toUpperCase()==='YEAR');
+  }
+  function periodFor(day,lesson){return S.periods.find(p=>String(p.day_of_week)===String(day)&&String(p.lesson_number)===String(lesson)&&p.is_active!==false);}
+  function refreshKpis(){
+    const pub=S.entries.filter(x=>String(x.status).toUpperCase()==='PUBLISHED').length;
+    const draft=S.entries.filter(x=>String(x.status).toUpperCase()==='DRAFT').length;
+    const activeAsg=S.assignments.filter(x=>String(x.status).toUpperCase()==='ACTIVE').length;
+    byId('r120Kpis').innerHTML=`<div><b>${S.entries.length}</b><span>Timetable Rows</span></div><div><b>${pub}</b><span>Published</span></div><div><b>${draft}</b><span>Draft</span></div><div><b>${S.periods.filter(x=>x.is_active!==false).length}</b><span>Configured Slots</span></div><div><b>${activeAsg}</b><span>Active Assignments</span></div>`;
+    byId('r120Status').innerHTML=renderValidation(S.validation)+(S.entries.length?banner('','EDITABLE LIVE TIMETABLE','Changes are saved as DRAFT. Validate and Publish before teachers see them.'):banner('warn','TIMETABLE EMPTY','Seed period configuration and import the approved baseline, or build the timetable manually.'));
+  }
+
+  function load(){
+    byId('r120Body').innerHTML='<div class="empty-state">Loading timetable workspace…</div>';
+    rpc('r120_get_timetable_workspace').then(d=>{
+      S=d||S;S.periods=S.periods||[];S.entries=S.entries||[];S.assignments=S.assignments||[];S.classes=S.classes||[];S.subjects=S.subjects||[];S.staff=S.staff||[];
+      refreshKpis();renderTab();
+    }).catch(x=>byId('r120Body').innerHTML=banner('warn','Timetable workspace could not open',errText(x)));
+  }
+
+  function renderTab(){
+    qsa('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
+    if(tab==='assign')renderAssignments(); else if(tab==='periods')renderPeriods(); else renderGrid();
+  }
+
+  function renderGrid(){
+    const body=byId('r120Body');
+    const baseline=embeddedTimetableBaselineR120();
+    body.innerHTML=`
+      ${S.periods.length===0?`<div class="r120-actionbar"><div><b>No periods configured.</b><span>Use the approved timetable times as the starting configuration.</span></div><button class="btn btn-primary" id="r120Seed">Seed Periods from Baseline</button></div>`:''}
+      ${S.entries.length===0?`<div class="r120-actionbar"><div><b>No live timetable rows.</b><span>Import the approved baseline using CURRENT teacher assignments. You can edit every row afterwards.</span></div><button class="btn btn-primary" id="r120Import">Import Baseline (${baseline.length})</button></div>`:''}
+      <div class="r120-split">
+        <div class="card"><div class="card-h"><h3>Add / Edit Timetable Lesson</h3></div><div class="card-b">
+          <input type="hidden" id="r120EntryId">
+          <div class="r120-form-grid">
+            <label>Day<select id="r120Day"><option value="">— Day —</option>${['MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY'].map(x=>opt(x,x)).join('')}</select></label>
+            <label>Period<select id="r120Lesson"><option value="">— Select day first —</option></select></label>
+            <label>Class<select id="r120Class"><option value="">— Class —</option>${S.classes.map(x=>opt(x.id,(x.class_code||'')+' — '+(x.class_name||''))).join('')}</select></label>
+            <label>Subject<select id="r120Subject"><option value="">— Subject —</option>${S.subjects.map(x=>opt(x.id,(x.subject_code||'')+' — '+(x.subject_name||''))).join('')}</select></label>
+            <label>Assigned Teacher<select id="r120Teacher"><option value="">— Select class + subject —</option></select></label>
+            <label>Room / Place<input id="r120Room" placeholder="Optional"></label>
+          </div>
+          <div class="r120-form-actions"><button class="btn btn-primary" id="r120SaveEntry">Save as Draft</button><button class="btn btn-outline" id="r120ClearEntry">Clear</button></div>
+          <div class="sub" id="r120EntryHint">Select class and subject. Teacher choices come from Teacher Assignments.</div>
+        </div></div>
+        <div class="card"><div class="card-h"><h3>Live Timetable</h3></div><div class="card-b">
+          <div class="r120-filters"><select id="r120FDay"><option value="">All Days</option>${['MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY'].map(x=>opt(x,x)).join('')}</select><select id="r120FClass"><option value="">All Classes</option>${S.classes.map(x=>opt(x.id,x.class_code||x.class_name)).join('')}</select><select id="r120FTeacher"><option value="">All Teachers</option>${S.staff.map(x=>opt(x.id,x.full_name)).join('')}</select></div>
+          <div id="r120GridTable"></div>
+        </div></div>
+      </div>`;
+
+    function updatePeriods(sel){
+      const day=byId('r120Day').value;const periods=S.periods.filter(p=>p.is_active!==false&&p.day_of_week===day&&String(p.slot_type).toUpperCase()!=='BREAK');
+      byId('r120Lesson').innerHTML='<option value="">— Period —</option>'+periods.map(p=>opt(p.lesson_number,`${p.lesson_number} · ${p.slot_label||'ISAHA '+p.lesson_number} · ${String(p.start_time).slice(0,5)}-${String(p.end_time).slice(0,5)}`,sel)).join('');
+    }
+    function updateTeachers(sel){
+      const a=effectiveAssignments(byId('r120Class').value,byId('r120Subject').value);
+      byId('r120Teacher').innerHTML='<option value="">— Assigned Teacher —</option>'+a.map(x=>opt(x.staff_id,`${x.teacher_name} · ${x.scope}`,sel)).join('');
+      byId('r120EntryHint').textContent=a.length?`${a.length} effective assignment(s) found. TERM assignment overrides YEAR assignment.`:'No active teacher assignment for this class + subject. Open Teacher Assignments tab first.';
+    }
+    function clearForm(){byId('r120EntryId').value='';byId('r120Day').value='';updatePeriods();byId('r120Class').value='';byId('r120Subject').value='';updateTeachers();byId('r120Room').value='';byId('r120SaveEntry').textContent='Save as Draft';}
+    function renderRows(){
+      const fd=byId('r120FDay').value,fc=byId('r120FClass').value,ft=byId('r120FTeacher').value;
+      let rows=S.entries.filter(r=>(!fd||r.day_of_week===fd)&&(!fc||String(r.class_id)===fc)&&(!ft||String(r.staff_id)===ft));
+      byId('r120GridTable').innerHTML=rows.length?`<div class="tbl-wrap r120-scroll"><table class="dt"><thead><tr><th>Day</th><th>Period</th><th>Time</th><th>Class</th><th>Subject</th><th>Teacher</th><th>Status</th><th>Action</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${e(r.day_of_week)}</td><td>${e(r.lesson_number)}</td><td>${e(String(r.start_time||'').slice(0,5))}-${e(String(r.end_time||'').slice(0,5))}</td><td>${e(r.class_code)}</td><td>${e(r.subject_code||r.subject_name)}</td><td>${e(r.teacher_name)}</td><td>${pill(r.status)}</td><td><button class="btn btn-outline btn-sm" data-edit-entry="${e(r.id)}">Edit</button> <button class="btn btn-outline btn-sm" data-archive-entry="${e(r.id)}">Archive</button></td></tr>`).join('')}</tbody></table></div>`:'<div class="empty-state">No timetable rows match the filter.</div>';
+      qsa('[data-edit-entry]',byId('r120GridTable')).forEach(b=>b.onclick=()=>{const r=S.entries.find(x=>String(x.id)===String(b.dataset.editEntry));if(!r)return;byId('r120EntryId').value=r.id;byId('r120Day').value=r.day_of_week;updatePeriods(r.lesson_number);byId('r120Class').value=r.class_id;byId('r120Subject').value=r.subject_id;updateTeachers(r.staff_id);byId('r120Room').value=r.room||'';byId('r120SaveEntry').textContent='Update as Draft';window.scrollTo({top:0,behavior:'smooth'});});
+      qsa('[data-archive-entry]',byId('r120GridTable')).forEach(b=>b.onclick=()=>{if(!confirm('Archive this timetable lesson? It will stop appearing in the published teacher timetable.'))return;b.disabled=true;rpc('r120_archive_timetable_entry',{p_entry_id:b.dataset.archiveEntry}).then(()=>{toast('Timetable lesson archived.');load();}).catch(x=>alert(errText(x))).finally(()=>b.disabled=false);});
+    }
+
+    byId('r120Day').onchange=()=>updatePeriods();byId('r120Class').onchange=()=>updateTeachers();byId('r120Subject').onchange=()=>updateTeachers();
+    ['r120FDay','r120FClass','r120FTeacher'].forEach(id=>byId(id).onchange=renderRows);
+    byId('r120ClearEntry').onclick=clearForm;
+    byId('r120SaveEntry').onclick=()=>{
+      const payload={p_entry_id:byId('r120EntryId').value||null,p_day_of_week:byId('r120Day').value,p_lesson_number:Number(byId('r120Lesson').value)||null,p_class_id:byId('r120Class').value||null,p_subject_id:byId('r120Subject').value||null,p_staff_id:byId('r120Teacher').value||null,p_room:byId('r120Room').value||null};
+      if(!payload.p_day_of_week||!payload.p_lesson_number||!payload.p_class_id||!payload.p_subject_id||!payload.p_staff_id){alert('Complete Day, Period, Class, Subject and Assigned Teacher.');return;}
+      btnBusy('r120SaveEntry','Saving…');rpc('r120_save_timetable_entry',payload).then(r=>{toast(r.message||'Timetable lesson saved.');load();}).catch(x=>alert(errText(x))).finally(()=>btnDone('r120SaveEntry'));
+    };
+    if(byId('r120Seed'))byId('r120Seed').onclick=()=>{if(!baseline.length){alert('Approved embedded timetable baseline not found.');return;}btnBusy('r120Seed','Seeding…');rpc('r120_seed_slots_from_baseline',{p_rows:baseline}).then(r=>{toast('Period configuration seeded: '+(r.slots_processed||0));load();}).catch(x=>alert(errText(x))).finally(()=>btnDone('r120Seed'));};
+    if(byId('r120Import'))byId('r120Import').onclick=()=>{if(!baseline.length){alert('Approved embedded timetable baseline not found.');return;}if(!confirm('Import the approved timetable pattern using CURRENT teacher assignments? The imported rows can be edited afterwards.'))return;btnBusy('r120Import','Importing…');rpc('r120_seed_slots_from_baseline',{p_rows:baseline}).then(()=>rpc('r119_import_timetable_baseline',{p_rows:baseline,p_publish:false,p_include_p6b:true})).then(r=>{alert(`Import complete.\nImported: ${r.imported||0}\nMoved for conflicts: ${r.moved_for_conflict||0}\nSkipped: ${r.skipped||0}\n\nRows remain DRAFT until you Validate and Publish.`);load();}).catch(x=>alert(errText(x))).finally(()=>btnDone('r120Import'));};
+    updatePeriods();updateTeachers();renderRows();
+  }
+
+  function renderAssignments(){
+    const body=byId('r120Body');
+    const esc=e;
+    let M={academic_years:[],terms:[],teachers:[],classes:[],subjects:[],assignments:[],effective_assignments:[],selected:{}};
+    let pendingConflicts=[];
+
+    function rpcMatrix(yearId,termId,staffId){
+      return rpc('r162_get_teacher_assignment_matrix',{
+        p_academic_year_id:yearId||null,
+        p_term_id:termId||null,
+        p_staff_id:staffId||null
+      });
+    }
+    function applicable(sub,cls){
+      const sl=String(sub.level||'').toUpperCase(), cl=String(cls.level||'').toUpperCase(), code=String(cls.class_code||'').toUpperCase(), sc=String(sub.subject_code||'').toUpperCase();
+      if(sl!==cl)return false;
+      if(cl==='PRIMARY'){
+        if(/^P[1-3]/.test(code))return sc.indexOf('LP-')===0;
+        if(/^P[4-6]/.test(code))return sc.indexOf('UP-')===0;
+      }
+      return true;
+    }
+    function effectiveMap(){
+      const z={};(M.effective_assignments||[]).forEach(a=>z[String(a.class_id)+'|'+String(a.subject_id)]=a);return z;
+    }
+    function ownMap(){
+      const z={};(M.assignments||[]).forEach(a=>{
+        if(String(a.staff_id)!==String(M.selected.staff_id)||String(a.status).toUpperCase()!=='ACTIVE')return;
+        const k=String(a.class_id)+'|'+String(a.subject_id);
+        if(!z[k] || (a.term_id && !z[k].term_id))z[k]=a;
+      });return z;
+    }
+    function cellId(sid,cid){return 'r162c_'+String(sid).replace(/-/g,'')+'_'+String(cid).replace(/-/g,'');}
+    function periodsId(sid,cid){return 'r162p_'+String(sid).replace(/-/g,'')+'_'+String(cid).replace(/-/g,'');}
+    function statusText(a){return !a?'':(String(a.scope||'TERM').toUpperCase()==='YEAR'?'YEAR':'TERM');}
+
+    function shell(){
+      body.innerHTML=`
+      <style>
+        .r162-head{display:grid;grid-template-columns:repeat(3,minmax(190px,1fr));gap:10px;margin-bottom:12px}
+        .r162-head label,.r162-filter label{display:flex;flex-direction:column;gap:5px;font-size:11px;font-weight:800;color:#475569}
+        .r162-head select,.r162-filter select,.r162-filter input{min-height:42px;border:1px solid #cbd5e1;border-radius:10px;padding:8px 10px;background:#fff}
+        .r162-matrix-wrap{overflow:auto;max-height:62vh;border:1px solid #dbe3ec;border-radius:12px;background:#fff}
+        .r162-matrix{border-collapse:separate;border-spacing:0;min-width:max-content;width:100%;font-size:11px}
+        .r162-matrix th,.r162-matrix td{border-right:1px solid #e5e7eb;border-bottom:1px solid #e5e7eb;padding:6px;vertical-align:middle;background:#fff}
+        .r162-matrix thead th{position:sticky;top:0;z-index:4;background:#f8fafc;white-space:nowrap;text-align:center}
+        .r162-matrix .r162-subject{position:sticky;left:0;z-index:3;min-width:225px;max-width:225px;text-align:left;background:#fff}
+        .r162-matrix thead .r162-subject{z-index:6;background:#f8fafc}
+        .r162-cell{min-width:116px;text-align:center}
+        .r162-cellbox{display:grid;grid-template-columns:24px 62px;align-items:center;justify-content:center;gap:5px;min-height:40px}
+        .r162-cellbox input[type=checkbox]{width:20px;height:20px;cursor:pointer}
+        .r162-period{width:62px;min-height:34px;border:1px solid #cbd5e1;border-radius:8px;text-align:center;padding:4px}
+        .r162-period:disabled{background:#f1f5f9;color:#94a3b8}
+        .r162-owner{grid-column:1/-1;font-size:9px;line-height:1.2;color:#b45309;max-width:112px;white-space:normal}
+        .r162-own{color:#047857}.r162-na{background:#f8fafc!important;color:#cbd5e1;text-align:center}
+        .r162-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:12px 0}
+        .r162-summary{font-size:11px;color:#475569;margin-left:auto}.r162-summary b{color:#0f172a}
+        .r162-conflicts{border:1px solid #f59e0b;background:#fffbeb;border-radius:12px;padding:12px;margin:12px 0}
+        .r162-conflict-row{display:grid;grid-template-columns:minmax(180px,1fr) minmax(180px,1fr) auto auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid #fde68a}
+        .r162-conflict-row:last-child{border-bottom:0}.r162-conflict-row small{color:#92400e}
+        .r162-register{margin-top:14px}.r162-filter{display:grid;grid-template-columns:repeat(6,minmax(130px,1fr));gap:8px;margin-bottom:10px}
+        .r162-edit-cell{box-shadow:inset 0 0 0 2px #2563eb;background:#eff6ff!important}
+        @media(max-width:900px){.r162-head{grid-template-columns:1fr}.r162-filter{grid-template-columns:repeat(2,minmax(140px,1fr))}.r162-summary{width:100%;margin-left:0}.r162-conflict-row{grid-template-columns:1fr}.r162-matrix-wrap{max-height:58vh}.r162-matrix .r162-subject{min-width:180px;max-width:180px}}
+      </style>
+      <div class="card">
+        <div class="card-h"><h3>Teacher Assignment Matrix</h3><span class="sub">TEACHER → SUBJECTS → TICK CLASSES → PERIODS/WEEK → SAVE ALL</span></div>
+        <div class="card-b">
+          <div class="r162-head">
+            <label>ACADEMIC YEAR<select id="r162Year"><option value="">Loading…</option></select></label>
+            <label>TERM<select id="r162Term"><option value="">Loading…</option></select></label>
+            <label>TEACHER<select id="r162Teacher"><option value="">Loading…</option></select></label>
+          </div>
+          <div id="r162MatrixHost"><div class="empty-state">Loading assignment matrix…</div></div>
+          <div id="r162ConflictHost"></div>
+        </div>
+      </div>
+      <div class="card r162-register"><div class="card-h"><h3>Current Assignment Register</h3></div><div class="card-b"><div id="r162Register"></div></div></div>`;
+    }
+
+    function fillSelectors(){
+      const y=byId('r162Year'),t=byId('r162Term'),st=byId('r162Teacher');
+      y.innerHTML=(M.academic_years||[]).map(x=>opt(x.id,x.year_name+(x.status?' · '+x.status:''),String(x.id)===String(M.selected.academic_year_id))).join('');
+      t.innerHTML=(M.terms||[]).map(x=>opt(x.id,x.term_code+(x.status?' · '+x.status:''),String(x.id)===String(M.selected.term_id))).join('');
+      st.innerHTML=(M.teachers||[]).map(x=>opt(x.id,x.full_name+' · '+(x.staff_code||''),String(x.id)===String(M.selected.staff_id))).join('');
+      y.value=M.selected.academic_year_id||'';t.value=M.selected.term_id||'';st.value=M.selected.staff_id||'';
+      y.onchange=()=>reload(y.value,null,st.value);
+      t.onchange=()=>reload(y.value,t.value,st.value);
+      st.onchange=()=>reload(y.value,t.value,st.value);
+    }
+
+    function renderMatrix(){
+      const host=byId('r162MatrixHost');
+      const classes=(M.classes||[]),subjects=(M.subjects||[]),eff=effectiveMap(),own=ownMap();
+      if(!classes.length||!subjects.length){host.innerHTML='<div class="empty-state">No active classes or subjects are available for this academic year.</div>';return;}
+      let html=`<div class="r162-matrix-wrap"><table class="r162-matrix"><thead><tr><th class="r162-subject">SUBJECT</th>${classes.map(c=>`<th>${esc(c.class_code)}${c.class_teacher_name?`<small style="display:block;font-weight:500;color:#64748b">CT: ${esc(c.class_teacher_name)}</small>`:''}</th>`).join('')}</tr></thead><tbody>`;
+      subjects.forEach(sub=>{
+        const visible=classes.some(cls=>applicable(sub,cls));if(!visible)return;
+        html+=`<tr><th class="r162-subject"><b>${esc(sub.subject_name)}</b><small style="display:block;color:#64748b">${esc(sub.subject_code||'')}</small></th>`;
+        classes.forEach(cls=>{
+          if(!applicable(sub,cls)){html+='<td class="r162-na">—</td>';return;}
+          const k=String(cls.id)+'|'+String(sub.id),a=eff[k],mine=own[k],checked=!!mine;
+          const owner=a&&String(a.staff_id)!==String(M.selected.staff_id)?a:null;
+          const per=mine&&mine.periods_per_week!=null?mine.periods_per_week:(a&&a.periods_per_week!=null?a.periods_per_week:1);
+          html+=`<td class="r162-cell" data-matrix-cell="${esc(k)}"><div class="r162-cellbox"><input type="checkbox" id="${cellId(sub.id,cls.id)}" data-r162-check="1" data-subject="${esc(sub.id)}" data-class="${esc(cls.id)}" ${checked?'checked':''}><input class="r162-period" type="number" min="0" max="40" id="${periodsId(sub.id,cls.id)}" value="${esc(per)}" ${checked?'':'disabled'}>${owner?`<div class="r162-owner">Assigned: ${esc(owner.teacher_name)} · ${esc(statusText(owner))}</div>`:(mine?`<div class="r162-owner r162-own">Current assignment · ${esc(statusText(mine))}</div>`:'')}</div></td>`;
+        });html+='</tr>';
+      });
+      html+=`</tbody></table></div><div class="r162-actions"><button class="btn btn-outline" id="r162SelectAll">SELECT ALL VISIBLE</button><button class="btn btn-outline" id="r162Clear">CLEAR TICKS</button><button class="btn btn-primary" id="r162Save">SAVE ASSIGNMENTS</button><div class="r162-summary">Teacher: <b>${esc(M.selected.teacher_name||'—')}</b> · Tick only the Class + Subject cells this teacher owns.</div></div>`;
+      host.innerHTML=html;
+      qsa('[data-r162-check]',host).forEach(ch=>ch.onchange=()=>{const p=byId(periodsId(ch.dataset.subject,ch.dataset.class));if(p)p.disabled=!ch.checked;});
+      byId('r162SelectAll').onclick=()=>qsa('[data-r162-check]',host).forEach(ch=>{ch.checked=true;const p=byId(periodsId(ch.dataset.subject,ch.dataset.class));if(p)p.disabled=false;});
+      byId('r162Clear').onclick=()=>qsa('[data-r162-check]',host).forEach(ch=>{ch.checked=false;const p=byId(periodsId(ch.dataset.subject,ch.dataset.class));if(p)p.disabled=true;});
+      byId('r162Save').onclick=saveMatrix;
+    }
+
+    function collectItems(replaceKeys){
+      replaceKeys=replaceKeys||{};const out=[];
+      (M.subjects||[]).forEach(sub=>(M.classes||[]).forEach(cls=>{
+        if(!applicable(sub,cls))return;
+        const ch=byId(cellId(sub.id,cls.id)),p=byId(periodsId(sub.id,cls.id));if(!ch)return;
+        const key=String(cls.id)+'|'+String(sub.id);
+        out.push({class_id:cls.id,subject_id:sub.id,selected:!!ch.checked,periods_per_week:Number(p&&p.value)||0,replace_existing:!!replaceKeys[key]});
+      }));return out;
+    }
+
+    function saveMatrix(){
+      const btn=byId('r162Save');const items=collectItems();
+      if(!items.some(x=>x.selected) && !confirm('No classes are ticked for this teacher. Continue? This can deactivate current TERM assignments for this teacher.'))return;
+      btnBusy('r162Save','Saving…');
+      rpc('r162_save_teacher_assignment_matrix',{p_academic_year_id:M.selected.academic_year_id,p_term_id:M.selected.term_id,p_staff_id:M.selected.staff_id,p_items:items})
+      .then(r=>{
+        pendingConflicts=(r&&r.conflicts)||[];
+        if(pendingConflicts.length){renderConflicts();alert(`${pendingConflicts.length} conflict(s) were NOT replaced automatically. Choose KEEP CURRENT or REPLACE for each conflict.`);}
+        else{
+          alert(`${r.message||'Assignments saved successfully'}\nTeacher: ${r.teacher||M.selected.teacher_name||''}\nSubjects: ${(r.subjects||[]).length}\nClasses: ${(r.classes||[]).join(', ')||'—'}\nAssignment rows created/updated: ${r.assignment_rows_created_or_updated||0}${Number(r.timetable_rows_to_sync||0)>0?`\n\n${r.timetable_rows_to_sync} timetable row(s) require teacher synchronization before republishing.`:''}`);
+          reload(M.selected.academic_year_id,M.selected.term_id,M.selected.staff_id);
+        }
+      }).catch(x=>alert(errText(x))).finally(()=>btnDone('r162Save'));
+    }
+
+    function renderConflicts(){
+      const host=byId('r162ConflictHost');if(!pendingConflicts.length){host.innerHTML='';return;}
+      host.innerHTML=`<div class="r162-conflicts"><b>ASSIGNMENT CONFLICTS — NO AUTOMATIC REPLACEMENT</b><p class="sub">Review each class/subject. KEEP CURRENT leaves the existing teacher unchanged. REPLACE creates the selected teacher's TERM assignment only after your explicit choice.</p>${pendingConflicts.map((c,i)=>`<div class="r162-conflict-row"><div><b>${esc(c.subject_code)} — ${esc(c.class_code)}</b><small style="display:block">Currently assigned to: ${esc(c.current_teacher||'Unknown')}</small></div><div>Requested teacher: <b>${esc(c.requested_teacher||M.selected.teacher_name||'')}</b></div><button class="btn btn-outline btn-sm" data-keep-conflict="${i}">KEEP CURRENT</button><button class="btn btn-primary btn-sm" data-replace-conflict="${i}">REPLACE WITH ${esc((c.requested_teacher||M.selected.teacher_name||'TEACHER').split(' ')[0])}</button></div>`).join('')}</div>`;
+      qsa('[data-keep-conflict]',host).forEach(b=>b.onclick=()=>{const i=Number(b.dataset.keepConflict);pendingConflicts.splice(i,1);renderConflicts();});
+      qsa('[data-replace-conflict]',host).forEach(b=>b.onclick=()=>replaceConflict(Number(b.dataset.replaceConflict)));
+    }
+    function replaceConflict(i){
+      const c=pendingConflicts[i];if(!c)return;
+      if(!confirm(`Replace ${c.current_teacher||'current teacher'} with ${c.requested_teacher||M.selected.teacher_name} for ${c.subject_code} — ${c.class_code}?`))return;
+      const p=byId(periodsId(c.subject_id,c.class_id));
+      const item={class_id:c.class_id,subject_id:c.subject_id,selected:true,periods_per_week:Number(p&&p.value)||1,replace_existing:true};
+      rpc('r162_save_teacher_assignment_matrix',{p_academic_year_id:M.selected.academic_year_id,p_term_id:M.selected.term_id,p_staff_id:M.selected.staff_id,p_items:[item]}).then(r=>{
+        if(r&&r.conflict_count){alert('Replacement was not completed: '+(r.message||'conflict remains'));return;}
+        pendingConflicts.splice(i,1);renderConflicts();toast(`${c.subject_code} — ${c.class_code} reassigned.`);reload(M.selected.academic_year_id,M.selected.term_id,M.selected.staff_id);
+      }).catch(x=>alert(errText(x)));
+    }
+
+    function renderRegister(){
+      const host=byId('r162Register'),rows=(M.assignments||[]),teachers=M.teachers||[],classes=M.all_classes||M.classes||[],subjects=M.subjects||[];
+      host.innerHTML=`<div class="r162-filter"><label>Teacher<select id="r162FTeacher"><option value="">ALL TEACHERS</option>${teachers.map(x=>opt(x.id,x.full_name)).join('')}</select></label><label>Class<select id="r162FClass"><option value="">ALL CLASSES</option>${classes.map(x=>opt(x.id,x.class_code)).join('')}</select></label><label>Subject<select id="r162FSubject"><option value="">ALL SUBJECTS</option>${subjects.map(x=>opt(x.id,x.subject_name)).join('')}</select></label><label>Status<select id="r162FStatus"><option value="">ALL STATUS</option><option>ACTIVE</option><option>INACTIVE</option></select></label><label>Search<input id="r162Search" placeholder="Teacher, subject, class"></label><label>Sort By<select id="r162Sort"><option value="teacher">Teacher A-Z</option><option value="class">Class</option><option value="subject">Subject</option><option value="periods_desc">Periods High-Low</option></select></label></div><div id="r162RegisterTable"></div>`;
+      const draw=()=>{
+        const ft=byId('r162FTeacher').value,fc=byId('r162FClass').value,fs=byId('r162FSubject').value,st=byId('r162FStatus').value,q=String(byId('r162Search').value||'').toLowerCase(),sort=byId('r162Sort').value;
+        let a=rows.filter(r=>(!ft||String(r.staff_id)===ft)&&(!fc||String(r.class_id)===fc)&&(!fs||String(r.subject_id)===fs)&&(!st||String(r.status).toUpperCase()===st)&&(!q||[r.teacher_name,r.subject_name,r.subject_code,r.class_code].join(' ').toLowerCase().includes(q)));
+        a=a.slice().sort((x,y)=>sort==='class'?String(x.class_code).localeCompare(String(y.class_code)):sort==='subject'?String(x.subject_name).localeCompare(String(y.subject_name)):sort==='periods_desc'?(Number(y.periods_per_week)||0)-(Number(x.periods_per_week)||0):String(x.teacher_name).localeCompare(String(y.teacher_name)));
+        byId('r162RegisterTable').innerHTML=a.length?`<div class="tbl-wrap"><table class="dt"><thead><tr><th>#</th><th>Teacher</th><th>Subject</th><th>Class</th><th>Periods/Week</th><th>Scope</th><th>Status</th><th>Action</th></tr></thead><tbody>${a.map((r,i)=>`<tr><td>${i+1}</td><td>${esc(r.teacher_name)}</td><td>${esc(r.subject_name||r.subject_code)}</td><td>${esc(r.class_code)}</td><td>${esc(r.periods_per_week)}</td><td>${esc(r.scope||'TERM')}</td><td>${pill(r.status)}</td><td><button class="btn btn-outline btn-sm" data-r162-edit="${esc(r.id)}">Edit</button> <button class="btn btn-danger btn-sm" data-r162-delete="${esc(r.id)}">Delete</button></td></tr>`).join('')}</tbody></table></div>`:'<div class="empty-state">No assignments match the selected filters.</div>';
+        qsa('[data-r162-edit]',byId('r162RegisterTable')).forEach(b=>b.onclick=()=>editRow(b.dataset.r162Edit));
+        qsa('[data-r162-delete]',byId('r162RegisterTable')).forEach(b=>b.onclick=()=>deleteRow(b.dataset.r162Delete));
+      };
+      ['r162FTeacher','r162FClass','r162FSubject','r162FStatus','r162Sort'].forEach(id=>byId(id).onchange=draw);byId('r162Search').oninput=draw;draw();
+    }
+
+    function editRow(id){
+      const r=(M.assignments||[]).find(x=>String(x.id)===String(id));if(!r)return;
+      if(String(r.staff_id)!==String(M.selected.staff_id)){byId('r162Teacher').value=r.staff_id;reload(M.selected.academic_year_id,M.selected.term_id,r.staff_id).then(()=>highlightRow(r));}
+      else highlightRow(r);
+    }
+    function highlightRow(r){
+      const ch=byId(cellId(r.subject_id,r.class_id)),p=byId(periodsId(r.subject_id,r.class_id));if(ch){ch.checked=String(r.status).toUpperCase()==='ACTIVE';if(p){p.disabled=!ch.checked;p.value=r.periods_per_week||1;}const td=ch.closest('td');if(td){td.classList.add('r162-edit-cell');td.scrollIntoView({behavior:'smooth',block:'center',inline:'center'});setTimeout(()=>td.classList.remove('r162-edit-cell'),2500);}}
+    }
+    function deleteRow(id){
+      const r=(M.assignments||[]).find(x=>String(x.id)===String(id));if(!r)return;
+      if(!confirm(`Delete/Deactivate assignment?\n${r.teacher_name} → ${r.subject_name||r.subject_code} → ${r.class_code}\n\nThis does not silently rewrite the timetable. Synchronize/validate before republishing if needed.`))return;
+      rpc('r162_delete_teacher_assignment',{p_assignment_id:id}).then(x=>{alert((x&&x.message)||'Assignment removed.');reload(M.selected.academic_year_id,M.selected.term_id,M.selected.staff_id);}).catch(x=>alert(errText(x)));
+    }
+
+    function reload(yearId,termId,staffId){
+      byId('r162MatrixHost').innerHTML='<div class="empty-state">Loading assignment matrix…</div>';byId('r162ConflictHost').innerHTML='';
+      return rpcMatrix(yearId,termId,staffId).then(d=>{M=d||M;M.selected=M.selected||{};fillSelectors();renderMatrix();renderRegister();return M;}).catch(x=>{byId('r162MatrixHost').innerHTML=banner('warn','Teacher assignment matrix could not open',errText(x));throw x;});
+    }
+
+    shell();reload(null,null,null);
+  }
+
+  function renderPeriods(){
+    const body=byId('r120Body');const baseline=embeddedTimetableBaselineR120();
+    body.innerHTML=`${S.periods.length===0?`<div class="r120-actionbar"><div><b>Start from approved school times.</b><span>You can edit every period afterwards, including Wednesday/Friday special blocks.</span></div><button class="btn btn-primary" id="r120SeedPeriods">Seed from Baseline</button></div>`:''}<div class="r120-split"><div class="card"><div class="card-h"><h3>Add / Edit Period</h3></div><div class="card-b"><input type="hidden" id="r120PeriodId"><div class="r120-form-grid"><label>Day<select id="r120PDay">${['MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY'].map(x=>opt(x,x)).join('')}</select></label><label>Lesson Number<input type="number" id="r120PNo" min="1" max="30" value="1"></label><label>Label<input id="r120PLabel" value="ISAHA 1"></label><label>Start Time<input type="time" id="r120PStart"></label><label>End Time<input type="time" id="r120PEnd"></label><label>Type<select id="r120PType"><option>TEACHING</option><option>BREAK</option><option>ITORERO</option><option>CLUB</option><option>CPD</option><option>SPECIAL</option></select></label><label>Active<select id="r120PActive"><option value="true">YES</option><option value="false">NO</option></select></label></div><div class="r120-form-actions"><button class="btn btn-primary" id="r120SavePeriod">Save / Update Period</button><button class="btn btn-outline" id="r120ClearPeriod">Clear</button></div><div class="sub">Changing a period time automatically updates affected timetable rows and returns them to DRAFT for validation/republication.</div></div></div><div class="card"><div class="card-h"><h3>Period Configuration</h3></div><div class="card-b" id="r120PeriodTable"></div></div></div>`;
+    function renderRows(){byId('r120PeriodTable').innerHTML=S.periods.length?`<div class="tbl-wrap r120-scroll"><table class="dt"><thead><tr><th>Day</th><th>No.</th><th>Label</th><th>Time</th><th>Type</th><th>Active</th><th>Action</th></tr></thead><tbody>${S.periods.map(r=>`<tr><td>${e(r.day_of_week)}</td><td>${e(r.lesson_number)}</td><td>${e(r.slot_label)}</td><td>${e(String(r.start_time||'').slice(0,5))}-${e(String(r.end_time||'').slice(0,5))}</td><td>${e(r.slot_type)}</td><td>${r.is_active===false?'NO':'YES'}</td><td><button class="btn btn-outline btn-sm" data-edit-period="${e(r.id)}">Edit</button></td></tr>`).join('')}</tbody></table></div>`:'<div class="empty-state">No period configuration yet.</div>';qsa('[data-edit-period]',byId('r120PeriodTable')).forEach(b=>b.onclick=()=>{const r=S.periods.find(x=>String(x.id)===String(b.dataset.editPeriod));if(!r)return;byId('r120PeriodId').value=r.id;byId('r120PDay').value=r.day_of_week;byId('r120PNo').value=r.lesson_number;byId('r120PLabel').value=r.slot_label||'';byId('r120PStart').value=String(r.start_time||'').slice(0,5);byId('r120PEnd').value=String(r.end_time||'').slice(0,5);byId('r120PType').value=r.slot_type||'TEACHING';byId('r120PActive').value=String(r.is_active!==false);byId('r120SavePeriod').textContent='Update Period';});}
+    byId('r120PNo').oninput=()=>{if(!byId('r120PeriodId').value)byId('r120PLabel').value='ISAHA '+byId('r120PNo').value;};byId('r120ClearPeriod').onclick=()=>renderPeriods();
+    byId('r120SavePeriod').onclick=()=>{const p={p_period_id:byId('r120PeriodId').value||null,p_day_of_week:byId('r120PDay').value,p_lesson_number:Number(byId('r120PNo').value)||null,p_start_time:byId('r120PStart').value||null,p_end_time:byId('r120PEnd').value||null,p_slot_label:byId('r120PLabel').value||null,p_slot_type:byId('r120PType').value,p_is_active:byId('r120PActive').value==='true'};if(!p.p_lesson_number||!p.p_start_time||!p.p_end_time){alert('Complete Lesson Number, Start Time and End Time.');return;}btnBusy('r120SavePeriod','Saving…');rpc('r120_save_period_config',p).then(r=>{alert(`Period saved. ${r.affected_timetable_rows||0} timetable row(s) updated. ${r.requires_publish?'Validate and Publish again.':''}`);load();}).catch(x=>alert(errText(x))).finally(()=>btnDone('r120SavePeriod'));};
+    if(byId('r120SeedPeriods'))byId('r120SeedPeriods').onclick=()=>{if(!baseline.length){alert('Approved embedded timetable baseline not found.');return;}btnBusy('r120SeedPeriods','Seeding…');rpc('r120_seed_slots_from_baseline',{p_rows:baseline}).then(r=>{toast('Periods seeded: '+(r.slots_processed||0));load();}).catch(x=>alert(errText(x))).finally(()=>btnDone('r120SeedPeriods'));};
+    renderRows();
+  }
+
+  qsa('[data-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;renderTab();});
+  byId('r120Validate').onclick=()=>{btnBusy('r120Validate','Checking…');rpc('r120_validate_timetable').then(v=>{S.validation=v;refreshKpis();alert(v.valid?'PASS — no class/teacher conflicts or assignment mismatches.':`Validation requires action.\nClass conflicts: ${v.class_conflicts}\nTeacher conflicts: ${v.teacher_conflicts}\nMissing periods: ${v.missing_period_config}\nAssignment mismatch: ${v.assignment_mismatch}`);}).catch(x=>alert(errText(x))).finally(()=>btnDone('r120Validate'));};
+  byId('r120Sync').onclick=()=>{btnBusy('r120Sync','Checking…');rpc('r120_sync_timetable_assignments',{p_apply:false}).then(r=>{if(!r.changes){alert(`No teacher changes need synchronization.\nMissing assignments: ${r.missing_assignments||0}\nAmbiguous assignments: ${r.ambiguous_assignments||0}\nConflicts: ${r.conflicts||0}`);return null;}if(!confirm(`${r.changes} timetable row(s) can be updated to current teacher assignments.\nConflicts: ${r.conflicts||0}\nMissing: ${r.missing_assignments||0}\nAmbiguous: ${r.ambiguous_assignments||0}\n\nApply safe changes now? Updated rows become DRAFT.`))return null;return rpc('r120_sync_timetable_assignments',{p_apply:true});}).then(r=>{if(r){toast('Teacher changes synchronized: '+(r.changes||0));load();}}).catch(x=>alert(errText(x))).finally(()=>btnDone('r120Sync'));};
+  byId('r120Publish').onclick=()=>{if(!confirm('Validate and PUBLISH the current timetable? Teachers will see only published rows.'))return;btnBusy('r120Publish','Publishing…');rpc('r120_publish_timetable').then(r=>{if(!r.success){const v=r.validation||{};alert(`Publish blocked.\nClass conflicts: ${v.class_conflicts||0}\nTeacher conflicts: ${v.teacher_conflicts||0}\nMissing periods: ${v.missing_period_config||0}\nAssignment mismatch: ${v.assignment_mismatch||0}`);}else{toast('Timetable published.');load();}}).catch(x=>alert(errText(x))).finally(()=>btnDone('r120Publish'));};
+  byId('r120Print').onclick=()=>window.GSM_printReport({title:'School Timetable',subTitle:'GS MUSUMBA SCHOOL MANAGEMENT SYSTEM — PUBLISHED TIMETABLE',ay:c.ay,term:c.term,columns:[{key:'day_of_week',label:'Day'},{key:'lesson_number',label:'Period'},{key:'start_time',label:'Start'},{key:'end_time',label:'End'},{key:'class_code',label:'Class'},{key:'subject_code',label:'Subject'},{key:'teacher_name',label:'Teacher'},{key:'room',label:'Room'}],rows:S.entries.filter(x=>String(x.status).toUpperCase()==='PUBLISHED'),landscape:true});
+  load();
+};
+
+
 /* ===== r186-timetable-integration.js ===== */
 /* GS MUSUMBA R186.28 — POST-FINAL CURRENT/FUTURE TIMETABLE AUTHORITY. */
 (function(){
@@ -7892,60 +8211,7 @@ V.r18638_headteacher=(m,c)=>roleCenter(m,c,'HEADTEACHER');V.r18638_dos=(m,c)=>ro
 V.r18638_all_services=function(m,c){pageTitle('ALL SCHOOL SERVICES');const groups=[['HEADTEACHER','HEADTEACHER'],['DOS','DOS'],['DOD','DOD'],['SECRETARY','SECRETARY'],['BURSAR','BURSAR'],['LIBRARIAN','LIBRARIAN'],['STUDENTS','STUDENTS'],['SYSTEM MANAGEMENT','SYSTEM']];m.innerHTML='<section class="r18638-role-head"><h2>ALL SCHOOL SERVICES · VIEW / REPORT ACCESS</h2><p>Senior authorized staff can view and report across the school. Add/Edit/Update/Remove/Change stay enabled only in the services owned by their role; SUPER ADMIN has system-wide override.</p></section><div class="r18638-card-grid">'+groups.map((g,i)=>'<button class="r18638-card" data-all="'+i+'"><b>'+esc(g[0])+'</b><span>Open services, embedded reports and analysis.</span></button>').join('')+'</div><div id="r38AllView"></div>';const h=m.querySelector('#r38AllView');$$('[data-all]',m).forEach(b=>b.onclick=()=>{const g=groups[+b.dataset.all];if(g[1]==='STUDENTS')return V.r18638_students(h,c);if(g[1]==='SYSTEM')return V.r18638_system(h,c);return roleCenter(h,c,g[1])});visualSanitize(m)};
 
 V.r18638_students=function(m,c){pageTitle('STUDENTS');m.innerHTML='<section class="r18638-role-head"><h2>STUDENTS · MANAGEMENT MODULE</h2><p>Student login remains disabled. Authorized staff manage the student lifecycle here.</p></section><div class="r18638-card-grid">'+STUDENT_SERVICES.map((x,i)=>'<button class="r18638-card" data-st="'+i+'"><b>'+esc(x[1])+'</b><span>'+esc(x[2])+'</span></button>').join('')+'</div><div id="r38StuView"></div>';const h=m.querySelector('#r38StuView');$$('[data-st]',m).forEach(b=>b.onclick=()=>openService(h,c,STUDENT_SERVICES[+b.dataset.st]));visualSanitize(m)};
-V.r18638_system=async function(m,c){
- pageTitle('SYSTEM MANAGEMENT');
- m.innerHTML='<section class="r18638-role-head"><h2>SYSTEM MANAGEMENT</h2><p>All configuration and management authorities are centralized here. SUPER ADMIN / DOD has final system-wide authority.</p></section><div class="r18638-report-status" id="r39SysLoad">LOADING ALL SYSTEM MANAGEMENT SERVICES…</div><div class="r18638-card-grid" id="r39SysCards"></div><div id="r38SysView"></div>';
- const cards=m.querySelector('#r39SysCards'),h=m.querySelector('#r38SysView'),st=m.querySelector('#r39SysLoad');
- const systemKey=v=>{
-   const t=up(v).replace(/&/g,' AND ').replace(/[^A-Z0-9]+/g,' ').trim().replace(/\s+/g,' ');
-   const aliases={
-     'AUDIT AND VERSION':'AUDIT LOG',
-     'USER ACCOUNTS':'USERS AND ACCESS',
-     'USERS ACCESS':'USERS AND ACCESS',
-     'MARKS CONFIGURATION':'MARKS MANAGEMENT AND CONFIGURATION',
-     'MARKS MANAGEMENT CONFIGURATION':'MARKS MANAGEMENT AND CONFIGURATION',
-     'ACADEMIC YEARS TERMS':'ACADEMIC YEARS AND TERMS',
-     'SYSTEM HEALTH':'SYSTEM HEALTH',
-     'STAFF MANAGEMENT':'STAFF MANAGEMENT',
-     'TIMETABLE MANAGEMENT':'TIMETABLE MANAGEMENT',
-     'DATA RESET TOOLS':'DATA RESET TOOLS',
-     'DASHBOARD':'DASHBOARD'
-   };
-   return aliases[t]||t;
- };
- function render(list){
-   cards.innerHTML=list.map((x,i)=>'<button class="r18638-card" data-sm="'+i+'"><b>'+esc(x[1])+'</b><span>'+esc(x[2])+'</span></button>').join('');
-   $$('[data-sm]',cards).forEach(b=>b.onclick=()=>openService(h,c,list[+b.dataset.sm]));
-   visualSanitize(m)
- }
- render(SYSTEM_SERVICES);
- try{
-   const rows=(await cachedServices()).filter(x=>up(x.primary_owner_role)==='SUPER_ADMIN');
-   if(rows.length){
-     const merged=SYSTEM_SERVICES.slice();
-     const seen=new Set(merged.map(x=>systemKey(x[1])));
-     let consolidated=0;
-     rows.forEach(r=>{
-       const name=up(r.service_name);
-       const key=systemKey(name);
-       // These are already represented by the canonical System Management UI,
-       // or are injected separately by the final reset-tools patch.
-       if(key==='DASHBOARD'||key==='DATA RESET TOOLS'||seen.has(key)){
-         consolidated++;
-         return;
-       }
-       merged.push([r.route_id,name,up(r.service_group||'SYSTEM MANAGEMENT')+' · LIVE SERVICE CATALOG',roleServiceAction(r.route_id,'SUPER_ADMIN')]);
-       seen.add(key);
-     });
-     render(merged);
-     st.className='r18638-report-status good';
-     st.textContent=merged.length+' SYSTEM MANAGEMENT SERVICE(S) LOADED · '+consolidated+' DUPLICATE/LEGACY CATALOG ENTRY(IES) CONSOLIDATED.';
-   }
- }catch(e){
-   st.className='r18638-report-status bad';
-   st.textContent='LIVE SYSTEM CATALOG COULD NOT LOAD · USING '+SYSTEM_SERVICES.length+' LOCAL SERVICES. '+(e.message||e);
- }
-};
+V.r18638_system=async function(m,c){pageTitle('SYSTEM MANAGEMENT');m.innerHTML='<section class="r18638-role-head"><h2>SYSTEM MANAGEMENT</h2><p>All configuration and management authorities are centralized here. SUPER ADMIN / DOD has final system-wide authority.</p></section><div class="r18638-report-status" id="r39SysLoad">LOADING ALL SYSTEM MANAGEMENT SERVICES…</div><div class="r18638-card-grid" id="r39SysCards"></div><div id="r38SysView"></div>';const cards=m.querySelector('#r39SysCards'),h=m.querySelector('#r38SysView'),st=m.querySelector('#r39SysLoad');function render(list){cards.innerHTML=list.map((x,i)=>'<button class="r18638-card" data-sm="'+i+'"><b>'+esc(x[1])+'</b><span>'+esc(x[2])+'</span></button>').join('');$$('[data-sm]',cards).forEach(b=>b.onclick=()=>openService(h,c,list[+b.dataset.sm]));visualSanitize(m)}render(SYSTEM_SERVICES);try{const rows=(await cachedServices()).filter(x=>up(x.primary_owner_role)==='SUPER_ADMIN');if(rows.length){const baseMap=new Map(SYSTEM_SERVICES.map(x=>[x[0],x]));const merged=SYSTEM_SERVICES.slice(),seen=new Set(merged.map(x=>x[0]));rows.forEach(r=>{if(seen.has(r.route_id))return;merged.push([r.route_id,up(r.service_name),up(r.service_group||'SYSTEM MANAGEMENT')+' · LIVE SERVICE CATALOG',roleServiceAction(r.route_id,'SUPER_ADMIN')]);seen.add(r.route_id)});render(merged);st.className='r18638-report-status good';st.textContent=merged.length+' SYSTEM MANAGEMENT SERVICE(S) LOADED · LOCAL MANAGEMENT AUTHORITIES + LIVE CATALOG.'}}catch(e){st.className='r18638-report-status bad';st.textContent='LIVE SYSTEM CATALOG COULD NOT LOAD · USING '+SYSTEM_SERVICES.length+' LOCAL SERVICES. '+(e.message||e)}};
 
 /* Teacher direct-service wrappers: report is inside the service, no My Reports menu. */
 function teacherWrap(routeId,title,desc,view){return(m,c)=>serviceShell(m,c,routeId,title,desc,(h)=>typeof V[view]==='function'?V[view](h,c):genericActivity(h,routeId,title))}
@@ -9628,4 +9894,27 @@ if(typeof V.r18638_system==='function'&&typeof V.r186_reset_tools==='function'){
   return ret;
  };
 }
+})();
+
+
+/* ===== R186.97 FINAL SERVICE DEDUP / FORM ROUTING REPAIR ===== */
+(function(){
+'use strict';
+if(window.__GSM_R18697_SERVICE_REPAIR__)return;window.__GSM_R18697_SERVICE_REPAIR__=true;
+const V=window.GSM_VIEWS||{};
+const $=(s,r=document)=>r.querySelector(s),$$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const up=v=>String(v||'').replace(/[_\-]+/g,' ').replace(/\s+/g,' ').trim().toUpperCase();
+const canonical={
+ 'STAFF MANAGEMENT':'r176_staff_directory','TEACHERS / STAFF MANAGEMENT':'r176_staff_directory','TEACHER MANAGEMENT':'r176_staff_directory','STAFF RECORDS':'r176_staff_directory',
+ 'CLASS MANAGEMENT':'r139_class_structure','SUBJECT MANAGEMENT':'r139_camis_config','ASSESSMENT CATEGORIES':'r139_camis_config','MARKS MANAGEMENT & CONFIGURATION':'r139_camis_config','MARKS CONFIGURATION':'r139_camis_config','CAMIS CONFIGURATION':'r139_camis_config','CAMIS & EXAMS':'r139_camis_config','GRADE SCALE CONFIGURATION':'r139_camis_config',
+ 'ACADEMIC YEARS & TERMS':'r145_academic_context','ACADEMIC YEARS AND TERMS':'r145_academic_context','SCHOOL CALENDAR':'r145_academic_context',
+ 'USERS & ACCESS':'r146_accounts','USER ACCOUNTS':'r146_accounts','ROLES & PERMISSIONS':'r146_system','ACCOUNT / SECURITY SETTINGS':'r129_account','SCHOOL PROFILE':'r129_schoolprofile','SYSTEM HEALTH':'r127_system_health','AUDIT LOG':'r127_system_health','AUDIT & VERSION':'version','BACKUP / RELEASE MANAGEMENT':'version','DATA IMPORT / EXPORT':'SA_INTEGRITY','DATABASE RECONCILIATION':'SA_INTEGRITY',
+ 'TEACHER ASSIGNMENTS CONFIGURATION':'r18612_teacher_assignments','TEACHER ASSIGNMENTS':'r18612_teacher_assignments','TIMETABLE MANAGEMENT':'r18612_timetable_manager','TIMETABLE OPERATIONS':'r18612_timetable_manager',
+ 'MOVE / DIVIDE STUDENTS':'r18660_student_move','STUDENT MANAGEMENT':'r132_student360','STUDENT IDENTIFICATION':'r127_secretary_center','STUDENT IDENTIFICATION / PROFILE COMPLETION':'r127_secretary_center','STUDENT LIST CHANGE / UPLOAD / SAVE':'r18636_student_roster_sync','ENROLMENT & CLASS PLACEMENT':'r127_secretary_center','STUDENT MOVEMENT':'r127_secretary_center'
+};
+function canonicalView(title){const k=up(title);if(canonical[k]&&typeof V[canonical[k]]==='function')return canonical[k];if(/^(STAFF|TEACHER).*(MANAGEMENT|RECORD)/.test(k)&&typeof V.r176_staff_directory==='function')return'r176_staff_directory';if(/USER.*ACCOUNT|ACCOUNT.*ACCESS/.test(k)&&typeof V.r146_accounts==='function')return'r146_accounts';if(/TIMETABLE/.test(k)&&typeof V.r120_timetable_manager==='function')return'r120_timetable_manager';if(/ACADEMIC YEAR|SCHOOL CALENDAR/.test(k)&&typeof V.r145_academic_context==='function')return'r145_academic_context';if(/MARKS|CAMIS|ASSESSMENT|EXAM/.test(k)&&typeof V.r139_camis_config==='function')return'r139_camis_config';if(/CLASS MANAGEMENT/.test(k)&&typeof V.r139_class_structure==='function')return'r139_class_structure';return null;}
+function dedupGrid(grid){if(!grid)return;const seen=new Set();$$('.r18638-card',grid).forEach(card=>{const title=up(($('b',card)||{}).textContent||'');const view=canonicalView(title);if(!view)return;const sig=view+'|'+title;if(seen.has(sig)){card.dataset.r18697Duplicate='1';card.remove()}else seen.add(sig)})}
+function schedule(root){[40,300,900].forEach(ms=>setTimeout(()=>dedupGrid(root),ms))}
+['r18638_system','r18638_headteacher','r18638_dos','r18638_dod','r18638_secretary','r18638_bursar','r18638_librarian'].forEach(name=>{if(typeof V[name]!=='function')return;const old=V[name];V[name]=async function(m,c){const r=await old(m,c);schedule(m);return r}});
+window.GSM_R18697_SERVICE_REPAIR={release:'R186.97',semanticDedup:true,canonicalFormRouting:true};
 })();

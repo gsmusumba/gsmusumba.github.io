@@ -1,0 +1,34 @@
+GS MUSUMBA — SUPABASE BACKUP BEFORE R186.97
+Project ref: xydrwpbgikwsxerqwkik
+
+1) Open VS Code Terminal in the project folder.
+2) Make sure Supabase CLI is installed and Docker Desktop is running if the CLI asks for it.
+3) Login:
+   supabase login
+
+4) Link the live project:
+   supabase link --project-ref xydrwpbgikwsxerqwkik
+
+5) Create a backup folder:
+   mkdir backups
+
+6) Backup database schema:
+   supabase db dump --linked -f backups\schema_before_R18697.sql
+
+7) Backup database data:
+   supabase db dump --linked --data-only --use-copy -f backups\data_before_R18697.sql
+
+8) Optional: backup custom roles:
+   supabase db dump --linked --role-only -f backups\roles_before_R18697.sql
+
+9) Pull the current remote schema into a migration for inspection:
+   supabase db pull
+
+10) After the backup is confirmed, run the supplied:
+   SUPABASE_R18697_BACKUP_AND_REPAIR.sql
+   in Supabase Dashboard -> SQL Editor.
+
+IMPORTANT:
+- Never put your database password, service-role key, or connection string into the website source code.
+- For a complete logical backup, Supabase recommends `supabase db dump`; the CLI excludes Supabase-managed schemas.
+- Keep the backup files outside the public website folder and preferably copy them to another safe drive.

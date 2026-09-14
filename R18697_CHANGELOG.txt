@@ -1,0 +1,31 @@
+GS MUSUMBA R186.97 FINAL REPAIR
+
+FIXED / RESTORED
+1. Restored the missing DOS Timetable Management data-entry workspace.
+   - Add/Edit timetable lesson form
+   - Teacher assignment selector
+   - Period configuration form
+   - Validate
+   - Sync teacher changes
+   - Publish
+   - Archive lesson
+   - Print / PDF
+2. Restored the manager against the existing RPC contracts:
+   r120_get_timetable_workspace
+   r120_save_timetable_entry
+   r120_archive_timetable_entry
+   r120_validate_timetable
+   r120_sync_timetable_assignments
+   r120_publish_timetable
+   r120_save_period_config
+   r120_seed_slots_from_baseline
+   r119_import_timetable_baseline
+3. Teacher My Timetable no longer becomes blank merely because Supabase has zero published rows.
+   It falls back to the approved embedded 2026-2027 Term 1 timetable master.
+4. DOS/SUPER ADMIN timetable browser also falls back to the approved timetable master when live rows are empty.
+5. System/role service catalog duplicates are semantically de-duplicated so legacy live-catalog cards do not bypass the canonical form and show the misleading generic REPORT-only message.
+6. Added non-destructive backend preflight SQL and Windows backup commands.
+7. JavaScript syntax checked with Node.js `node --check` for the modified JS files.
+
+IMPORTANT BACKEND NOTE
+The frontend uses the exact existing RPC contracts already referenced by previous production builds. The supplied SQL intentionally does not guess or overwrite your production schema. First make the Supabase backup, then run the preflight SQL. If it reports missing RPCs, pull the live schema/migrations before creating any backend function.
