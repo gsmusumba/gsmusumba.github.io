@@ -1759,6 +1759,7 @@ window.GSM_R122_03={release:'R122.03-V4-FULL-INTERIOR-FAST',supabase:true,design
 /* --- SERVICE RUNTIME block 9: gsm-r156-password-recovery --- */
 
 (function(){'use strict';
+if(window.__GSM_R18680_RECOVERY_ACTIVE__)return;
 const URL='https://xydrwpbgikwsxerqwkik.supabase.co',KEY='sb_publishable_-k49Hut2E8SNIJLvofL4JQ_jW1K865r',RECOVERY_KEY='gsm.r156.recovery',NORMAL_KEY='gsm.r186.13.session',el=id=>document.getElementById(id);
 window.GSM_R156_RECOVERY={release:'R156-RECOVERY-IDENTITY-PRESERVE',usernamePreserved:true,recoveryForm:true};
 function req(path,opt){return fetch(URL+path,Object.assign({cache:'no-store'},opt||{})).then(async r=>{const tx=await r.text();let b=null;try{b=tx?JSON.parse(tx):null}catch(_){b=tx}if(!r.ok){const e=new Error((b&&(b.message||b.error_description||b.error))||('HTTP '+r.status));e.status=r.status;throw e}return b})}
@@ -6957,7 +6958,7 @@ function retireImportedArchive(){const M=window.GSM_MENUS||{};Object.keys(M).for
 function focusOpenedServices(){const main=document.getElementById('main');if(!main)return;const apply=()=>{$$('.r132-page',main).forEach(p=>{const v=p.querySelector('#r132Viewer');if(v&&v.textContent.trim().length>20)p.classList.add('r186-service-focus')});const marks=main.querySelector('.r159-marks-shell,[class*="marks-shell"]');main.classList.toggle('r186-marks-page',!!marks)};apply();document.addEventListener('click',()=>setTimeout(apply,35),true)}
 function networkBadge(){const b=document.createElement('div');b.className='r186-net';b.textContent='NETWORK IS OFFLINE — unsaved work may not reach Supabase.';document.body.appendChild(b);const f=()=>b.classList.toggle('show',!navigator.onLine);addEventListener('online',f);addEventListener('offline',f);f()}
 function printSettingsButton(){const b=document.createElement('button');b.type='button';b.className='r186-print-settings';b.textContent='PRINT SETTINGS';b.onclick=editPrint;document.body.appendChild(b);const f=()=>b.style.display=canEditPrint()?'block':'none';[0,300,1200,3500].forEach(ms=>setTimeout(f,ms));document.addEventListener('click',f,true);window.addEventListener('focus',f,{passive:true});f()}
-function serviceWorker(){if(!('serviceWorker'in navigator)||!/^https?:$/.test(location.protocol))return;const local=/^(127\.0\.0\.1|localhost)$/.test(location.hostname);if(local){navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{});return}navigator.serviceWorker.register('./sw.js?v=R186.79',{updateViaCache:'none'}).then(r=>{try{r.update()}catch(_){}}).catch(()=>{})}
+function serviceWorker(){try{if(!('serviceWorker'in navigator))return;navigator.serviceWorker.getRegistrations().then(rs=>Promise.all(rs.map(r=>r.unregister()))).catch(()=>{});if('caches'in window)caches.keys().then(keys=>Promise.all(keys.filter(k=>/^gsm-/i.test(k)).map(k=>caches.delete(k)))).catch(()=>{});}catch(_){}}
 function enforceDashboardAuthority(){return renderCurrentDashboardNow()}
 function cleanInternalBranding(){
  const app=document.getElementById('app'); if(!app)return;
@@ -7928,10 +7929,32 @@ function pageHead(title,sub,extra=''){
   if(typeof window.GSM_pageHead==='function')return window.GSM_pageHead(title,sub,extra);
   return `<div class="page-head"><div><h2>${esc(title)}</h2><p>${esc(sub)}</p></div>${extra}</div>`;
 }
+function ttSubjectKey(text){
+ const t=norm(text);
+ if(/\b(MATH|MATHEMATICS|IMIBARE)\b/.test(t))return'math';
+ if(/\b(ENG|ENGLISH|ICYONGEREZA)\b/.test(t))return'english';
+ if(/\b(KINY|KINYARWANDA|IKINYARWANDA)\b|INKURU MU KINYARWANDA/.test(t))return'kiny';
+ if(/\b(FRE|FRENCH|IGIFARANSA)\b/.test(t))return'french';
+ if(/\b(SWAH|SWAHILI|IGISWAHILI)\b/.test(t))return'swahili';
+ if(/\b(SET|SCI|SCIENCE|BIO|CHEM|PHYS)\b|IBIDUKIKIJE/.test(t))return'science';
+ if(/\b(HIST|HISTORY)\b/.test(t))return'history';
+ if(/\b(GEO|GEOG|GEOGRAPHY)\b/.test(t))return'geography';
+ if(/\b(SRE|REL|RELIG|SOCIAL|CIVIC)\b/.test(t))return'sre';
+ if(/\b(ENT|ENTREPRENEUR)\b/.test(t))return'ent';
+ if(/\b(ICT|COMPUT)\b/.test(t))return'ict';
+ if(/\b(PES|PE\b|SPORT)\b|IMIKINO/.test(t))return'pes';
+ if(/\b(HOME SCI|HOME SCIENCE|HEALTH)\b|IBONEZA BUZIMA/.test(t))return'home';
+ if(/\b(CREATIVE|ART|MUSIC|DANCE)\b|UBUGENI|UMUCO|IMBAMUTIMA/.test(t))return'arts';
+ if(/\b(ASSEMBLY|HYGIENE)\b|KWAKIRA ABANA/.test(t))return'assembly';
+ if(/\b(BREAK|LUNCH)\b/.test(t))return'break';
+ if(/\b(CPD|CLUB|CCA|ITORERO|UMUGANDA)\b/.test(t))return'activity';
+ return'general';
+}
+function ttClass(text){const z=String(text||'').trim();return z==='—'||!z?'empty':'r18680-tt-cell r18668-subject-'+ttSubjectKey(z)}
 function currentGridHTML(t){
   if(!t)return '<div class="r18628-state bad"><b>CURRENT TIMETABLE NOT MATCHED TO THIS ACCOUNT.</b><span>The uploaded master contains 27 teacher timetables, but this signed-in staff name did not match one of them.</span></div>';
   return `<div class="r18628-source"><b>CURRENT TIMETABLE · ${esc(MASTER.academic_year)} · ${esc(MASTER.term)}</b><span>Loaded directly from the approved timetable master — no timetable RPC is required to draw this page.</span></div>
-  <div class="r18628-week-wrap"><table class="r18628-week"><thead><tr><th>PERIOD / HOUR</th>${days.map(d=>`<th>${d}</th>`).join('')}</tr></thead><tbody>${(t.slots||[]).map(s=>`<tr><th><b>${esc(s.label)}</b><span>${esc(s.time)}</span></th>${(s.days||[]).map(v=>`<td class="${String(v||'').trim()==='—'?'empty':''}">${esc(v||'—')}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+  <div class="r18628-week-wrap"><table class="r18628-week"><thead><tr><th>PERIOD / HOUR</th>${days.map(d=>`<th>${d}</th>`).join('')}</tr></thead><tbody>${(t.slots||[]).map(s=>`<tr><th><b>${esc(s.label)}</b><span>${esc(s.time)}</span></th>${(s.days||[]).map(v=>`<td class="${ttClass(v)}">${esc(v||'—')}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
 }
 
 function classTeacherLabel(code){if(typeof window.GSM_R18632_CLASS_TEACHER_LABEL==='function')return window.GSM_R18632_CLASS_TEACHER_LABEL(code);return''}
@@ -7939,7 +7962,7 @@ function classGridHTML(code){
   if(!AUTH||!AUTH.class_timetables)return '<div class="r18628-state bad"><b>WORKBOOK CLASS TIMETABLE DATA NOT LOADED.</b></div>';
   const rows=AUTH.class_timetables[code]||[];if(!rows.length)return '<div class="r18628-state warn"><b>NO CURRENT CLASS TIMETABLE FOUND FOR '+esc(code)+'.</b></div>';
   const slots=[],seen=new Map();rows.forEach(r=>{const k=String(r[1])+'|'+String(r[2]);if(!seen.has(k)){seen.set(k,{label:r[1],time:r[2],days:{}});slots.push(seen.get(k))}seen.get(k).days[r[0]]={activity:r[3],teacher:r[4],kind:r[5]}});
-  return `<div class="r18628-source"><b>CURRENT CLASS TIMETABLE · ${esc(code)}</b><span>CLASS TEACHER: ${esc(classTeacherLabel(code)||'—')} · Direct from approved workbook.</span></div><div class="r18628-week-wrap"><table class="r18628-week"><thead><tr><th>PERIOD / HOUR</th>${days.map(d=>`<th>${d}</th>`).join('')}</tr></thead><tbody>${slots.map(x=>`<tr><th><b>${esc(x.label)}</b><span>${esc(x.time)}</span></th>${days.map(d=>{const v=x.days[d];return `<td class="${!v?'empty':''}">${v?`<b>${esc(v.activity||'—')}</b>${v.teacher?`<span>${esc(v.teacher)}</span>`:''}`:'—'}</td>`}).join('')}</tr>`).join('')}</tbody></table></div>`;
+  return `<div class="r18628-source"><b>CURRENT CLASS TIMETABLE · ${esc(code)}</b><span>CLASS TEACHER: ${esc(classTeacherLabel(code)||'—')} · Direct from approved workbook.</span></div><div class="r18628-week-wrap"><table class="r18628-week"><thead><tr><th>PERIOD / HOUR</th>${days.map(d=>`<th>${d}</th>`).join('')}</tr></thead><tbody>${slots.map(x=>`<tr><th><b>${esc(x.label)}</b><span>${esc(x.time)}</span></th>${days.map(d=>{const v=x.days[d];return `<td class="${v?ttClass(v.activity):'empty'}">${v?`<b>${esc(v.activity||'—')}</b>${v.teacher?`<span>${esc(v.teacher)}</span>`:''}`:'—'}</td>`}).join('')}</tr>`).join('')}</tbody></table></div>`;
 }
 
 function currentClasses(t){
@@ -8218,23 +8241,23 @@ V.marksentry=function(mount,c){
  pageTitle('MARKS ENTRY');
  const C=ctx();let assignments=[],workspace=null,data=null,search='',loadSeq=0,forceNew=false;const cache=new Map();
  mount.innerHTML=`<div class="r18636-marks-page r18637-marks-page">
-  <div class="r18636-marks-title"><div><h2>MARKS ENTRY</h2><p>RAW ASSESSMENTS → CAMIS E.U → EXAM RAW → CAMIS EXAM → TOTAL CAMIS</p></div><div class="r18637-marks-head-actions"><b id="r18636MxContext">${esc(C.ay)} · ${esc(C.term)}</b><button type="button" id="r18637MxMenu" class="r18636-btn-white">MENU</button><button type="button" id="r18637MxExit" class="r18636-btn-white">EXIT FULL SCREEN</button></div></div>
+  <div class="r18636-marks-title"><div><h2>MARKS ENTRY</h2><p>Enter the selected assessment. CAMIS and totals calculate automatically.</p></div><div class="r18637-marks-head-actions"><b id="r18636MxContext">${esc(C.ay)} · ${esc(C.term)}</b><button type="button" id="r18637MxMenu" class="r18636-btn-white">MENU</button><button type="button" id="r18637MxExit" class="r18636-btn-white">EXIT FULL SCREEN</button></div></div>
   <div class="r18636-form-row r18636-no-print">
-    <label>CHOOSE CLASS<select id="r18636MxClass"><option value="">CHOOSE CLASS</option></select></label>
-    <label>CHOOSE SUBJECT<select id="r18636MxSubject"><option value="">CHOOSE SUBJECT</option></select></label>
-    <label>CHOOSE ASSESSMENT TYPE<select id="r18636MxType"><option value="">CHOOSE ASSESSMENT TYPE</option></select></label>
-    <label>WRITE MAX MARKS<input id="r18636MxMax" type="number" min="0.01" step="0.01" placeholder="MAX"></label>
+    <label>CLASS<select id="r18636MxClass"><option value="">SELECT CLASS</option></select></label>
+    <label>SUBJECT<select id="r18636MxSubject"><option value="">SELECT SUBJECT</option></select></label>
+    <label>ASSESSMENT<select id="r18636MxType"><option value="">SELECT TYPE</option></select></label>
+    <label>MAX MARK<input id="r18636MxMax" type="number" min="0.01" step="0.01" placeholder="MAX"></label>
     <button type="button" id="r18636MxCreate" class="r18636-btn-green">CREATE / OPEN</button>
   </div>
   <div class="r18636-tools-row r18636-no-print">
-    <button type="button" id="r18636MxAll" class="r18636-btn-red r18650-view-all">VIEW ALL MARKS ASSESSMENT</button>
+    <button type="button" id="r18636MxAll" class="r18636-btn-red r18650-view-all">ALL MARKS</button>
     <button type="button" id="r18636MxEdit" class="r18636-btn-yellow">EDIT MARKS</button>
     <label>SORT<select id="r18636MxSort"><option value="NAME_ASC">NAME A–Z</option><option value="NAME_DESC">NAME Z–A</option><option value="SDMS_ASC">SDMS</option><option value="MARK_DESC">MARK HIGH–LOW</option><option value="MARK_ASC">MARK LOW–HIGH</option><option value="RANK_ASC">RANK</option></select></label>
     <label>FILTER<select id="r18636MxFilter"><option value="ALL">ALL STUDENTS</option><option value="MISSING">MISSING ENTRY</option><option value="ENTERED">ENTERED</option><option value="NUMERIC">NUMERIC MARKS</option><option value="STATUS">A / E / S / N / P</option></select></label>
-    <button type="button" id="r18636MxDownload" class="r18636-btn-white">DOWNLOAD XLSX</button>
+    <button type="button" id="r18636MxDownload" class="r18636-btn-white">XLSX</button>
     <button type="button" id="r18636MxPrint" class="r18636-btn-blue">PRINT</button>
     <label class="r18637-search-label">SEARCH<input id="r18636MxSearch" placeholder="Student name or SDMS"></label>
-    <button type="button" id="r18636MxNew" class="r18636-btn-white">NEW MARKS</button>
+    <button type="button" id="r18636MxNew" class="r18636-btn-white">NEW</button>
     <button type="button" id="r18636MxRefresh" class="r18636-btn-white">REFRESH</button>
   </div>
   <div id="r18636MxPrintOptions" class="r18636-report-options r18636-no-print" hidden>
@@ -8259,7 +8282,7 @@ V.marksentry=function(mount,c){
  function currentTypeLabel(){const a=currentAssessment(),sel=e('r18636MxType'),opt=sel.options[sel.selectedIndex];return a?(a.assessment_name||a.category_name||'ASSESSMENT'):(opt&&sel.value?opt.textContent:'ASSESSMENT')}
  function isCurrentExam(){const a=currentAssessment();if(!a)return false;const code=categoryCode(a),typ=up(a.category_type);return typ==='EXAM'||['EXAM','TERM_EXAM','END_TERM_EXAM','FINAL_EXAM','SCHOOL_EXAM','DISTRICT_EXAM','NESA_EXAM'].includes(code)}
  function rowSex(r){const z=(workspace&&workspace.roster||[]).find(x=>String(x.student_id)===String(r.student_id));return mf(r.sex||(z&&z.sex))}
- function officialMetrics(r){const cm=Number((r.camis_max ?? data?.config?.camis_max ?? workspace?.config?.camis_max ?? 0))||null;const eu=r.camis_eu_official!=null?Number(r.camis_eu_official):(r.camis_eu==null?null:roundOfficial(r.camis_eu));const ex=r.camis_exam_official!=null?Number(r.camis_exam_official):(r.camis_exam==null?null:roundOfficial(r.camis_exam));const total=r.total_camis_official!=null?Number(r.total_camis_official):((eu!=null&&ex!=null)?eu+ex:null);const totalMax=r.total_camis_max_official!=null?Number(r.total_camis_max_official):(cm?cm*2:null);const fp=r.final_percent_official!=null?Number(r.final_percent_official):(total!=null&&totalMax>0?pct(total,totalMax):null);const gi=gradeInfo(fp,workspace&&workspace.grading_scale||[]);return{cm,eu,ex,total,totalMax,finalPct:fp,grade:gi.grade,remark:gi.remark}}
+ function officialMetrics(r){const cm=Number((r.camis_max ?? data?.config?.camis_max ?? workspace?.config?.camis_max ?? 0))||null;const eu=r.camis_eu_official!=null?Number(r.camis_eu_official):(r.camis_eu==null?null:roundOfficial(r.camis_eu));const ex=r.camis_exam_official!=null?Number(r.camis_exam_official):(r.camis_exam==null?null:roundOfficial(r.camis_exam));const backendTotal=r.total_marks==null?null:Number(r.total_marks),backendMax=r.total_marks_max==null?null:Number(r.total_marks_max),backendPct=r.percentage==null?null:Number(r.percentage);const total=r.total_camis_official!=null?Number(r.total_camis_official):((eu!=null&&ex!=null)?eu+ex:(Number.isFinite(backendTotal)?backendTotal:eu));const totalMax=r.total_camis_max_official!=null?Number(r.total_camis_max_official):((eu!=null&&ex!=null&&cm)?cm*2:(Number.isFinite(backendMax)?backendMax:cm));const fp=r.final_percent_official!=null?Number(r.final_percent_official):(total!=null&&totalMax>0?pct(total,totalMax):(Number.isFinite(backendPct)?backendPct:null));const gi=gradeInfo(fp,workspace&&workspace.grading_scale||[]);return{cm,eu,ex,total,totalMax,finalPct:fp,grade:r.grade||gi.grade,remark:gi.remark}}
  function filteredRows(){let rows=(data&&data.rows||[]).map(x=>Object.assign({},x));const q=search.trim().toLowerCase(),f=e('r18636MxFilter').value;rows=rows.filter(r=>!q||String(r.student_name||'').toLowerCase().includes(q)||String(r.sdms_code||'').toLowerCase().includes(q));const special=r=>['A','E','S','N','P'].includes(up(r.entry_status));if(f==='MISSING')rows=rows.filter(r=>r.entry_mark==null&&!special(r));if(f==='ENTERED')rows=rows.filter(r=>r.entry_mark!=null||special(r));if(f==='NUMERIC')rows=rows.filter(r=>r.entry_mark!=null);if(f==='STATUS')rows=rows.filter(special);const s=e('r18636MxSort').value;rows.sort((a,b)=>s==='NAME_DESC'?String(b.student_name||'').localeCompare(String(a.student_name||'')):s==='SDMS_ASC'?String(a.sdms_code||'').localeCompare(String(b.sdms_code||''),undefined,{numeric:true}):s==='MARK_DESC'?(Number(b.entry_mark??-1)-Number(a.entry_mark??-1)):s==='MARK_ASC'?(Number(a.entry_mark??1e9)-Number(b.entry_mark??1e9)):s==='RANK_ASC'?(Number(a.rank??1e9)-Number(b.rank??1e9)):String(a.student_name||'').localeCompare(String(b.student_name||'')));return rows}
  function dynamicCell(r,col){const a=currentAssessment(),isCurrent=a&&String(a.id)===String(col.id),editable=!!(a&&a.editable&&isCurrent&&!isCurrentExam()),m=matrixFor(r)[String(col.id)]||{},v=isCurrent?(r.entry_status&&r.entry_status!=='MARK'?r.entry_status:(r.entry_mark??m.display??'')):(m.display??'');if(editable)return `<td class="r18637-ass-cell current-assessment"><input class="mark-entry" value="${esc(v)}" aria-label="${esc(col.assessment_name||'Assessment')} for ${esc(r.student_name||'student')}"></td>`;return `<td class="r18637-ass-cell ${isCurrent?'current-assessment':''}"><b>${esc(v||'—')}</b></td>`}
  function examRawCell(r){const a=currentAssessment(),editable=!!(a&&a.editable&&isCurrentExam()),v=r.entry_status&&r.entry_status!=='MARK'?r.entry_status:(r.entry_mark??r.exam_raw??'');if(editable)return `<td class="raw-check current-assessment"><input class="mark-entry" value="${esc(v)}" aria-label="${esc(examName())} raw mark for ${esc(r.student_name||'student')}"></td>`;return `<td class="raw-check"><b>${esc(r.exam_raw==null?'—':r.exam_raw)}</b></td>`}
@@ -8271,23 +8294,23 @@ V.marksentry=function(mount,c){
  function assessmentGrade(r,m){const p=assessmentSummaryPct(r,m),g=gradeInfo(p,workspace&&workspace.grading_scale||[]);return {pct:p,grade:g.grade||m.grade||'—',remark:g.remark||m.remark||'—'}}
  function assessmentTotalRaw(r){if(r.total_raw!=null)return r.total_raw;if(r.all_ass_obtained!=null)return r.all_ass_obtained;return '—'}
  function render(){
-  const rows=filteredRows(),a=currentAssessment(),entryMax=a&&a.max_mark!=null?a.max_mark:'—',cm=Number(data&&data.config&&data.config.camis_max||workspace&&workspace.config&&workspace.config.camis_max||0)||null,exam=examName(),examMax=rows.find(r=>Number(r.exam_raw_max)>0)?.exam_raw_max??null,totalCols=17;
-  let group='<tr class="group"><th colspan="3" class="g-blue">STUDENT INFORMATION</th><th class="g-blue">CURRENT ASSESSMENT</th><th class="g-yellow">ASSESSMENT SUMMARY</th><th colspan="3" class="g-green">CAMIS / TERM EXAM</th><th colspan="3" class="g-blue">TOTALS</th><th colspan="6" class="g-green">PERFORMANCE</th></tr>';
-  let heads=`<tr class="columns"><th class="h-blue sticky-no r18652-cm">NO.</th><th class="h-blue sticky-sdms">SDMS CODE</th><th class="h-blue sticky-name">STUDENT NAME</th><th class="h-blue r18652-current-head">${esc(currentTypeLabel())}<br><small>/ ${esc(entryMax)}</small></th><th class="h-yellow r18652-ass-total">ALL ASSESSMENTS<br>TOTAL</th><th class="h-green">CAMIS E.U<br><small>/ ${esc(cm??'—')}</small></th><th class="h-yellow">${esc(exam)} RAW<br><small>/ ${esc(examMax??'—')}</small></th><th class="h-green">CAMIS ${esc(exam)}</th><th class="h-blue r18652-cm">TOTAL RAW</th><th class="h-green r18654-cm-total">TOTAL CAMIS<br>MARKS</th><th class="h-green">TOTAL CAMIS<br>MAX</th><th class="h-blue">ASSESSMENT %</th><th class="h-green">FINAL %</th><th class="h-green r18652-cm">GRADE</th><th class="h-green r18652-cm">RANK</th><th class="h-green r18652-cm"># ASS.</th><th class="h-green r18652-cm">REMARK</th></tr>`;
+  const rows=filteredRows(),a=currentAssessment(),entryMax=a&&a.max_mark!=null?a.max_mark:'—',cm=Number(data&&data.config&&data.config.camis_max||workspace&&workspace.config&&workspace.config.camis_max||0)||null,exam=examName(),totalCols=16;
+  let group='<tr class="group"><th colspan="3" class="g-blue">STUDENT</th><th class="g-blue">MARK ENTRY</th><th colspan="4" class="g-green">ALL ASSESSMENTS / CAMIS E.U</th><th colspan="3" class="g-red">EXAM</th><th colspan="5" class="g-blue">LIVE / FINAL RESULT</th></tr>';
+  let heads=`<tr class="columns"><th class="h-blue sticky-no r18652-cm">NO.</th><th class="h-blue sticky-sdms">SDMS</th><th class="h-blue sticky-name">STUDENT NAME</th><th class="h-blue r18652-current-head">${esc(currentTypeLabel())}<br><small>RAW / ${esc(entryMax)}</small></th><th class="h-green"># ASS.</th><th class="h-yellow r18652-ass-total">ASS. RAW</th><th class="h-green">ASS. %</th><th class="h-green">CAMIS E.U<br><small>/ ${esc(cm??'—')}</small></th><th class="h-red">${esc(exam)} RAW</th><th class="h-red">EXAM %</th><th class="h-green">CAMIS ${esc(exam)}<br><small>/ ${esc(cm??'—')}</small></th><th class="h-green r18654-cm-total">CAMIS TOTAL</th><th class="h-green">TOTAL MAX</th><th class="h-green">PERFORMANCE %</th><th class="h-green r18652-cm">GRADE</th><th class="h-green r18652-cm">RANK</th></tr>`;
   const rankable=rows.map(r=>{const m=officialMetrics(r);return{r,m,p:m.finalPct!=null?Number(m.finalPct):assessmentSummaryPct(r,m)}}).filter(x=>x.p!=null&&Number.isFinite(x.p)).sort((a,b)=>b.p-a.p);let last=null,rank=0;rankable.forEach((x,i)=>{if(last===null||x.p!==last)rank=i+1;last=x.p;x.r.__r18637Rank=rank});
-  const body=rows.map((r,i)=>{const m=officialMetrics(r),assPct=pct(r.all_ass_obtained,r.all_ass_max),remark=m.remark||gradeInfo(assPct,workspace&&workspace.grading_scale||[]).remark||'—';return `<tr data-student="${esc(r.student_id)}"><td class="sticky-no r18652-cm">${i+1}</td><td class="sticky-sdms"><b>${esc(r.sdms_code||'')}</b></td><td class="sticky-name name" title="${esc(r.student_name||'')}">${esc(r.student_name||'')}</td>${currentEntryCell(r)}<td class="raw-check r18652-ass-total" data-k="asstotal"><b>${esc(assessmentTotalLabel(r))}</b></td><td class="official" data-k="eu"><b>${esc(m.eu==null?'—':m.eu)}</b></td>${examRawCell(r)}<td class="official" data-k="exconv"><b>${esc(m.ex==null?'—':m.ex)}</b></td><td class="r18652-cm" data-k="rawtotal"><b>${esc(r.total_raw==null?assessmentTotalRaw(r):r.total_raw)}</b></td><td class="official r18654-cm-total" data-k="total"><b>${esc(m.total==null?'—':m.total)}</b></td><td class="official" data-k="totalmax"><b>${esc(m.totalMax==null?'—':m.totalMax)}</b></td><td data-k="asspct"><b>${assPct==null?'—':assPct.toFixed(2)+'%'}</b></td><td class="official" data-k="finalpct"><b>${m.finalPct==null?'—':Number(m.finalPct).toFixed(2)+'%'}</b></td><td class="r18652-cm" data-k="grade"><b>${esc(m.grade||'—')}</b></td><td class="r18652-cm" data-k="rank"><b>${esc(r.__r18637Rank??'—')}</b></td><td class="r18652-cm" data-k="asscount"><b>${esc(assessmentDoneCount(r))}</b></td><td class="r18652-cm r18652-remark" data-k="remark" title="${esc(remark)}">${esc(shortRemark(remark))}</td></tr>`}).join('');
-  const colgroup='<colgroup class="r18665-marks-cols"><col class="c-no"><col class="c-sdms"><col class="c-name"><col class="c-current"><col class="c-ass-total"><col class="c-eu"><col class="c-exam-raw"><col class="c-exam-camis"><col class="c-total-raw"><col class="c-total-camis"><col class="c-total-max"><col class="c-ass-pct"><col class="c-final-pct"><col class="c-grade"><col class="c-rank"><col class="c-ass-count"><col class="c-remark"></colgroup>';
-  e('r18637MxTableHost').innerHTML=`<table class="r18636-marks-table r18637-marks-table r18650-marks-entry r18652-marks-entry">${colgroup}<thead>${group}${heads}</thead><tbody id="r18636MxRows">${body||`<tr><td colspan="${totalCols}">No students match this filter.</td></tr>`}</tbody></table>`;
+  const body=rows.map((r,i)=>{const m=officialMetrics(r),assPct=Number(r.assessment_percent??(Number(r.all_ass_max)>0?100*Number(r.all_ass_obtained||0)/Number(r.all_ass_max):NaN)),exPct=Number(r.exam_raw_max)>0?100*Number(r.exam_raw||0)/Number(r.exam_raw_max):null,examRaw=r.exam_raw==null?'—':r.exam_raw+' / '+(r.exam_raw_max??'—');return `<tr data-student="${esc(r.student_id)}"><td class="sticky-no r18652-cm">${i+1}</td><td class="sticky-sdms"><b>${esc(r.sdms_code||'')}</b></td><td class="sticky-name name" title="${esc(r.student_name||'')}">${esc(r.student_name||'')}</td>${currentEntryCell(r)}<td class="official" data-k="asscount"><b>${esc(assessmentDoneCount(r))}</b></td><td class="raw-check r18652-ass-total" data-k="asstotal"><b>${esc(assessmentTotalLabel(r))}</b></td><td class="official" data-k="asspct"><b>${Number.isFinite(assPct)?assPct.toFixed(2)+'%':'—'}</b></td><td class="official" data-k="eu"><b>${esc(m.eu==null?'—':m.eu)}</b></td><td class="raw-check" data-k="examraw"><b>${esc(examRaw)}</b></td><td class="official" data-k="exampct"><b>${exPct==null?'—':exPct.toFixed(2)+'%'}</b></td><td class="official" data-k="exconv"><b>${esc(m.ex==null?'—':m.ex)}</b></td><td class="official r18654-cm-total" data-k="total"><b>${esc(m.total==null?'—':m.total)}</b></td><td class="official" data-k="totalmax"><b>${esc(m.totalMax==null?'—':m.totalMax)}</b></td><td class="official" data-k="finalpct"><b>${m.finalPct==null?'—':Number(m.finalPct).toFixed(2)+'%'}</b></td><td class="r18652-cm" data-k="grade"><b>${esc(m.grade||'—')}</b></td><td class="r18652-cm" data-k="rank"><b>${esc(r.__r18637Rank??'—')}</b></td></tr>`}).join('');
+  const colgroup='<colgroup class="r18684-marks-cols"><col class="c-no"><col class="c-sdms"><col class="c-name"><col class="c-current"><col class="c-ass-count"><col class="c-ass-total"><col class="c-ass-pct"><col class="c-eu"><col class="c-exam-raw"><col class="c-exam-pct"><col class="c-exam-camis"><col class="c-total-camis"><col class="c-total-max"><col class="c-final-pct"><col class="c-grade"><col class="c-rank"></colgroup>';
+  e('r18637MxTableHost').innerHTML=`<table class="r18636-marks-table r18637-marks-table r18650-marks-entry r18652-marks-entry r18680-marks-entry r18684-live-marks">${colgroup}<thead>${group}${heads}</thead><tbody id="r18636MxRows">${body||`<tr><td colspan="${totalCols}">No students match this filter.</td></tr>`}</tbody></table>`;
   $$('.mark-entry',mount).forEach(inp=>{inp.dataset.lastValid=inp.value;inp.addEventListener('focus',()=>{if(validate(inp))inp.dataset.lastValid=inp.value});inp.addEventListener('input',()=>handleMarkInput(inp))});if(window.GSM_R18637_applyTableAuthority)window.GSM_R18637_applyTableAuthority(mount)
  }
  function validate(inp){const a=currentAssessment(),sv=statusValue(inp.value.trim()),max=Number(a&&a.max_mark);const ok=sv.valid&&(sv.status!=='MARK'||sv.mark==null||(sv.mark>=0&&Number.isFinite(max)&&sv.mark<=max));inp.classList.toggle('invalid',!ok);inp.setAttribute('aria-invalid',ok?'false':'true');if(!ok)inp.title=sv.status==='MARK'&&Number.isFinite(max)?'Allowed range: 0 to '+max:'Enter a mark or A / E / S / N / P';else inp.removeAttribute('title');return ok} function handleMarkInput(inp){const a=currentAssessment(),max=Number(a&&a.max_mark),raw=inp.value.trim(),sv=statusValue(raw);if(sv.valid&&sv.status==='MARK'&&Number.isFinite(max)&&sv.mark>max){const attempted=raw;inp.value=inp.dataset.lastValid||'';inp.classList.add('r18654-overmax');state('MARK '+attempted+' IS ABOVE MAX '+max+'. VALUE REJECTED.','bad');setTimeout(()=>inp.classList.remove('r18654-overmax'),1200);ready();liveRecalc();return}if(validate(inp))inp.dataset.lastValid=inp.value;ready();liveRecalc()}
  function payload(requireAll){const out=[];let bad=0,blank=0;$$('#r18636MxRows tr[data-student]',mount).forEach(tr=>{const inp=$('.mark-entry',tr);if(!inp)return;const sv=statusValue(inp.value.trim());if(!validate(inp)){bad++;return}if(sv.blank){blank++;return}out.push({student_id:tr.dataset.student,mark:sv.status==='MARK'?sv.mark:null,mark_status:sv.status,remarks:null})});if(bad)throw new Error('Correct invalid marks before saving.');if(requireAll&&blank)throw new Error(blank+' student(s) still have no mark/status.');return out}
- function liveRecalc(){if(!data||!currentAssessment())return;const cm=Number(data.config&&data.config.camis_max||workspace&&workspace.config&&workspace.config.camis_max||0),official=up(data.config&&data.config.official_exam_type||workspace&&workspace.config&&workspace.config.official_exam_type||''),scale=workspace&&workspace.grading_scale||[],base=new Map((data.rows||[]).map(r=>[String(r.student_id),r]));const ranks=[];$$('#r18636MxRows tr[data-student]',mount).forEach(tr=>{const r=base.get(String(tr.dataset.student)),inp=$('.mark-entry',tr);if(!r||!inp||!validate(inp))return;const sv=statusValue(inp.value.trim());let co=Number(r.other_cont_obtained||0),cx=Number(r.other_cont_max||0),cc=Number(r.other_cont_entries||0),eo=Number(r.other_exam_obtained||0),ex=Number(r.other_exam_max||0),ec=Number(r.other_exam_entries||0);const currentMax=Number(r.current_max||currentAssessment().max_mark||0),isExam=isCurrentExam()||up(r.current_type)===official;if(sv.status==='MARK'){if(isExam){eo+=sv.mark;ex+=currentMax;ec++}else{co+=sv.mark;cx+=currentMax;cc++}}const eu=cc&&cx>0&&cm?roundOfficial(co/cx*cm):null,examConv=ec&&ex>0&&cm?roundOfficial(eo/ex*cm):null,total=(eu!=null&&examConv!=null)?eu+examConv:null,totalMax=cm?cm*2:null,finalPct=total!=null&&totalMax>0?pct(total,totalMax):null,assPct=cc&&cx>0?pct(co,cx):null,gi=gradeInfo(finalPct,scale),rawTotal=(cc||ec)?co+eo:null;const put=(k,v)=>{const x=tr.querySelector('[data-k="'+k+'"]');if(x)x.textContent=v==null?'—':v};put('asscount',cc);put('asstotal',cc&&cx>0?(co+' / '+cx):'—');put('eu',eu);put('exconv',examConv);put('rawtotal',rawTotal);put('total',total);put('totalmax',totalMax);put('asspct',assPct==null?'—':assPct.toFixed(2)+'%');put('finalpct',finalPct==null?'—':finalPct.toFixed(2)+'%');put('grade',gi.grade||'—');put('remark',shortRemark(gi.remark||'—'));if(finalPct!=null)ranks.push({tr,p:finalPct})});ranks.sort((a,b)=>b.p-a.p);let last=null,rank=0;ranks.forEach((x,i)=>{if(last===null||x.p!==last)rank=i+1;last=x.p;const c=x.tr.querySelector('[data-k="rank"]');if(c)c.textContent=rank})}
+ function liveRecalc(){if(!data||!currentAssessment())return;const cm=Number(data.config&&data.config.camis_max||workspace&&workspace.config&&workspace.config.camis_max||0),official=up(data.config&&data.config.official_exam_type||workspace&&workspace.config&&workspace.config.official_exam_type||''),scale=workspace&&workspace.grading_scale||[],base=new Map((data.rows||[]).map(r=>[String(r.student_id),r]));const ranks=[];$$('#r18636MxRows tr[data-student]',mount).forEach(tr=>{const r=base.get(String(tr.dataset.student)),inp=$('.mark-entry',tr);if(!r||!inp||!validate(inp))return;const sv=statusValue(inp.value.trim());let co=Number(r.other_cont_obtained||0),cx=Number(r.other_cont_max||0),cc=Number(r.other_cont_entries||0),eo=Number(r.other_exam_obtained||0),ex=Number(r.other_exam_max||0),ec=Number(r.other_exam_entries||0);const currentMax=Number(r.current_max||currentAssessment().max_mark||0),isExam=isCurrentExam()||up(r.current_type)===official;if(sv.status==='MARK'){if(isExam){eo+=sv.mark;ex+=currentMax;ec++}else{co+=sv.mark;cx+=currentMax;cc++}}const eu=cc&&cx>0&&cm?roundOfficial(co/cx*cm):null,examConv=ec&&ex>0&&cm?roundOfficial(eo/ex*cm):null,assPct=cc&&cx>0?pct(co,cx):null,examPct=ec&&ex>0?pct(eo,ex):null,total=eu!=null?(examConv!=null?eu+examConv:eu):null,totalMax=cm?(examConv!=null?cm*2:cm):null,performancePct=total!=null&&totalMax>0?pct(total,totalMax):assPct,gi=gradeInfo(performancePct,scale);const put=(k,v)=>{const x=tr.querySelector('[data-k="'+k+'"]');if(x)x.textContent=v==null?'—':v};put('asscount',cc);put('asstotal',cc&&cx>0?(co+' / '+cx):'—');put('asspct',assPct==null?'—':assPct.toFixed(2)+'%');put('eu',eu);put('examraw',ec&&ex>0?(eo+' / '+ex):'—');put('exampct',examPct==null?'—':examPct.toFixed(2)+'%');put('exconv',examConv);put('total',total);put('totalmax',totalMax);put('finalpct',performancePct==null?'—':performancePct.toFixed(2)+'%');put('grade',gi.grade||'—');put('remark',shortRemark(gi.remark||'—'));if(performancePct!=null)ranks.push({tr,p:performancePct})});ranks.sort((a,b)=>b.p-a.p);let last=null,rank=0;ranks.forEach((x,i)=>{if(last===null||x.p!==last)rank=i+1;last=x.p;const c=x.tr.querySelector('[data-k="rank"]');if(c)c.textContent=rank})}
  function state(msg,tone=''){e('r18636MxState').className='r18636-marks-status '+tone;e('r18636MxState').textContent=msg}
  function ready(){const a=currentAssessment(),editable=!!(a&&a.editable),bad=!!$('.mark-entry.invalid',mount);e('r18636MxDraft').disabled=!editable||bad;e('r18636MxSubmit').disabled=!editable||bad;e('r18636MxEdit').disabled=!editable}
  function resetData(d){return !d||!d.assessment?d:Object.assign({},d,{assessment:null,rows:(d.rows||[]).map(r=>Object.assign({},r,{entry_mark:null,entry_status:null,current_type:null,current_max:null}))})}
- async function loadSubject(force){const seq=++loadSeq,a=assignment();if(!a){workspace=null;data=null;render();return}state('LOADING '+a.class_code+' · '+(a.subject_name||a.subject_code)+'…');try{workspace=await getWorkspace(a,force);if(seq!==loadSeq)return;const cats=sortedCategories(workspace.categories||[]);e('r18636MxType').innerHTML='<option value="">CHOOSE ASSESSMENT TYPE</option>'+cats.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.name||x.code)+'</option>').join('');const pref=forceNew?null:preferredAssessment(workspace.assessments||[]);let d=await getMatrix(a,pref?pref.assessment_id:null);if(seq!==loadSeq)return;if(!pref)d=resetData(d);data=d;if(pref&&d.assessment){e('r18636MxType').value=String(pref.category_id||d.assessment.category_id||'');e('r18636MxMax').value=pref.max_mark??d.assessment.max_mark??'';state(fmt(d.student_count)+' STUDENTS READY · '+up(d.assessment.workflow_status||'DRAFT')+' · '+(d.assessment.assessment_name||'ASSESSMENT'),'')}else{e('r18636MxType').value='';e('r18636MxMax').value='';state(fmt(d.student_count)+' STUDENTS READY · CREATE OR OPEN AN ASSESSMENT','warn')}forceNew=false;ready();render()}catch(x){state('MARKS ENTRY LOAD FAILED: '+err(x),'bad')}}
- function populateSubjects(){loadSeq++;const cid=e('r18636MxClass').value,subs=assignments.filter(a=>String(a.class_id)===cid),seen=new Set();e('r18636MxSubject').innerHTML='<option value="">CHOOSE SUBJECT</option>'+subs.filter(a=>{const k=String(a.subject_id);if(seen.has(k))return false;seen.add(k);return true}).map(a=>'<option value="'+esc(a.subject_id)+'">'+esc(a.subject_name||a.subject_code)+'</option>').join('');workspace=null;data=null;render()}
+ async function loadSubject(force){const seq=++loadSeq,a=assignment();if(!a){workspace=null;data=null;render();return}state('LOADING '+a.class_code+' · '+(a.subject_name||a.subject_code)+'…');try{workspace=await getWorkspace(a,force);if(seq!==loadSeq)return;const cats=sortedCategories(workspace.categories||[]);e('r18636MxType').innerHTML='<option value="">SELECT TYPE</option>'+cats.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.name||x.code)+'</option>').join('');const pref=forceNew?null:preferredAssessment(workspace.assessments||[]);let d=await getMatrix(a,pref?pref.assessment_id:null);if(seq!==loadSeq)return;if(!pref)d=resetData(d);data=d;if(pref&&d.assessment){e('r18636MxType').value=String(pref.category_id||d.assessment.category_id||'');e('r18636MxMax').value=pref.max_mark??d.assessment.max_mark??'';state(fmt(d.student_count)+' STUDENTS READY · '+up(d.assessment.workflow_status||'DRAFT')+' · '+(d.assessment.assessment_name||'ASSESSMENT'),'')}else{e('r18636MxType').value='';e('r18636MxMax').value='';state(fmt(d.student_count)+' STUDENTS READY · CREATE OR OPEN AN ASSESSMENT','warn')}forceNew=false;ready();render()}catch(x){state('MARKS ENTRY LOAD FAILED: '+err(x),'bad')}}
+ function populateSubjects(){loadSeq++;const cid=e('r18636MxClass').value,subs=assignments.filter(a=>String(a.class_id)===cid),seen=new Set();e('r18636MxSubject').innerHTML='<option value="">SELECT SUBJECT</option>'+subs.filter(a=>{const k=String(a.subject_id);if(seen.has(k))return false;seen.add(k);return true}).map(a=>'<option value="'+esc(a.subject_id)+'">'+esc(a.subject_name||a.subject_code)+'</option>').join('');workspace=null;data=null;render()}
  async function openAssessment(){const a=assignment(),cat=e('r18636MxType').value,max=Number(e('r18636MxMax').value);if(!a||!cat||!Number.isFinite(max)||max<=0){state('Choose Class, Subject, Assessment Type and write a Maximum Mark greater than 0. There is no fixed assessment maximum.','bad');return}const b=e('r18636MxCreate');b.disabled=true;state('CREATING / OPENING MARKS SHEET…');try{const opened=await rpc('r174_teacher_open_assessment',{p_class_id:a.class_id,p_subject_id:a.subject_id,p_category_id:cat,p_max_mark:max});data=await getMatrix(a,opened&&opened.assessment&&opened.assessment.id);cache.delete(wkey(a));ready();render();state(fmt(data.student_count)+' STUDENTS READY · '+up(data.assessment&&data.assessment.workflow_status||'DRAFT'));const f=$('.mark-entry:not([disabled])',mount);if(f)setTimeout(()=>f.focus(),50)}catch(x){state(err(x),'bad')}finally{b.disabled=false}}
  async function save(submit){if(!currentAssessment())return;let rows;try{rows=payload(!!submit)}catch(x){state(x.message,'bad');return}const b=submit?e('r18636MxSubmit'):e('r18636MxDraft'),a=assignment(),aid=currentAssessment().id;b.disabled=true;state(submit?'SUBMITTING MARKS…':'SAVING DRAFT…');try{await rpc('r174_teacher_save_marks',{p_assessment_id:aid,p_rows:rows,p_submit:!!submit});data=await getMatrix(a,aid);if(a)cache.delete(wkey(a));ready();render();state(submit?'MARKS SUBMITTED TO DOS.':'DRAFT MARKS SAVED.');toast(submit?'Marks submitted.':'Draft saved.')}catch(x){state(err(x),'bad')}finally{b.disabled=false}}
  function exportRows(){const rows=filteredRows(),exam=examName(),a=currentAssessment();const headers=['NO.','SDMS CODE','STUDENT NAME','CURRENT ASSESSMENT / '+(a&&a.max_mark!=null?a.max_mark:'—'),'ASSESSMENTS TOTAL','CAMIS E.U',exam+' RAW','CAMIS '+exam,'TOTAL RAW','TOTAL CAMIS','FINAL %','GRADE','RANK','NO. OF ASSESSMENTS DONE','REMARK'];return[headers].concat(rows.map((x,i)=>{const om=officialMetrics(x),entry=x.entry_status&&x.entry_status!=='MARK'?x.entry_status:(x.entry_mark??'');return[i+1,x.sdms_code,x.student_name,entry,assessmentTotalLabel(x),om.eu??'',x.exam_raw??'',om.ex??'',x.total_raw??'',om.total??'',om.finalPct??'',om.grade??'',x.__r18637Rank??'',assessmentDoneCount(x),om.remark??'']}))}
@@ -9372,14 +9395,14 @@ V.teacherstudents=function(mount,c){
      <label>HAS SPECIAL NEED<select id="r58HasSpecial"><option value="">NOT RECORDED</option><option>NO</option><option>YES</option></select></label><label>SPECIAL NEED TYPE<input id="r58SpecialType"></label><label>IMPAIRMENT TYPE<input id="r58Impairment"></label><label>SEVERITY<input id="r58Severity"></label><label class="wide">CARE / SUPPORT NOTES<input id="r58Care"></label>
     </div></div>
     <div class="r18658-profile-section"><h4>LIVE STUDENT INDICATORS</h4><div class="r18658-profile-kpis" id="r58Kpis"></div></div>
-    <div class="r18658-form-actions r186-no-print"><button type="submit" id="r58Save" class="blue">SAVE PROFILE</button><button type="button" id="r58Submit" class="green">SUBMIT PROFILE</button><button type="button" id="r58SaveNext" class="green">SAVE & NEXT STUDENT</button></div>
+    <div class="r18658-form-actions r186-no-print"><button type="submit" id="r58Save" class="green">SAVE PROFILE</button><button type="button" id="r58Submit" class="green">SUBMIT PROFILE</button><button type="button" id="r58SaveNext" class="green">SAVE & NEXT STUDENT</button></div>
    </form>
   </section>
  </div>`;
  const e=id=>$('#'+id,mount);
  function parentCell(name,phone){const n=String(name||'').trim()||'—',p=String(phone||'').trim();return '<b>'+esc(n)+'</b>'+(p?'<small class="r18669-parent-phone">'+esc(p)+'</small>':'')}
  function draw(){
-  e('r58StuRows').innerHTML=rows.length?rows.map((x,i)=>{const incomplete=Number(x.completion_percent||0)<100,canEdit=!!x.is_class_teacher;return `<tr class="${incomplete?'r18666-profile-incomplete':''}"><td>${i+1}</td><td class="code"><b>${esc(x.sdms_code||'—')}</b></td><td class="name" title="${esc(x.full_name||'')}">${esc(x.full_name||'—')}</td><td>${esc(mf(x.sex))}</td><td><b>${esc(x.class_code||'—')}</b></td><td class="parent father">${parentCell(x.father_guardian_name,x.father_guardian_phone)}</td><td class="parent mother">${parentCell(x.mother_guardian_name,x.mother_guardian_phone)}</td><td><span class="r18666-profile-status ${incomplete?'incomplete':'complete'}">${esc(up(x.profile_status||'DRAFT'))}</span></td><td><b>${esc(x.completion_percent||0)}%</b></td><td><button type="button" data-r58-open="${esc(x.id)}" class="${canEdit&&incomplete?'r18666-complete-profile':'light'}">${canEdit?(incomplete?'COMPLETE PROFILE':'EDIT PROFILE'):'VIEW ONLY'}</button></td></tr>`}).join(''):'<tr><td colspan="10" class="empty">No students match your authorized scope.</td></tr>';
+  e('r58StuRows').innerHTML=rows.length?rows.map((x,i)=>{const incomplete=Number(x.completion_percent||0)<100,canEdit=!!x.is_class_teacher;return `<tr class="${incomplete?'r18666-profile-incomplete':''}"><td>${i+1}</td><td class="code"><b>${esc(x.sdms_code||'—')}</b></td><td class="name" title="${esc(x.full_name||'')}"><button type="button" class="r18684-student-open" data-r58-open="${esc(x.id)}">${esc(x.full_name||'—')}</button></td><td>${esc(mf(x.sex))}</td><td><b>${esc(x.class_code||'—')}</b></td><td class="parent father">${parentCell(x.father_guardian_name,x.father_guardian_phone)}</td><td class="parent mother">${parentCell(x.mother_guardian_name,x.mother_guardian_phone)}</td><td><span class="r18666-profile-status ${incomplete?'incomplete':'complete'}">${esc(up(x.profile_status||'DRAFT'))}</span></td><td><b>${esc(x.completion_percent||0)}%</b></td><td><button type="button" data-r58-open="${esc(x.id)}" class="${canEdit&&incomplete?'r18666-complete-profile':'light'}">${canEdit?(incomplete?'COMPLETE PROFILE':'EDIT PROFILE'):'VIEW ONLY'}</button></td></tr>`}).join(''):'<tr><td colspan="10" class="empty">No students match your authorized scope.</td></tr>';
   $$('[data-r58-open]',mount).forEach(b=>b.onclick=()=>openProfile(rows.find(x=>String(x.id)===String(b.dataset.r58Open))));
  }
  function setVal(id,v){e(id).value=v==null?'':String(v)}
@@ -9586,7 +9609,7 @@ V.studentidentificationimport=function(mount){
  function draw(){e('r63RowsK').textContent=rows.length;e('r63InvalidK').textContent=rows.filter(x=>x.local_status==='INVALID').length;e('r63Body').innerHTML=rows.length?rows.slice(0,250).map((r,i)=>`<tr><td>${i+1}</td><td class="code">${esc(r.sdms_code)}</td><td class="name">${esc(r.full_name)}</td><td>${esc(r.sex)}</td><td>${esc(r.age)}</td><td class="name">${esc(r.father_guardian_name)}</td><td class="name">${esc(r.mother_guardian_name)}</td><td>${esc(r.district)}</td><td>${esc(r.sector)}</td><td>${esc(r.cell)}</td><td>${esc(r.village)}</td><td>${esc(r.source_class)}</td><td><span class="r18663-id-status ${/INVALID|NOT_FOUND/.test(r.server_status||r.local_status)?'bad':/UPDATE/.test(r.server_status||'')?'warn':'good'}">${esc(r.server_status||r.local_status||'READY')}</span></td></tr>`).join(''):'<tr><td colspan="13">No identification data loaded.</td></tr>';if(rows.length>250)e('r63Body').insertAdjacentHTML('beforeend',`<tr><td colspan="13">Preview limited to first 250 of ${rows.length}. Server validation processes every row.</td></tr>`)}
  function setServer(d){server=d||null;e('r63MatchK').textContent=d?Number(d.matched||0):'—';e('r63UpdateK').textContent=d?Number(d.updated||0):'—';e('r63MissingK').textContent=d?Number(d.not_found||0):'—';e('r63InvalidK').textContent=d?Number(d.invalid||0):rows.filter(x=>x.local_status==='INVALID').length;const miss=(d&&d.not_found_rows)||[];e('r63MissingCsv').disabled=!miss.length;e('r63Unmatched').hidden=!miss.length;e('r63Unmatched').innerHTML=miss.length?'<b>'+miss.length+' SDMS CODE(S) NOT FOUND IN CURRENT GS MUSUMBA STUDENT MASTER.</b> No student was created or moved. Use DOWNLOAD NOT FOUND for reconciliation.':''}
  async function loadText(text,name){fileName=name||'IDENTIFICATION.csv';try{rows=validate(parseRows(parseDelimited(text)));server=null;draw();setServer(null);const invalid=rows.filter(x=>x.local_status==='INVALID').length;e('r63Preview').disabled=!rows.length||invalid>0;e('r63Commit').disabled=true;e('r63State').textContent=rows.length+' identification row(s) loaded'+(invalid?' · '+invalid+' invalid row(s).':' · ready for server preview.')}catch(x){rows=[];draw();setServer(null);e('r63State').textContent='FILE ERROR: '+(x.message||x);e('r63Preview').disabled=true;e('r63Commit').disabled=true}}
- e('r63LoadOfficial').onclick=async()=>{e('r63State').textContent='Loading included official 2026/2027 SDMS identification file…';try{const r=await fetch('./GS_MUSUMBA_STUDENT_IDENTIFICATION_SDMS_990.csv?v=R186.66',{cache:'no-store'});if(!r.ok)throw new Error('Included CSV was not found.');await loadText(await r.text(),'STUDENTS IDENTIFICATION 2026-2027.pdf → normalized CSV')}catch(x){e('r63State').textContent='LOAD FAILED: '+(x.message||x)}};
+ e('r63LoadOfficial').onclick=async()=>{e('r63State').textContent='Loading included official 2026/2027 SDMS identification file…';try{const r=await fetch('./GS_MUSUMBA_STUDENT_IDENTIFICATION_SDMS_990.csv?v=R186.86',{cache:'no-store'});if(!r.ok)throw new Error('Included CSV was not found.');await loadText(await r.text(),'STUDENTS IDENTIFICATION 2026-2027.pdf → normalized CSV')}catch(x){e('r63State').textContent='LOAD FAILED: '+(x.message||x)}};
  e('r63Template').onclick=()=>download('GS_MUSUMBA_STUDENT_IDENTIFICATION_TEMPLATE.csv','SDMS CODE,FULL NAME,SEX,AGE,FATHER / GUARDIAN,MOTHER / GUARDIAN,BOARDING TYPE,DISTRICT,SECTOR,CELL,VILLAGE,SOURCE CLASS\n280904000001,STUDENT NAME,MALE,10,FATHER NAME,MOTHER NAME,Day,Kamonyi,Nyarubaka,Gitare,Mugereke,P4\n');
  e('r63Pick').onclick=()=>e('r63File').click();e('r63File').onchange=async()=>{const f=e('r63File').files[0];if(f)await loadText(await f.text(),f.name)};
  e('r63Preview').onclick=async()=>{e('r63Preview').disabled=true;e('r63State').textContent='Matching SDMS codes against the live student master…';try{const d=await rpc('r18663_import_student_identification',{p_rows:rows.map(payload),p_source_file:fileName,p_apply:false});setServer(d);const sm=new Map((d.results||[]).map(x=>[String(x.sdms_code||''),x]));rows=rows.map(x=>Object.assign({},x,{server_status:sm.get(x.sdms_code)?.status||x.local_status}));draw();e('r63Commit').disabled=Number(d.invalid||0)>0;e('r63State').textContent='PREVIEW COMPLETE · '+d.processed+' rows · '+d.matched+' matched · '+d.updated+' would update · '+d.unchanged+' unchanged · '+d.not_found+' not found · '+d.invalid+' invalid.'}catch(x){e('r63State').textContent='SERVER PREVIEW FAILED: '+(x.message||x)}finally{e('r63Preview').disabled=!rows.length}};
@@ -10059,151 +10082,15 @@ try{document.documentElement.setAttribute('data-gsm-release','R186.79');document
 
 /* R186.79 permanent policy: students are records, never portal users. */
 (function(){try{if(window.GSM_MENUS)delete window.GSM_MENUS.STUDENT;const rp=document.getElementById('rolePreview');if(rp)Array.from(rp.options||[]).forEach(o=>{if(String(o.value||'').toUpperCase()==='STUDENT')o.remove()});window.GSM_STUDENT_PORTAL_ENABLED=false;}catch(_){}})();
-/* GS MUSUMBA R186.80 — FINAL QA FIXES
-   Scope: auth refresh behaviour, password recovery, Marks & Assessments visual cleanup.
-   Timetable data/rendering is intentionally untouched. Old deployments remain available for rollback.
-*/
+
+/* R186.80 — FINAL AUTH / TITLE / UI CONSISTENCY AUTHORITY */
 (function(){'use strict';
-  const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
-  const esc=v=>String(v==null?'':v).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
-  const KEY='sb_publishable_-k49Hut2E8SNIJLvofL4JQ_jW1K865r';
-  const URL='https://xydrwpbgikwsxerqwkik.supabase.co';
-
-  /* Never let a stale service-view title survive into the next route. */
-  function cleanCrumb(){
-    const c=$('#crumb'); if(!c)return;
-    const t=String(c.textContent||'').replace(/^MT(?=MY TIMETABLE)/i,'').replace(/^MS(?=MY STUDENTS)/i,'').replace(/^MA(?=MARKS)/i,'').trim();
-    if(t)c.textContent=t;
-  }
-
-  /* Compact, single-authority Marks & Assessments shell.
-     The existing marks engine remains responsible for data, save and submit. */
-  function patchMarksShell(){
-    const V=window.GSM_VIEWS||{};
-    if(typeof V.teachermarksassessments!=='function' || V.teachermarksassessments.__r18680)return;
-    V.teachermarksassessments.__r18680=true;
-    V.teachermarksassessments=function(mount,ctx){
-      let perf=typeof V.teacherperformance==='function';
-      try{const c=$('#crumb');if(c)c.textContent='MARKS & ASSESSMENTS';document.title='MARKS & ASSESSMENTS | GS MUSUMBA SCHOOL MANAGEMENT SYSTEM'}catch(_){}
-      mount.innerHTML='<div class="r18680-marks-shell">'+
-        '<div class="r18680-tabs" role="tablist">'+
-        '<button type="button" class="active" data-r18680-tab="entry">ENTER MARKS</button>'+ 
-        '<button type="button" data-r18680-tab="all">ASSESSMENTS & MONITORING</button>'+ 
-        (perf?'<button type="button" data-r18680-tab="performance">PERFORMANCE</button>':'')+
-        '</div><div id="r18680MarksHost"></div></div>';
-      const host=$('#r18680MarksHost',mount);
-      function open(which){
-        $$('.r18680-tabs button',mount).forEach(b=>b.classList.toggle('active',b.dataset.r18680Tab===which));
-        host.innerHTML='<div class="r18680-loading">Loading…</div>';
-        if(which==='entry'&&typeof V.marksentry==='function')V.marksentry(host,ctx);
-        else if(which==='all'&&typeof V.allmarks==='function')V.allmarks(host,ctx);
-        else if(which==='performance'&&typeof V.teacherperformance==='function')V.teacherperformance(host,ctx);
-        setTimeout(()=>{
-          try{const c=$('#crumb');if(c)c.textContent='MARKS & ASSESSMENTS';}catch(_){}
-          cleanupMarksInner(host);
-        },0);
-      }
-      function cleanupMarksInner(root){
-        /* Keep exactly one page identity: the top app crumb. Remove nested duplicate page headings. */
-        $$('.r18636-marks-title,.r18629-pagehead',root).forEach(x=>x.remove());
-        $$('p',root).forEach(p=>{if(/RAW ASSESSMENTS\s*→|Enter marks, review every assessment/i.test(p.textContent||''))p.remove()});
-        /* Remove empty decorative boxes created by legacy header actions. */
-        $$('.r18637-marks-head-actions',root).forEach(x=>{if(!x.textContent.trim())x.remove()});
-      }
-      $$('.r18680-tabs button',mount).forEach(b=>b.onclick=()=>open(b.dataset.r18680Tab));
-      open('entry');
-    };
-  }
-
-  /* Contrast repair for text that previously rendered too close to the background. */
-  function contrastFix(){
-    const root=$('#main');if(!root)return;
-    root.classList.add('r18680-contrast');
-    $$('.r18636-marks-status,.r18680-loading',root).forEach(x=>x.style.color='#17324d');
-    $$('.r18636-marks-page,.r18637-marks-table-host',root).forEach(x=>x.style.color='#102030');
-    $$('.r18636-marks-table thead th,.r176-marks-table thead th',root).forEach(x=>{x.style.color='#fff';x.style.webkitTextFillColor='#fff'});
-    $$('.r18636-btn-green,.r18636-btn-blue,.r18636-btn-red',root).forEach(x=>{x.style.color='#fff';x.style.webkitTextFillColor='#fff'});
-  }
-
-  /* Password recovery: use the actual Supabase recovery session, never a school DB password.
-     Supports token_hash links and access_token links, then forces a clean login after update. */
-  async function recoveryRequest(identifier){
-    const id=String(identifier||'').trim();
-    if(!id)throw new Error('Enter your email, username, staff code or telephone number.');
-    let email=id;
-    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){
-      const r=await fetch(URL+'/rest/v1/rpc/resolve_login_email',{method:'POST',cache:'no-store',headers:{apikey:KEY,'Content-Type':'application/json'},body:JSON.stringify({p_identifier:id})});
-      if(!r.ok)throw new Error('Account could not be resolved.');
-      email=String(await r.text()).replace(/^"|"$/g,'');
-      if(!email||email.endsWith('@gsmusumba.invalid'))throw new Error('Account could not be resolved.');
-    }
-    const redirect=location.origin+location.pathname+'?password-recovery=1';
-    const r=await fetch(URL+'/auth/v1/recover?redirect_to='+encodeURIComponent(redirect),{method:'POST',cache:'no-store',headers:{apikey:KEY,'Content-Type':'application/json'},body:JSON.stringify({email:email.toLowerCase()})});
-    if(!r.ok)throw new Error('Reset link could not be requested.');
-  }
-  function tokenFromUrl(){
-    const h=new URLSearchParams(String(location.hash||'').replace(/^#/,'')),q=new URLSearchParams(location.search||'');
-    return h.get('access_token')||q.get('access_token')||'';
-  }
-  async function activateRecovery(){
-    const q=new URLSearchParams(location.search||''),h=new URLSearchParams(String(location.hash||'').replace(/^#/,''));
-    const token=tokenFromUrl();
-    if(token){sessionStorage.setItem('gsm.r18680.recovery',JSON.stringify({access_token:token}));return token}
-    const hash=q.get('token_hash');
-    if(hash){
-      const r=await fetch(URL+'/auth/v1/verify',{method:'POST',cache:'no-store',headers:{apikey:KEY,'Content-Type':'application/json'},body:JSON.stringify({type:'recovery',token_hash:hash})});
-      if(!r.ok)throw new Error('Recovery link is invalid or expired.');
-      const s=await r.json();if(!s.access_token)throw new Error('Recovery session could not be created.');
-      sessionStorage.setItem('gsm.r18680.recovery',JSON.stringify({access_token:s.access_token}));
-      return s.access_token;
-    }
-    return '';
-  }
-  function recoveryToken(){
-    try{return JSON.parse(sessionStorage.getItem('gsm.r18680.recovery')||'{}').access_token||''}catch(_){return ''}
-  }
-  function showRecoveryForm(msg){
-    const m=$('#passwordRecoveryModal');if(!m)return;
-    m.classList.add('open');m.setAttribute('aria-hidden','false');
-    const a=$('#recoveryRequestPane'),b=$('#recoveryChangePane');if(a)a.hidden=true;if(b)b.hidden=false;
-    const t=$('#recoveryTitle');if(t)t.textContent='CHANGE YOUR PASSWORD';
-    const tx=$('#recoveryText');if(tx)tx.textContent='Enter and confirm a new password.';
-    const out=$('#recoveryMessage');if(out){out.textContent=msg||'';out.className='r123-recovery-message'+(msg?' bad':'')}
-    try{document.documentElement.classList.add('r18655-recovery-open')}catch(_){}
-  }
-  async function saveRecovery(){
-    const a=$('#recoveryNewPassword'),b=$('#recoveryConfirmPassword'),msg=$('#recoveryMessage'),btn=$('#saveRecoveryPasswordBtn');
-    if(!a||!b||!msg)return;
-    const pw=a.value||'';if(pw.length<8){msg.textContent='Use at least 8 characters.';msg.className='r123-recovery-message bad';return}
-    if(pw!==b.value){msg.textContent='Passwords do not match.';msg.className='r123-recovery-message bad';return}
-    const token=recoveryToken()||await activateRecovery().catch(()=>''),
-          endpoint=URL+'/auth/v1/user';
-    if(!token){msg.textContent='The reset link is missing or expired. Request a new reset link.';msg.className='r123-recovery-message bad';return}
-    btn.disabled=true;btn.textContent='SAVING...';
-    try{
-      const r=await fetch(endpoint,{method:'PUT',cache:'no-store',headers:{apikey:KEY,Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({password:pw})});
-      if(!r.ok){const tx=await r.text();throw new Error(tx||'Password could not be updated.')}
-      sessionStorage.removeItem('gsm.r18680.recovery');
-      try{history.replaceState(null,'',location.origin+location.pathname)}catch(_){}
-      a.value='';b.value='';
-      const modal=$('#passwordRecoveryModal');if(modal){modal.classList.remove('open');modal.setAttribute('aria-hidden','true')}
-      const login=$('#loginScreen'),app=$('#appShell');if(login)login.style.setProperty('display','flex','important');if(app)app.style.setProperty('display','none','important');
-      const lm=$('#loginMessage');if(lm){lm.style.display='block';lm.style.color='#137333';lm.textContent='Password changed successfully. Sign in with your new password.'}
-    }catch(e){msg.textContent=e.message||'Password could not be updated.';msg.className='r123-recovery-message bad'}
-    finally{btn.disabled=false;btn.textContent='SAVE NEW PASSWORD'}
-  }
-  function patchRecovery(){
-    const forgot=$('#forgotPasswordBtn'),send=$('#sendRecoveryBtn'),save=$('#saveRecoveryPasswordBtn');
-    if(forgot&&!forgot.__r18680){forgot.__r18680=true;forgot.onclick=()=>{const x=$('#recoveryIdentifier');if(x)x.value=$('#identifier')?.value||'';const m=$('#passwordRecoveryModal');if(m){m.classList.add('open');m.setAttribute('aria-hidden','false')}const p=$('#recoveryRequestPane'),c=$('#recoveryChangePane');if(p)p.hidden=false;if(c)c.hidden=true}};
-    if(send&&!send.__r18680){send.__r18680=true;send.onclick=async()=>{send.disabled=true;send.textContent='SENDING...';try{await recoveryRequest($('#recoveryIdentifier')?.value||'');const msg=$('#recoveryMessage');if(msg){msg.textContent='Reset link sent. Check the registered email and open the link to set a new password.';msg.className='r123-recovery-message ok'}}catch(e){const msg=$('#recoveryMessage');if(msg){msg.textContent=e.message||'Reset link could not be requested.';msg.className='r123-recovery-message bad'}}finally{send.disabled=false;send.textContent='SEND RESET LINK'}}};
-    if(save&&!save.__r18680){save.__r18680=true;save.onclick=saveRecovery}
-  }
-  async function boot(){
-    patchMarksShell();patchRecovery();cleanCrumb();
-    try{const token=await activateRecovery();if(token)showRecoveryForm('Recovery session ready. Enter your new password.')}catch(e){if(/password-recovery|type=recovery|token_hash|access_token/.test(location.href)){showRecoveryForm(e.message)}}
-    setTimeout(()=>{patchMarksShell();patchRecovery();contrastFix()},100);
-  }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
-  document.addEventListener('gsm:view-rendered',()=>setTimeout(()=>{cleanCrumb();contrastFix()},0));
-  window.GSM_R18680={release:'R186.80-FINAL-QA',timetable:'UNCHANGED',marks:'SINGLE_TITLE_COMPACT_HIGH_CONTRAST',refreshSession:'REMEMBER_ME_ONLY',passwordRecovery:'SUPABASE_AUTH_RECOVERY'};
+ if(window.__GSM_R18680_FINAL_UI__)return;window.__GSM_R18680_FINAL_UI__=true;
+ const norm=v=>String(v||'').replace(/\s+/g,' ').trim().toUpperCase();
+ function dedupe(){const bar=document.querySelector('body.gsm77-service-focus #gsm77ServiceBar:not([hidden]) [data-gsm77-title]'),main=document.getElementById('main');if(!main)return;main.querySelectorAll('.r18680-duplicate-page-title').forEach(h=>h.classList.remove('r18680-duplicate-page-title'));if(!bar)return;const title=norm(bar.textContent);if(!title)return;main.querySelectorAll('h1,h2').forEach(h=>{if(norm(h.textContent)===title)h.classList.add('r18680-duplicate-page-title')})}
+ function run(){requestAnimationFrame(()=>{dedupe();setTimeout(dedupe,60)})}
+ document.addEventListener('gsm:view-rendered',run);document.addEventListener('click',e=>{if(e.target.closest('button,.side-link'))setTimeout(dedupe,80)},true);
+ window.GSM_R18680={release:'R186.80',strictRememberMe:true,loginSafePasswordReset:true,canonicalDashboard:true,directTimetableColors:true,compactMarksEntry:true,noDuplicateVisibleRouteTitle:true};
+ try{document.documentElement.setAttribute('data-gsm-release','R186.80');document.documentElement.setAttribute('data-gsm-component-release','R186.80')}catch(_){ }
+ setTimeout(dedupe,120);
 })();
