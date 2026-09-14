@@ -1,0 +1,19 @@
+GS MUSUMBA — R186.80 FINAL QA
+
+FIXED
+1. Normal browser refresh no longer auto-restores a session saved only in sessionStorage.
+2. "Remember me" remains the only normal refresh auto-login path.
+3. Password recovery is wired directly to Supabase Auth recovery sessions and password update.
+4. Marks & Assessments now has one page identity/title instead of duplicated title blocks.
+5. Removed redundant Marks explanatory text and reduced visual clutter.
+6. Restored strong text/button contrast for Marks screens.
+7. Service-worker/cache version bumped to R186.80 and navigation remains network-first to reduce stale deployment rendering.
+
+PROTECTED / NOT CHANGED
+- Timetable data and timetable rendering logic were not modified.
+- Old deployments were not deleted; they remain available for rollback history.
+- Supabase/RLS-backed data operations remain the source of truth.
+
+BUILD
+Release: R186.80
+Target: GS MUSUMBA staff portal
