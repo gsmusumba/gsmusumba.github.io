@@ -9552,8 +9552,9 @@ if(!window.GSM_VIEWS)return;
 const V=window.GSM_VIEWS;
 function q(s,r){return (r||document).querySelector(s)}
 
-if(typeof V.r186_discipline_cases==='function')V.r119_discipline=function(m,c){return V.r186_discipline_cases(m,c)};
-if(typeof V.r186_svc_DOD_PERMISSIONS==='function')V.r119_permissions=function(m,c){return V.r186_svc_DOD_PERMISSIONS(m,c)};
+/* R186.96: NOT overriding r119_discipline / r119_permissions any more — this codebase already has a
+   complete, better, hand-built real form for both (with a proper Save button and student picker).
+   My earlier alias here was SHADOWING that good implementation with a plainer generic one. Removed. */
 
 if(typeof V.r18638_system==='function'&&typeof V.r186_reset_tools==='function'){
  const prevSys2=V.r18638_system;
