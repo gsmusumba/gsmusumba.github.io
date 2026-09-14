@@ -1,0 +1,32 @@
+GS MUSUMBA R186.97 — SYSTEM MANAGEMENT DUPLICATE-SERVICE FIX
+
+Problem observed:
+- SYSTEM MANAGEMENT was rendering the local canonical service list and then appending
+  every SUPER_ADMIN service returned by the live catalog.
+- Deduplication used route_id only, so different legacy route IDs for the same service
+  produced duplicate cards such as:
+    STAFF MANAGEMENT
+    TIMETABLE MANAGEMENT
+    MARKS CONFIGURATION / MARKS MANAGEMENT & CONFIGURATION
+    ACADEMIC YEARS & TERMS
+    SYSTEM HEALTH
+    USER ACCOUNTS / USERS & ACCESS
+    AUDIT & VERSION / AUDIT LOG
+    DASHBOARD
+    DATA RESET TOOLS
+
+Fix:
+- Added semantic service-name normalization and aliasing.
+- Canonical local System Management cards now win when a live catalog row represents
+  the same service.
+- DASHBOARD and DATA RESET TOOLS are excluded from the live catalog merge because
+  they are already handled separately.
+- Unique live SUPER_ADMIN services are still appended normally.
+- Bumped loader cache version from R186.96 to R186.97.
+
+Files changed:
+- index.html
+- r18661-loader.js
+- r18661-extensions.js
+
+No database data or Supabase schema was changed by this patch.

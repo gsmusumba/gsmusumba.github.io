@@ -7892,7 +7892,60 @@ V.r18638_headteacher=(m,c)=>roleCenter(m,c,'HEADTEACHER');V.r18638_dos=(m,c)=>ro
 V.r18638_all_services=function(m,c){pageTitle('ALL SCHOOL SERVICES');const groups=[['HEADTEACHER','HEADTEACHER'],['DOS','DOS'],['DOD','DOD'],['SECRETARY','SECRETARY'],['BURSAR','BURSAR'],['LIBRARIAN','LIBRARIAN'],['STUDENTS','STUDENTS'],['SYSTEM MANAGEMENT','SYSTEM']];m.innerHTML='<section class="r18638-role-head"><h2>ALL SCHOOL SERVICES · VIEW / REPORT ACCESS</h2><p>Senior authorized staff can view and report across the school. Add/Edit/Update/Remove/Change stay enabled only in the services owned by their role; SUPER ADMIN has system-wide override.</p></section><div class="r18638-card-grid">'+groups.map((g,i)=>'<button class="r18638-card" data-all="'+i+'"><b>'+esc(g[0])+'</b><span>Open services, embedded reports and analysis.</span></button>').join('')+'</div><div id="r38AllView"></div>';const h=m.querySelector('#r38AllView');$$('[data-all]',m).forEach(b=>b.onclick=()=>{const g=groups[+b.dataset.all];if(g[1]==='STUDENTS')return V.r18638_students(h,c);if(g[1]==='SYSTEM')return V.r18638_system(h,c);return roleCenter(h,c,g[1])});visualSanitize(m)};
 
 V.r18638_students=function(m,c){pageTitle('STUDENTS');m.innerHTML='<section class="r18638-role-head"><h2>STUDENTS · MANAGEMENT MODULE</h2><p>Student login remains disabled. Authorized staff manage the student lifecycle here.</p></section><div class="r18638-card-grid">'+STUDENT_SERVICES.map((x,i)=>'<button class="r18638-card" data-st="'+i+'"><b>'+esc(x[1])+'</b><span>'+esc(x[2])+'</span></button>').join('')+'</div><div id="r38StuView"></div>';const h=m.querySelector('#r38StuView');$$('[data-st]',m).forEach(b=>b.onclick=()=>openService(h,c,STUDENT_SERVICES[+b.dataset.st]));visualSanitize(m)};
-V.r18638_system=async function(m,c){pageTitle('SYSTEM MANAGEMENT');m.innerHTML='<section class="r18638-role-head"><h2>SYSTEM MANAGEMENT</h2><p>All configuration and management authorities are centralized here. SUPER ADMIN / DOD has final system-wide authority.</p></section><div class="r18638-report-status" id="r39SysLoad">LOADING ALL SYSTEM MANAGEMENT SERVICES…</div><div class="r18638-card-grid" id="r39SysCards"></div><div id="r38SysView"></div>';const cards=m.querySelector('#r39SysCards'),h=m.querySelector('#r38SysView'),st=m.querySelector('#r39SysLoad');function render(list){cards.innerHTML=list.map((x,i)=>'<button class="r18638-card" data-sm="'+i+'"><b>'+esc(x[1])+'</b><span>'+esc(x[2])+'</span></button>').join('');$$('[data-sm]',cards).forEach(b=>b.onclick=()=>openService(h,c,list[+b.dataset.sm]));visualSanitize(m)}render(SYSTEM_SERVICES);try{const rows=(await cachedServices()).filter(x=>up(x.primary_owner_role)==='SUPER_ADMIN');if(rows.length){const baseMap=new Map(SYSTEM_SERVICES.map(x=>[x[0],x]));const merged=SYSTEM_SERVICES.slice(),seen=new Set(merged.map(x=>x[0]));rows.forEach(r=>{if(seen.has(r.route_id))return;merged.push([r.route_id,up(r.service_name),up(r.service_group||'SYSTEM MANAGEMENT')+' · LIVE SERVICE CATALOG',roleServiceAction(r.route_id,'SUPER_ADMIN')]);seen.add(r.route_id)});render(merged);st.className='r18638-report-status good';st.textContent=merged.length+' SYSTEM MANAGEMENT SERVICE(S) LOADED · LOCAL MANAGEMENT AUTHORITIES + LIVE CATALOG.'}}catch(e){st.className='r18638-report-status bad';st.textContent='LIVE SYSTEM CATALOG COULD NOT LOAD · USING '+SYSTEM_SERVICES.length+' LOCAL SERVICES. '+(e.message||e)}};
+V.r18638_system=async function(m,c){
+ pageTitle('SYSTEM MANAGEMENT');
+ m.innerHTML='<section class="r18638-role-head"><h2>SYSTEM MANAGEMENT</h2><p>All configuration and management authorities are centralized here. SUPER ADMIN / DOD has final system-wide authority.</p></section><div class="r18638-report-status" id="r39SysLoad">LOADING ALL SYSTEM MANAGEMENT SERVICES…</div><div class="r18638-card-grid" id="r39SysCards"></div><div id="r38SysView"></div>';
+ const cards=m.querySelector('#r39SysCards'),h=m.querySelector('#r38SysView'),st=m.querySelector('#r39SysLoad');
+ const systemKey=v=>{
+   const t=up(v).replace(/&/g,' AND ').replace(/[^A-Z0-9]+/g,' ').trim().replace(/\s+/g,' ');
+   const aliases={
+     'AUDIT AND VERSION':'AUDIT LOG',
+     'USER ACCOUNTS':'USERS AND ACCESS',
+     'USERS ACCESS':'USERS AND ACCESS',
+     'MARKS CONFIGURATION':'MARKS MANAGEMENT AND CONFIGURATION',
+     'MARKS MANAGEMENT CONFIGURATION':'MARKS MANAGEMENT AND CONFIGURATION',
+     'ACADEMIC YEARS TERMS':'ACADEMIC YEARS AND TERMS',
+     'SYSTEM HEALTH':'SYSTEM HEALTH',
+     'STAFF MANAGEMENT':'STAFF MANAGEMENT',
+     'TIMETABLE MANAGEMENT':'TIMETABLE MANAGEMENT',
+     'DATA RESET TOOLS':'DATA RESET TOOLS',
+     'DASHBOARD':'DASHBOARD'
+   };
+   return aliases[t]||t;
+ };
+ function render(list){
+   cards.innerHTML=list.map((x,i)=>'<button class="r18638-card" data-sm="'+i+'"><b>'+esc(x[1])+'</b><span>'+esc(x[2])+'</span></button>').join('');
+   $$('[data-sm]',cards).forEach(b=>b.onclick=()=>openService(h,c,list[+b.dataset.sm]));
+   visualSanitize(m)
+ }
+ render(SYSTEM_SERVICES);
+ try{
+   const rows=(await cachedServices()).filter(x=>up(x.primary_owner_role)==='SUPER_ADMIN');
+   if(rows.length){
+     const merged=SYSTEM_SERVICES.slice();
+     const seen=new Set(merged.map(x=>systemKey(x[1])));
+     let consolidated=0;
+     rows.forEach(r=>{
+       const name=up(r.service_name);
+       const key=systemKey(name);
+       // These are already represented by the canonical System Management UI,
+       // or are injected separately by the final reset-tools patch.
+       if(key==='DASHBOARD'||key==='DATA RESET TOOLS'||seen.has(key)){
+         consolidated++;
+         return;
+       }
+       merged.push([r.route_id,name,up(r.service_group||'SYSTEM MANAGEMENT')+' · LIVE SERVICE CATALOG',roleServiceAction(r.route_id,'SUPER_ADMIN')]);
+       seen.add(key);
+     });
+     render(merged);
+     st.className='r18638-report-status good';
+     st.textContent=merged.length+' SYSTEM MANAGEMENT SERVICE(S) LOADED · '+consolidated+' DUPLICATE/LEGACY CATALOG ENTRY(IES) CONSOLIDATED.';
+   }
+ }catch(e){
+   st.className='r18638-report-status bad';
+   st.textContent='LIVE SYSTEM CATALOG COULD NOT LOAD · USING '+SYSTEM_SERVICES.length+' LOCAL SERVICES. '+(e.message||e);
+ }
+};
 
 /* Teacher direct-service wrappers: report is inside the service, no My Reports menu. */
 function teacherWrap(routeId,title,desc,view){return(m,c)=>serviceShell(m,c,routeId,title,desc,(h)=>typeof V[view]==='function'?V[view](h,c):genericActivity(h,routeId,title))}
