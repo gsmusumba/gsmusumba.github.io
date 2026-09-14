@@ -1,3 +1,16 @@
+/* ===== R186.96 FIXES =====
+   1) STUDENT LIST SYNCHRONIZATION: file upload now correctly parses .xlsx / .xls
+      (previously any non-CSV/TXT file, including Excel workbooks, was read as raw
+      text via FileReader.readAsText, producing garbled binary in the preview).
+      Excel files are now parsed with SheetJS (loaded on demand) and converted to
+      CSV before reuse of the existing roster parser. Clear error messages are shown
+      if the reader cannot load (e.g. offline) or the workbook has no readable rows.
+   2) Generic "no dedicated activity form" notice reworded to be clearer and now
+      includes a working "GO TO VIEW / REPORT" button.
+   3) VIEW / REPORT drop-down: if the report catalog fails to load (e.g. the browser
+      could not reach the backend), the message is now explicit about the cause and
+      includes a RETRY button, instead of leaving the drop-down silently disabled.
+===== END R186.96 FIXES ===== */
 
 /* ===== r186-timetable-master.js ===== */
 /* GS MUSUMBA R186.28 — embedded CURRENT teacher timetable master from approved XLSX. Future timetable data is intentionally server-gated. */
@@ -7166,15 +7179,15 @@ V.marksentry=function(mount,c){
  function assessmentTotalRaw(r){if(r.total_raw!=null)return r.total_raw;if(r.all_ass_obtained!=null)return r.all_ass_obtained;return '—'}
  function render(){
   const rows=filteredRows(),a=currentAssessment(),entryMax=a&&a.max_mark!=null?a.max_mark:'—',cm=Number(data&&data.config&&data.config.camis_max||workspace&&workspace.config&&workspace.config.camis_max||0)||null,exam=examName(),totalCols=16;
-  let group='<tr class="group"><th colspan="3" class="g-blue">STUDENT</th><th class="g-blue">MARK ENTRY</th><th colspan="4" class="g-green">ALL ASSESSMENTS / CAMIS E.U</th><th colspan="3" class="g-red">EXAM</th><th colspan="5" class="g-blue">LIVE / FINAL RESULT</th></tr>';
-  let heads=`<tr class="columns"><th class="h-blue sticky-no r18652-cm">NO.</th><th class="h-blue sticky-sdms">SDMS</th><th class="h-blue sticky-name">STUDENT NAME</th><th class="h-blue r18652-current-head">${esc(currentTypeLabel())}<br><small>RAW / ${esc(entryMax)}</small></th><th class="h-green"># ASS.</th><th class="h-yellow r18652-ass-total">ASS. RAW</th><th class="h-green">ASS. %</th><th class="h-green">CAMIS E.U<br><small>/ ${esc(cm??'—')}</small></th><th class="h-red">${esc(exam)} RAW</th><th class="h-red">EXAM %</th><th class="h-green">CAMIS ${esc(exam)}<br><small>/ ${esc(cm??'—')}</small></th><th class="h-green r18654-cm-total">CAMIS TOTAL</th><th class="h-green">TOTAL MAX</th><th class="h-green">PERFORMANCE %</th><th class="h-green r18652-cm">GRADE</th><th class="h-green r18652-cm">RANK</th></tr>`;
+  let group='<tr class="group"><th colspan="3" class="g-blue">STUDENT</th><th class="g-blue">MARK ENTRY</th><th colspan="3" class="g-green">ALL ASSESSMENTS / CAMIS E.U</th><th colspan="3" class="g-red">EXAM</th><th colspan="6" class="g-blue">LIVE / FINAL RESULT</th></tr>';
+  let heads=`<tr class="columns"><th class="h-blue sticky-no r18652-cm">NO.</th><th class="h-blue sticky-sdms">SDMS</th><th class="h-blue sticky-name">STUDENT NAME</th><th class="h-blue r18652-current-head">${esc(currentTypeLabel())}<br><small>RAW / ${esc(entryMax)}</small></th><th class="h-yellow r18652-ass-total">ASS. RAW</th><th class="h-green">ASS. %</th><th class="h-green">CAMIS E.U<br><small>/ ${esc(cm??'—')}</small></th><th class="h-red">${esc(exam)} RAW</th><th class="h-red">EXAM %</th><th class="h-green">CAMIS ${esc(exam)}<br><small>/ ${esc(cm??'—')}</small></th><th class="h-green r18654-cm-total">CAMIS TOTAL</th><th class="h-green">TOTAL MAX</th><th class="h-green">PERFORMANCE %</th><th class="h-green"># ASS.</th><th class="h-green r18652-cm">GRADE</th><th class="h-green r18652-cm">RANK</th></tr>`;
   const rankable=rows.map(r=>{const m=officialMetrics(r);return{r,m,p:m.finalPct!=null?Number(m.finalPct):assessmentSummaryPct(r,m)}}).filter(x=>x.p!=null&&Number.isFinite(x.p)).sort((a,b)=>b.p-a.p);let last=null,rank=0;rankable.forEach((x,i)=>{if(last===null||x.p!==last)rank=i+1;last=x.p;x.r.__r18637Rank=rank});
-  const body=rows.map((r,i)=>{const m=officialMetrics(r),assPct=Number(r.assessment_percent??(Number(r.all_ass_max)>0?100*Number(r.all_ass_obtained||0)/Number(r.all_ass_max):NaN)),exPct=Number(r.exam_raw_max)>0?100*Number(r.exam_raw||0)/Number(r.exam_raw_max):null,examRaw=r.exam_raw==null?'—':r.exam_raw+' / '+(r.exam_raw_max??'—');return `<tr data-student="${esc(r.student_id)}"><td class="sticky-no r18652-cm">${i+1}</td><td class="sticky-sdms"><b>${esc(r.sdms_code||'')}</b></td><td class="sticky-name name" title="${esc(r.student_name||'')}">${esc(r.student_name||'')}</td>${currentEntryCell(r)}<td class="official" data-k="asscount"><b>${esc(assessmentDoneCount(r))}</b></td><td class="raw-check r18652-ass-total" data-k="asstotal"><b>${esc(assessmentTotalLabel(r))}</b></td><td class="official" data-k="asspct"><b>${Number.isFinite(assPct)?assPct.toFixed(2)+'%':'—'}</b></td><td class="official" data-k="eu"><b>${esc(m.eu==null?'—':m.eu)}</b></td><td class="raw-check" data-k="examraw"><b>${esc(examRaw)}</b></td><td class="official" data-k="exampct"><b>${exPct==null?'—':exPct.toFixed(2)+'%'}</b></td><td class="official" data-k="exconv"><b>${esc(m.ex==null?'—':m.ex)}</b></td><td class="official r18654-cm-total" data-k="total"><b>${esc(m.total==null?'—':m.total)}</b></td><td class="official" data-k="totalmax"><b>${esc(m.totalMax==null?'—':m.totalMax)}</b></td><td class="official" data-k="finalpct"><b>${m.finalPct==null?'—':Number(m.finalPct).toFixed(2)+'%'}</b></td><td class="r18652-cm" data-k="grade"><b>${esc(m.grade||'—')}</b></td><td class="r18652-cm" data-k="rank"><b>${esc(r.__r18637Rank??'—')}</b></td></tr>`}).join('');
-  const colgroup='<colgroup class="r18684-marks-cols"><col class="c-no"><col class="c-sdms"><col class="c-name"><col class="c-current"><col class="c-ass-count"><col class="c-ass-total"><col class="c-ass-pct"><col class="c-eu"><col class="c-exam-raw"><col class="c-exam-pct"><col class="c-exam-camis"><col class="c-total-camis"><col class="c-total-max"><col class="c-final-pct"><col class="c-grade"><col class="c-rank"></colgroup>';
+  const body=rows.map((r,i)=>{const m=officialMetrics(r),assPct=Number(r.assessment_percent??(Number(r.all_ass_max)>0?100*Number(r.all_ass_obtained||0)/Number(r.all_ass_max):NaN)),exPct=Number(r.exam_raw_max)>0?100*Number(r.exam_raw||0)/Number(r.exam_raw_max):null,examRaw=r.exam_raw==null?'—':r.exam_raw+' / '+(r.exam_raw_max??'—');return `<tr data-student="${esc(r.student_id)}"><td class="sticky-no r18652-cm">${i+1}</td><td class="sticky-sdms"><b>${esc(r.sdms_code||'')}</b></td><td class="sticky-name name" title="${esc(r.student_name||'')}">${esc(r.student_name||'')}</td>${currentEntryCell(r)}<td class="raw-check r18652-ass-total" data-k="asstotal"><b>${esc(assessmentTotalLabel(r))}</b></td><td class="official" data-k="asspct"><b>${Number.isFinite(assPct)?assPct.toFixed(2)+'%':'—'}</b></td><td class="official" data-k="eu"><b>${esc(m.eu==null?'—':m.eu)}</b></td><td class="raw-check" data-k="examraw"><b>${esc(examRaw)}</b></td><td class="official" data-k="exampct"><b>${exPct==null?'—':exPct.toFixed(2)+'%'}</b></td><td class="official" data-k="exconv"><b>${esc(m.ex==null?'—':m.ex)}</b></td><td class="official r18654-cm-total" data-k="total"><b>${esc(m.total==null?'—':m.total)}</b></td><td class="official" data-k="totalmax"><b>${esc(m.totalMax==null?'—':m.totalMax)}</b></td><td class="official" data-k="finalpct"><b>${m.finalPct==null?'—':Number(m.finalPct).toFixed(2)+'%'}</b></td><td class="official" data-k="asscount"><b>${esc(assessmentDoneCount(r))}</b></td><td class="r18652-cm" data-k="grade"><b>${esc(m.grade||'—')}</b></td><td class="r18652-cm" data-k="rank"><b>${esc(r.__r18637Rank??'—')}</b></td></tr>`}).join('');
+  const colgroup='<colgroup class="r18684-marks-cols"><col class="c-no"><col class="c-sdms"><col class="c-name"><col class="c-current"><col class="c-ass-total"><col class="c-ass-pct"><col class="c-eu"><col class="c-exam-raw"><col class="c-exam-pct"><col class="c-exam-camis"><col class="c-total-camis"><col class="c-total-max"><col class="c-final-pct"><col class="c-grade"><col class="c-ass-count"><col class="c-rank"></colgroup>';
   e('r18637MxTableHost').innerHTML=`<table class="r18636-marks-table r18637-marks-table r18650-marks-entry r18652-marks-entry r18680-marks-entry r18684-live-marks">${colgroup}<thead>${group}${heads}</thead><tbody id="r18636MxRows">${body||`<tr><td colspan="${totalCols}">No students match this filter.</td></tr>`}</tbody></table>`;
   $$('.mark-entry',mount).forEach(inp=>{inp.dataset.lastValid=inp.value;inp.addEventListener('focus',()=>{if(validate(inp))inp.dataset.lastValid=inp.value});inp.addEventListener('input',()=>handleMarkInput(inp))});if(window.GSM_R18637_applyTableAuthority)window.GSM_R18637_applyTableAuthority(mount)
  }
- function validate(inp){const a=currentAssessment(),sv=statusValue(inp.value.trim()),max=Number(a&&a.max_mark);const ok=sv.valid&&(sv.status!=='MARK'||sv.mark==null||(sv.mark>=0&&Number.isFinite(max)&&sv.mark<=max));inp.classList.toggle('invalid',!ok);inp.setAttribute('aria-invalid',ok?'false':'true');if(!ok)inp.title=sv.status==='MARK'&&Number.isFinite(max)?'Allowed range: 0 to '+max:'Enter a mark or A / E / S / N / P';else inp.removeAttribute('title');return ok} function handleMarkInput(inp){const a=currentAssessment(),max=Number(a&&a.max_mark),raw=inp.value.trim(),sv=statusValue(raw);if(sv.valid&&sv.status==='MARK'&&Number.isFinite(max)&&sv.mark>max){const attempted=raw;inp.value=inp.dataset.lastValid||'';inp.classList.add('r18654-overmax');state('MARK '+attempted+' IS ABOVE MAX '+max+'. VALUE REJECTED.','bad');setTimeout(()=>inp.classList.remove('r18654-overmax'),1200);ready();liveRecalc();return}if(validate(inp))inp.dataset.lastValid=inp.value;ready();liveRecalc()}
+ function validate(inp){const a=currentAssessment(),sv=statusValue(inp.value.trim()),max=Number(a&&a.max_mark);const ok=sv.valid&&(sv.status!=='MARK'||sv.mark==null||(sv.mark>=0&&Number.isFinite(max)&&sv.mark<=max));inp.classList.toggle('invalid',!ok);inp.setAttribute('aria-invalid',ok?'false':'true');if(!ok)inp.title=sv.status==='MARK'&&Number.isFinite(max)?'Allowed range: 0 to '+max:'Enter a mark or A / E / S / N / P';else inp.removeAttribute('title');return ok} function handleMarkInput(inp){const a=currentAssessment(),max=Number(a&&a.max_mark),raw=inp.value.trim(),sv=statusValue(raw);if(sv.valid&&sv.status==='MARK'&&Number.isFinite(max)&&sv.mark>max){inp.classList.add('r18654-overmax','invalid');inp.setAttribute('aria-invalid','true');inp.title='MARK '+raw+' IS ABOVE MAX '+max+'. Correct it before saving.';ready();liveRecalc();return}if(validate(inp))inp.dataset.lastValid=inp.value;ready();liveRecalc()}
  function payload(requireAll){const out=[];let bad=0,blank=0;$$('#r18636MxRows tr[data-student]',mount).forEach(tr=>{const inp=$('.mark-entry',tr);if(!inp)return;const sv=statusValue(inp.value.trim());if(!validate(inp)){bad++;return}if(sv.blank){blank++;return}out.push({student_id:tr.dataset.student,mark:sv.status==='MARK'?sv.mark:null,mark_status:sv.status,remarks:null})});if(bad)throw new Error('Correct invalid marks before saving.');if(requireAll&&blank)throw new Error(blank+' student(s) still have no mark/status.');return out}
  function liveRecalc(){if(!data||!currentAssessment())return;const cm=Number(data.config&&data.config.camis_max||workspace&&workspace.config&&workspace.config.camis_max||0),official=up(data.config&&data.config.official_exam_type||workspace&&workspace.config&&workspace.config.official_exam_type||''),scale=workspace&&workspace.grading_scale||[],base=new Map((data.rows||[]).map(r=>[String(r.student_id),r]));const ranks=[];$$('#r18636MxRows tr[data-student]',mount).forEach(tr=>{const r=base.get(String(tr.dataset.student)),inp=$('.mark-entry',tr);if(!r||!inp||!validate(inp))return;const sv=statusValue(inp.value.trim());let co=Number(r.other_cont_obtained||0),cx=Number(r.other_cont_max||0),cc=Number(r.other_cont_entries||0),eo=Number(r.other_exam_obtained||0),ex=Number(r.other_exam_max||0),ec=Number(r.other_exam_entries||0);const currentMax=Number(r.current_max||currentAssessment().max_mark||0),isExam=isCurrentExam()||up(r.current_type)===official;if(sv.status==='MARK'){if(isExam){eo+=sv.mark;ex+=currentMax;ec++}else{co+=sv.mark;cx+=currentMax;cc++}}const eu=cc&&cx>0&&cm?roundOfficial(co/cx*cm):null,examConv=ec&&ex>0&&cm?roundOfficial(eo/ex*cm):null,assPct=cc&&cx>0?pct(co,cx):null,examPct=ec&&ex>0?pct(eo,ex):null,total=eu!=null?(examConv!=null?eu+examConv:eu):null,totalMax=cm?(examConv!=null?cm*2:cm):null,performancePct=total!=null&&totalMax>0?pct(total,totalMax):assPct,gi=gradeInfo(performancePct,scale);const put=(k,v)=>{const x=tr.querySelector('[data-k="'+k+'"]');if(x)x.textContent=v==null?'—':v};put('asscount',cc);put('asstotal',cc&&cx>0?(co+' / '+cx):'—');put('asspct',assPct==null?'—':assPct.toFixed(2)+'%');put('eu',eu);put('examraw',ec&&ex>0?(eo+' / '+ex):'—');put('exampct',examPct==null?'—':examPct.toFixed(2)+'%');put('exconv',examConv);put('total',total);put('totalmax',totalMax);put('finalpct',performancePct==null?'—':performancePct.toFixed(2)+'%');put('grade',gi.grade||'—');put('remark',shortRemark(gi.remark||'—'));if(performancePct!=null)ranks.push({tr,p:performancePct})});ranks.sort((a,b)=>b.p-a.p);let last=null,rank=0;ranks.forEach((x,i)=>{if(last===null||x.p!==last)rank=i+1;last=x.p;const c=x.tr.querySelector('[data-k="rank"]');if(c)c.textContent=rank})}
  function state(msg,tone=''){e('r18636MxState').className='r18636-marks-status '+tone;e('r18636MxState').textContent=msg}
@@ -7195,10 +7208,10 @@ V.marksentry=function(mount,c){
 };
 
 /* ========================= MINIMAL STUDENT ROSTER SYNC ========================= */
-function parseCsvLine(line,sep){const out=[];let cur='',q=false;for(let i=0;i<line.length;i++){const ch=line[i];if(ch==='"'){if(q&&line[i+1]==='"'){cur+='"';i++}else q=!q}else if(ch===sep&&!q){out.push(cur.trim());cur=''}else cur+=ch}out.push(cur.trim());return out}
+function r18636LoadXlsxLib(){if(window.XLSX)return Promise.resolve(window.XLSX);if(window.__GSM_XLSX_LOADING__)return window.__GSM_XLSX_LOADING__;window.__GSM_XLSX_LOADING__=new Promise(function(resolve,reject){var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';s.async=true;s.onload=function(){resolve(window.XLSX)};s.onerror=function(){window.__GSM_XLSX_LOADING__=null;reject(new Error('EXCEL_READER_UNAVAILABLE'))};document.head.appendChild(s)});return window.__GSM_XLSX_LOADING__}function r18636ReadRosterFile(file){var name=String(file&&file.name||'').toLowerCase();var isExcel=/\.(xlsx|xls)$/.test(name);if(!isExcel){return new Promise(function(resolve,reject){var rd=new FileReader();rd.onload=function(){resolve(String(rd.result||''))};rd.onerror=function(){reject(new Error('FILE_READ_FAILED'))};rd.readAsText(file)})}return new Promise(function(resolve,reject){var rd=new FileReader();rd.onload=function(){resolve(rd.result)};rd.onerror=function(){reject(new Error('FILE_READ_FAILED'))};rd.readAsArrayBuffer(file)}).then(function(buf){return r18636LoadXlsxLib().then(function(XLSX){var wb=XLSX.read(buf,{type:'array'});var names=(wb&&wb.SheetNames)||[];if(!names.length)throw new Error('EMPTY_WORKBOOK');var pickCsv=null;for(var i=0;i<names.length;i++){var ws=wb.Sheets[names[i]];if(!ws)continue;var csvTry=XLSX.utils.sheet_to_csv(ws,{blankrows:false});if(!csvTry||!csvTry.trim())continue;if(pickCsv===null)pickCsv=csvTry;var firstLine=csvTry.split(/\r?\n/,1)[0]||'';if(/SDMS/i.test(firstLine)){pickCsv=csvTry;break}}if(pickCsv===null)throw new Error('EMPTY_WORKBOOK');return pickCsv})})}function parseCsvLine(line,sep){const out=[];let cur='',q=false;for(let i=0;i<line.length;i++){const ch=line[i];if(ch==='"'){if(q&&line[i+1]==='"'){cur+='"';i++}else q=!q}else if(ch===sep&&!q){out.push(cur.trim());cur=''}else cur+=ch}out.push(cur.trim());return out}
 function parseRosterText(text){const lines=String(text||'').replace(/\r/g,'').split('\n').filter(x=>x.trim()),out=[];if(!lines.length)return out;const sep=lines[0].includes('\t')?'\t':',';let start=0,heads=parseCsvLine(lines[0],sep).map(up);if(heads.some(h=>h.includes('SDMS'))){start=1}for(let i=start;i<lines.length;i++){const a=parseCsvLine(lines[i],sep);if(a.length<3)continue;const offset=a.length>=4?1:0;out.push({no:offset?a[0]:i-start+1,sdms_code:a[offset]||'',student_name:a[offset+1]||'',sex:a[offset+2]||''})}return out}
-V.r18636_student_roster_sync=function(mount){pageTitle('STUDENT LIST · CHANGE / UPLOAD / SAVE');let rows=[],source='MANUAL_STUDENT_LIST';mount.innerHTML=`<div class="r18636-panel"><h3>STUDENT LIST SYNCHRONIZATION</h3><p><b>AUTHORIZED COLUMNS ONLY:</b> NO. · SDMS CODE · STUDENT NAME · SEX. Matching uses SDMS. Existing full profiles, parents, addresses, health/special-needs, class placement and history are preserved.</p><div class="r18636-tools-row r18636-no-print"><button id="r18636RosterChange" class="r18636-btn-yellow">CHANGE LIST</button><button id="r18636RosterUpload" class="r18636-btn-blue">UPLOAD LIST</button><button id="r18636RosterPreview" class="r18636-btn-white">PREVIEW</button><button id="r18636RosterSave" class="r18636-btn-green">SAVE & SYNCHRONIZE</button><button id="r18636RosterClear" class="r18636-btn-red">CLEAR</button><input id="r18636RosterFile" type="file" accept=".csv,.txt" hidden></div><textarea id="r18636RosterText" class="r18636-roster-text" placeholder="NO.,SDMS CODE,STUDENT NAME,SEX\n1,123456,STUDENT NAME,M\n2,123457,STUDENT NAME,F"></textarea><div id="r18636RosterState" class="r18636-marks-status">Paste a list or upload CSV/TXT, then PREVIEW before SAVE & SYNCHRONIZE.</div></div><div class="r18636-table-wrap"><table><thead><tr><th class="r18636-col-no">NO.</th><th class="r18636-col-sdms">SDMS CODE</th><th class="r18636-col-name">STUDENT NAME</th><th class="r18636-col-sex">SEX</th></tr></thead><tbody id="r18636RosterRows"><tr><td colspan="4">No preview yet.</td></tr></tbody></table></div>`;const e=id=>$('#'+id,mount);function draw(){rows=parseRosterText(e('r18636RosterText').value);e('r18636RosterRows').innerHTML=rows.length?rows.map((r,i)=>'<tr><td>'+esc(r.no||i+1)+'</td><td><b>'+esc(r.sdms_code)+'</b></td><td class="name">'+esc(r.student_name)+'</td><td>'+esc(mf(r.sex))+'</td></tr>').join(''):'<tr><td colspan="4">No valid rows found.</td></tr>';e('r18636RosterState').textContent=rows.length+' ROW(S) READY FOR VALIDATION. Full profiles will not be overwritten.'}
- e('r18636RosterChange').onclick=()=>{e('r18636RosterText').focus();e('r18636RosterText').select()};e('r18636RosterUpload').onclick=()=>e('r18636RosterFile').click();e('r18636RosterFile').onchange=()=>{const f=e('r18636RosterFile').files[0];if(!f)return;source=f.name;const rd=new FileReader();rd.onload=()=>{e('r18636RosterText').value=String(rd.result||'');draw()};rd.readAsText(f)};e('r18636RosterPreview').onclick=draw;e('r18636RosterClear').onclick=()=>{rows=[];e('r18636RosterText').value='';e('r18636RosterRows').innerHTML='<tr><td colspan="4">No preview yet.</td></tr>';e('r18636RosterState').textContent='List cleared.'};e('r18636RosterSave').onclick=async()=>{draw();if(!rows.length)return;e('r18636RosterSave').disabled=true;e('r18636RosterState').textContent='SYNCHRONIZING BY SDMS…';try{const d=await rpc('r18636_sync_student_roster',{p_rows:rows.map(r=>({sdms_code:r.sdms_code,student_name:r.student_name,sex:mf(r.sex)})),p_source_file:source});e('r18636RosterState').textContent='DONE · '+d.processed+' processed · '+d.updated+' updated · '+d.created+' created · '+d.unchanged+' unchanged · '+d.invalid+' invalid. Existing full profiles and enrolments preserved.';toast('Student list synchronized.')}catch(x){e('r18636RosterState').classList.add('bad');e('r18636RosterState').textContent=err(x)}finally{e('r18636RosterSave').disabled=false}}
+V.r18636_student_roster_sync=function(mount){pageTitle('STUDENT LIST · CHANGE / UPLOAD / SAVE');let rows=[],source='MANUAL_STUDENT_LIST';mount.innerHTML=`<div class="r18636-panel"><h3>STUDENT LIST SYNCHRONIZATION</h3><p><b>AUTHORIZED COLUMNS ONLY:</b> NO. · SDMS CODE · STUDENT NAME · SEX. Matching uses SDMS. Existing full profiles, parents, addresses, health/special-needs, class placement and history are preserved. Accepted files: CSV, TXT, XLSX or XLS — the first matching sheet/column set is used automatically.</p><div class="r18636-tools-row r18636-no-print"><button id="r18636RosterChange" class="r18636-btn-yellow">CHANGE LIST</button><button id="r18636RosterUpload" class="r18636-btn-blue">UPLOAD LIST</button><button id="r18636RosterPreview" class="r18636-btn-white">PREVIEW</button><button id="r18636RosterSave" class="r18636-btn-green">SAVE & SYNCHRONIZE</button><button id="r18636RosterClear" class="r18636-btn-red">CLEAR</button><input id="r18636RosterFile" type="file" accept=".csv,.txt,.xlsx,.xls" hidden></div><textarea id="r18636RosterText" class="r18636-roster-text" placeholder="NO.,SDMS CODE,STUDENT NAME,SEX\n1,123456,STUDENT NAME,M\n2,123457,STUDENT NAME,F"></textarea><div id="r18636RosterState" class="r18636-marks-status">Paste a list or upload CSV, TXT or Excel (.xlsx/.xls), then PREVIEW before SAVE & SYNCHRONIZE.</div></div><div class="r18636-table-wrap"><table><thead><tr><th class="r18636-col-no">NO.</th><th class="r18636-col-sdms">SDMS CODE</th><th class="r18636-col-name">STUDENT NAME</th><th class="r18636-col-sex">SEX</th></tr></thead><tbody id="r18636RosterRows"><tr><td colspan="4">No preview yet.</td></tr></tbody></table></div>`;const e=id=>$('#'+id,mount);function draw(){rows=parseRosterText(e('r18636RosterText').value);e('r18636RosterRows').innerHTML=rows.length?rows.map((r,i)=>'<tr><td>'+esc(r.no||i+1)+'</td><td><b>'+esc(r.sdms_code)+'</b></td><td class="name">'+esc(r.student_name)+'</td><td>'+esc(mf(r.sex))+'</td></tr>').join(''):'<tr><td colspan="4">No valid rows found.</td></tr>';e('r18636RosterState').classList.remove('bad');e('r18636RosterState').textContent=rows.length+' ROW(S) READY FOR VALIDATION. Full profiles will not be overwritten.'}
+ e('r18636RosterChange').onclick=()=>{e('r18636RosterText').focus();e('r18636RosterText').select()};e('r18636RosterUpload').onclick=()=>e('r18636RosterFile').click();e('r18636RosterFile').onchange=()=>{const f=e('r18636RosterFile').files[0];if(!f)return;const nm=String(f.name||'').toLowerCase();if(!/\.(csv|txt|xlsx|xls)$/.test(nm)){e('r18636RosterState').classList.add('bad');e('r18636RosterState').textContent='UNSUPPORTED FILE TYPE · UPLOAD A .CSV, .TXT, .XLSX OR .XLS FILE.';e('r18636RosterFile').value='';return}source=f.name;e('r18636RosterState').classList.remove('bad');e('r18636RosterState').textContent=/\.(xlsx|xls)$/.test(nm)?'READING EXCEL FILE…':'READING FILE…';r18636ReadRosterFile(f).then(text=>{e('r18636RosterText').value=text;draw();e('r18636RosterFile').value=''}).catch(err=>{const m=String(err&&err.message||err||'');e('r18636RosterState').classList.add('bad');e('r18636RosterState').textContent=/EXCEL_READER_UNAVAILABLE/.test(m)?'COULD NOT LOAD THE EXCEL READER · CHECK YOUR INTERNET CONNECTION, THEN TRY AGAIN, OR SAVE THE FILE AS CSV AND UPLOAD THAT INSTEAD.':(/EMPTY_WORKBOOK/.test(m)?'THIS EXCEL FILE HAS NO READABLE ROWS ON ITS FIRST SHEET. CHECK THE FILE AND TRY AGAIN.':'COULD NOT READ THIS FILE · '+m+'. SAVE THE FILE AS CSV AND TRY AGAIN, OR PASTE THE LIST DIRECTLY.');e('r18636RosterFile').value=''})};e('r18636RosterPreview').onclick=draw;e('r18636RosterClear').onclick=()=>{rows=[];e('r18636RosterText').value='';e('r18636RosterRows').innerHTML='<tr><td colspan="4">No preview yet.</td></tr>';e('r18636RosterState').textContent='List cleared.'};e('r18636RosterSave').onclick=async()=>{draw();if(!rows.length)return;e('r18636RosterSave').disabled=true;e('r18636RosterState').textContent='SYNCHRONIZING BY SDMS…';try{const d=await rpc('r18636_sync_student_roster',{p_rows:rows.map(r=>({sdms_code:r.sdms_code,student_name:r.student_name,sex:mf(r.sex)})),p_source_file:source});e('r18636RosterState').textContent='DONE · '+d.processed+' processed · '+d.updated+' updated · '+d.created+' created · '+d.unchanged+' unchanged · '+d.invalid+' invalid. Existing full profiles and enrolments preserved.';toast('Student list synchronized.')}catch(x){e('r18636RosterState').classList.add('bad');e('r18636RosterState').textContent=err(x)}finally{e('r18636RosterSave').disabled=false}}
 };
 
 /* ========================= STAFF MEETING / TRAINING ATTENDANCE LIST ========================= */
@@ -7650,7 +7663,14 @@ async function buildReportPanel(shell,routeId,title){
  const sel=bar.querySelector('#r39ReportSelect'),periodSel=bar.querySelector('#r39ReportPeriod'),reg=bar.querySelector('#r39RegistryState');
  let reports=[];
  try{reports=await cachedReports(routeId)}
- catch(e){reg.className='r18639-registry-state bad';reg.textContent='REPORT OPTIONS COULD NOT LOAD: '+String(e.message||e);sel.innerHTML='<option>ACTIVITY / SERVICE</option>';return}
+ catch(e){
+   reg.className='r18639-registry-state bad';
+   reg.innerHTML='COULD NOT REACH THE REPORT SERVICE · '+esc(String(e.message||e))+'. CHECK YOUR INTERNET CONNECTION, THEN RETRY.'+'<button type="button" class="r18638-btn white r18639-retry" style="margin-left:8px">RETRY</button>';
+   const retryBtn=reg.querySelector('.r18639-retry');
+   if(retryBtn)retryBtn.onclick=()=>buildReportPanel(shell,routeId,title);
+   sel.innerHTML='<option>ACTIVITY / SERVICE</option>';
+   return
+ }
  const views=[{report_code:'ACTIVITY',report_name:'ACTIVITY / SERVICE',report_kind:'ACTIVITY',default_period:'DAILY',supported_periods:allPeriods}].concat(reports);
  sel.innerHTML=views.map((r,i)=>'<option value="'+i+'">'+esc(up(r.report_name))+'</option>').join('');sel.disabled=false;
  reg.className='r18639-registry-state good';reg.textContent=reports.length+' REPORT / ANALYSIS OPTION(S) READY · SELECT FROM THE DROP-DOWN.';
@@ -7865,7 +7885,7 @@ V.r18660_student_move=async function(host){
  host.querySelectorAll('.r18660-mode').forEach(b=>b.onclick=()=>{mode=b.dataset.mode;if(mode==='ALL')applyAll();else if(mode==='RANGE')applyRange();else{syncSelectionMode();draw()}});el('r60ApplyRange').onclick=applyRange;el('r60Clear').onclick=()=>{mode='CUSTOM';selected.clear();syncSelectionMode();draw()};el('r60Move').onclick=moveSelected;syncSelectionMode();
 };
 
-function genericActivity(host,routeId,title){host.innerHTML='<div class="r18638-report-status"><b>'+esc(title)+'</b><br>Operational data is connected to the canonical service source. Use the embedded VIEW / REPORT drop-down for REPORT 1, REPORT 2 and ANALYSIS live evidence.</div>'}
+function genericActivity(host,routeId,title){host.innerHTML='<div class="r18638-report-status" id="r18641GenericNotice"><b>'+esc(title)+'</b><br>This screen has no separate data-entry form. Its records are shown through the <b>VIEW / REPORT</b> menu above.<br>Pick <b>REPORT 1</b>, <b>REPORT 2</b> or <b>ANALYSIS</b> from that drop-down, choose a period, then press <b>APPLY / REFRESH</b> to see the live evidence.<div class="r18638-report-actions r18638-no-print" style="margin-top:10px"><button type="button" class="r18638-btn white" id="r18641JumpReport">GO TO VIEW / REPORT ↑</button></div></div>';const jump=host.querySelector('#r18641JumpReport');if(jump)jump.onclick=()=>{const shell=host.closest('.r18638-service-shell');const sel=shell&&shell.querySelector('#r39ReportSelect');if(sel){sel.scrollIntoView({behavior:'smooth',block:'center'});sel.focus();}}}
 
 /* -------------------------- ROLE / MODULE VIEWS -------------------------- */
 V.r18638_headteacher=(m,c)=>roleCenter(m,c,'HEADTEACHER');V.r18638_dos=(m,c)=>roleCenter(m,c,'DOS');V.r18638_dod=(m,c)=>roleCenter(m,c,'DOD');V.r18638_secretary=(m,c)=>roleCenter(m,c,'SECRETARY');V.r18638_bursar=(m,c)=>roleCenter(m,c,'BURSAR');V.r18638_librarian=(m,c)=>roleCenter(m,c,'LIBRARIAN');
@@ -8947,4 +8967,612 @@ try{document.documentElement.setAttribute('data-gsm-release','R186.79');document
  window.GSM_R18680={release:'R186.80',strictRememberMe:true,loginSafePasswordReset:true,canonicalDashboard:true,directTimetableColors:true,compactMarksEntry:true,noDuplicateVisibleRouteTitle:true};
  try{document.documentElement.setAttribute('data-gsm-release','R186.80');document.documentElement.setAttribute('data-gsm-component-release','R186.80')}catch(_){ }
  setTimeout(dedupe,120);
+})();
+
+/* ===== R186.89 DATA RESET TOOLS — permanent delete for marks/attendance/students, SUPER_ADMIN only ===== */
+(function(){
+'use strict';
+const V=window.GSM_VIEWS;
+function q(s,r){return (r||document).querySelector(s)}
+function rpc(n,a){if(window.GSM_LIVE&&typeof window.GSM_LIVE.rpc==='function')return window.GSM_LIVE.rpc(n,a||{});return Promise.reject(new Error('LIVE SUPABASE CONNECTION REQUIRED'))}
+const prevSystem=V.r133_system;
+V.r186_reset_tools=function(mount,ctx){
+ mount.innerHTML=`<div class="r132-card" style="border:2px solid #c62828;padding:16px">
+  <h2 style="color:#c62828;margin:0 0 4px">DATA RESET TOOLS</h2>
+  <p style="margin:0 0 16px">Each button below <b>permanently deletes</b> real data from the database. There is no undo. Only SUPER_ADMIN can run these. Type <code>DELETE</code> in the box next to a button to enable it.</p>
+  <div id="r186ResetRows" style="display:flex;flex-direction:column;gap:12px;max-width:640px"></div>
+  <div id="r186ResetLog" style="margin-top:16px;font-family:monospace;font-size:12px;white-space:pre-wrap;background:#f5f5f5;border:1px solid #ccc;padding:10px;border-radius:6px;min-height:40px">Ready.</div>
+ </div>`;
+ const rows=[
+  {id:'marks',label:'DELETE ALL MARKS & ASSESSMENTS',rpc:'r186_reset_delete_marks'},
+  {id:'attendance',label:'DELETE ALL CLASS + SUBJECT ATTENDANCE',rpc:'r186_reset_delete_attendance'},
+  {id:'students',label:'DELETE ALL STUDENTS (full profile, marks, attendance, everything linked to them)',rpc:'r186_reset_delete_students'},
+  {id:'full',label:'FULL RESET — MARKS + ATTENDANCE + STUDENTS (everything above at once)',rpc:'r186_reset_full_profile'}
+ ];
+ const wrap=q('#r186ResetRows',mount);
+ rows.forEach(r=>{
+  const row=document.createElement('div');
+  row.style.cssText='display:flex;gap:8px;align-items:center;border:1px solid #e0b4b4;border-radius:8px;padding:10px;background:#fff6f6';
+  row.innerHTML=`<b style="flex:1">${r.label}</b><input type="text" placeholder="type DELETE" style="width:120px;border:1px solid #c62828;border-radius:6px;padding:6px" id="r186confirm_${r.id}"><button type="button" disabled style="background:#c62828;color:#fff;border:0;border-radius:6px;padding:8px 14px;font-weight:800;cursor:not-allowed" id="r186btn_${r.id}">DELETE</button>`;
+  wrap.appendChild(row);
+  const inp=q('#r186confirm_'+r.id,mount),btn=q('#r186btn_'+r.id,mount);
+  inp.addEventListener('input',()=>{const ok=inp.value.trim()==='DELETE';btn.disabled=!ok;btn.style.cursor=ok?'pointer':'not-allowed';btn.style.opacity=ok?'1':'.6'});
+  btn.addEventListener('click',async()=>{
+   if(!confirm('FINAL CONFIRMATION\n\n'+r.label+'\n\nThis cannot be undone. Continue?'))return;
+   btn.disabled=true;btn.textContent='WORKING…';
+   const log=q('#r186ResetLog',mount);
+   log.textContent='Running '+r.rpc+' ...';
+   try{
+    const result=await rpc(r.rpc,{});
+    log.textContent='DONE — '+r.rpc+'\n'+JSON.stringify(result,null,2);
+    inp.value='';btn.textContent='DELETE';btn.disabled=true;btn.style.cursor='not-allowed';btn.style.opacity='.6';
+   }catch(e){
+    log.textContent='ERROR — '+r.rpc+'\n'+(e&&e.message?e.message:String(e));
+    btn.disabled=false;btn.textContent='DELETE';
+   }
+  });
+ });
+};
+V.r133_system=function(mount,ctx){
+ prevSystem(mount,ctx);
+ let tries=0;
+ const tryInject=()=>{
+  tries++;
+  const grid=q('.r132-card-grid',mount),viewer=q('#r132Viewer',mount);
+  if(!grid||!viewer){if(tries<20)setTimeout(tryInject,150);return}
+  if(q('[data-r186-reset-card]',mount))return;
+  const card=document.createElement('article');
+  card.className='r132-card';
+  card.style.borderColor='#c62828';
+  card.setAttribute('data-r186-reset-card','1');
+  card.innerHTML='<div><h3 style="color:#c62828">⚠ DATA RESET TOOLS</h3><p>Permanently delete marks, attendance, or students to start fresh with real data. SUPER_ADMIN only. Cannot be undone.</p></div><span style="color:#c62828;font-weight:800">OPEN TOOL</span>';
+  card.onclick=()=>{V.r186_reset_tools(viewer,ctx);viewer.scrollIntoView({behavior:'smooth',block:'start'})};
+  grid.appendChild(card);
+ };
+ setTimeout(tryInject,50);
+};
+})();
+
+/* ===== R186.91 DISCIPLINE CASES — real form + table, wired to existing r126_save_discipline_case + new r186_discipline_cases_list ===== */
+(function(){
+'use strict';
+const V=window.GSM_VIEWS;
+function q(s,r){return (r||document).querySelector(s)}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function rpc(n,a){if(window.GSM_LIVE&&typeof window.GSM_LIVE.rpc==='function')return window.GSM_LIVE.rpc(n,a||{});return Promise.reject(new Error('LIVE SUPABASE CONNECTION REQUIRED'))}
+
+V.r186_discipline_cases=function(mount,ctx){
+ mount.innerHTML=`<div class="r132-card" style="padding:16px">
+  <h2 style="margin:0 0 4px">DISCIPLINE CASES</h2>
+  <p style="margin:0 0 16px">Record a new case, or review existing ones below.</p>
+  <div id="r186dcForm" style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;border:1px solid #dce4ee;border-radius:8px;padding:14px;margin-bottom:16px">
+   <div><label style="display:block;font-size:12px;font-weight:700">SDMS CODE *</label><input id="r186dcSdms" placeholder="e.g. 280902200108" style="padding:8px;border:1px solid #ccc;border-radius:6px;width:160px"></div>
+   <div><label style="display:block;font-size:12px;font-weight:700">STUDENT</label><div id="r186dcName" style="padding:8px;min-width:160px;color:#65758a">— type SDMS then Tab —</div></div>
+   <div><label style="display:block;font-size:12px;font-weight:700">CASE DATE *</label><input type="date" id="r186dcDate" style="padding:8px;border:1px solid #ccc;border-radius:6px"></div>
+   <div><label style="display:block;font-size:12px;font-weight:700">CATEGORY *</label><input id="r186dcCat" placeholder="e.g. FIGHTING" style="padding:8px;border:1px solid #ccc;border-radius:6px;width:160px"></div>
+   <div><label style="display:block;font-size:12px;font-weight:700">SEVERITY *</label><select id="r186dcSev" style="padding:8px;border:1px solid #ccc;border-radius:6px"><option value="MINOR">MINOR</option><option value="MODERATE">MODERATE</option><option value="SERIOUS">SERIOUS</option><option value="CRITICAL">CRITICAL</option></select></div>
+   <div style="flex:1;min-width:220px"><label style="display:block;font-size:12px;font-weight:700">DESCRIPTION</label><input id="r186dcDesc" style="padding:8px;border:1px solid #ccc;border-radius:6px;width:100%"></div>
+   <div style="flex:1;min-width:220px"><label style="display:block;font-size:12px;font-weight:700">ACTION TAKEN</label><input id="r186dcAction" style="padding:8px;border:1px solid #ccc;border-radius:6px;width:100%"></div>
+   <div><label style="display:block;font-size:12px;font-weight:700">FOLLOW-UP DATE</label><input type="date" id="r186dcFollow" style="padding:8px;border:1px solid #ccc;border-radius:6px"></div>
+   <div><label style="display:block;font-size:12px;font-weight:700"><input type="checkbox" id="r186dcParent"> PARENT CONTACTED</label></div>
+   <div><label style="display:block;font-size:12px;font-weight:700">STATUS</label><select id="r186dcStatus" style="padding:8px;border:1px solid #ccc;border-radius:6px"><option value="OPEN">OPEN</option><option value="FOLLOW_UP">FOLLOW_UP</option><option value="RESOLVED">RESOLVED</option><option value="REFERRED">REFERRED</option><option value="CLOSED">CLOSED</option></select></div>
+   <div><button type="button" id="r186dcSave" style="background:#1264a3;color:#fff;border:0;border-radius:6px;padding:10px 18px;font-weight:800;cursor:pointer">SAVE CASE</button></div>
+  </div>
+  <div id="r186dcMsg" style="margin-bottom:10px;font-size:13px"></div>
+  <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px" id="r186dcTable">
+   <thead><tr style="background:#092b52;color:#fff"><th style="padding:8px;text-align:left">DATE</th><th style="padding:8px;text-align:left">SDMS</th><th style="padding:8px;text-align:left">STUDENT</th><th style="padding:8px;text-align:left">CLASS</th><th style="padding:8px;text-align:left">CATEGORY</th><th style="padding:8px;text-align:left">SEVERITY</th><th style="padding:8px;text-align:left">STATUS</th><th style="padding:8px;text-align:left">ACTION TAKEN</th></tr></thead>
+   <tbody><tr><td colspan="8" style="padding:14px;text-align:center;color:#65758a">Loading…</td></tr></tbody>
+  </table></div>
+ </div>`;
+ let studentId=null;
+ const sdmsInp=q('#r186dcSdms',mount),nameBox=q('#r186dcName',mount);
+ sdmsInp.addEventListener('blur',async()=>{
+  const code=sdmsInp.value.trim();
+  if(!code){nameBox.textContent='— type SDMS then Tab —';studentId=null;return}
+  nameBox.textContent='Looking up…';
+  try{
+   const d=await rpc('r18677_student_identity_details_by_sdms',{p_sdms_code:code});
+   if(d&&d.student_id){studentId=d.student_id;nameBox.textContent=(d.full_name||'')+' — '+(d.class_code||'')}
+   else{studentId=null;nameBox.textContent='NOT FOUND — check SDMS code';nameBox.style.color='#c62828'}
+  }catch(e){studentId=null;nameBox.textContent='LOOKUP FAILED: '+(e.message||e);nameBox.style.color='#c62828'}
+ });
+ async function loadTable(){
+  const tbody=q('#r186dcTable tbody',mount);
+  try{
+   const rows=await rpc('r186_discipline_cases_list',{});
+   if(!rows||!rows.length){tbody.innerHTML='<tr><td colspan="8" style="padding:14px;text-align:center;color:#65758a">No cases recorded yet.</td></tr>';return}
+   tbody.innerHTML=rows.map(r=>'<tr style="border-bottom:1px solid #eee">'+
+    '<td style="padding:8px">'+esc(r.case_date)+'</td>'+
+    '<td style="padding:8px">'+esc(r.sdms_code)+'</td>'+
+    '<td style="padding:8px">'+esc(r.student_name)+'</td>'+
+    '<td style="padding:8px">'+esc(r.class_code)+'</td>'+
+    '<td style="padding:8px">'+esc(r.offence_category)+'</td>'+
+    '<td style="padding:8px">'+esc(r.severity)+'</td>'+
+    '<td style="padding:8px">'+esc(r.status)+'</td>'+
+    '<td style="padding:8px">'+esc(r.action_taken)+'</td></tr>').join('');
+  }catch(e){tbody.innerHTML='<tr><td colspan="8" style="padding:14px;color:#c62828">FAILED TO LOAD: '+esc(e.message||e)+'</td></tr>'}
+ }
+ q('#r186dcSave',mount).addEventListener('click',async()=>{
+  const msg=q('#r186dcMsg',mount);
+  if(!studentId){msg.style.color='#c62828';msg.textContent='Enter a valid SDMS code first.';return}
+  const caseDate=q('#r186dcDate',mount).value,cat=q('#r186dcCat',mount).value.trim(),sev=q('#r186dcSev',mount).value;
+  if(!caseDate||!cat){msg.style.color='#c62828';msg.textContent='Case date and category are required.';return}
+  msg.style.color='#65758a';msg.textContent='Saving…';
+  try{
+   await rpc('r126_save_discipline_case',{
+    p_student_id:studentId,p_category:cat,p_severity:sev,
+    p_description:q('#r186dcDesc',mount).value.trim()||null,
+    p_action_taken:q('#r186dcAction',mount).value.trim()||null,
+    p_follow_up_date:q('#r186dcFollow',mount).value||null,
+    p_parent_contacted:q('#r186dcParent',mount).checked,
+    p_status:q('#r186dcStatus',mount).value,
+    p_case_date:caseDate
+   });
+   msg.style.color='#0f7a4a';msg.textContent='SAVED.';
+   ['r186dcSdms','r186dcCat','r186dcDesc','r186dcAction','r186dcFollow'].forEach(id=>q('#'+id,mount).value='');
+   q('#r186dcParent',mount).checked=false;nameBox.textContent='— type SDMS then Tab —';nameBox.style.color='';studentId=null;
+   loadTable();
+  }catch(e){msg.style.color='#c62828';msg.textContent='SAVE FAILED: '+(e.message||e)}
+ });
+ loadTable();
+};
+if(typeof V.r127_operational==='function'){
+ const prevOperational=V.r127_operational;
+ V.r127_operational=function(m,c,p){
+  const k=String((p&&(p.key||p.serviceKey))||'').toUpperCase();
+  if(k==='DOD_DISCIPLINE')return V.r186_discipline_cases(m,c);
+  return prevOperational(m,c,p);
+ };
+}
+})();
+
+/* ===== R186.94 GENERIC DOD ACTIVITY FORMS — build out all remaining stub services + card colors ===== */
+(function(){
+'use strict';
+const V=window.GSM_VIEWS;
+function q(s,r){return (r||document).querySelector(s)}
+function qa(s,r){return Array.from((r||document).querySelectorAll(s))}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function rpc(n,a){if(window.GSM_LIVE&&typeof window.GSM_LIVE.rpc==='function')return window.GSM_LIVE.rpc(n,a||{});return Promise.reject(new Error('LIVE SUPABASE CONNECTION REQUIRED'))}
+
+// field types: sdms | date | text | select | checkbox | number | time
+const CFG={
+ DOD_ABSENTEE:{title:'ABSENTEES & FOLLOW-UP',student:true,color:'#c62828',fields:[
+   {k:'date',l:'FOLLOW-UP DATE',t:'date'},{k:'type1',l:'ABSENCE TYPE',t:'text'},{k:'reason',l:'REASON',t:'text',wide:1},
+   {k:'bool1',l:'PARENT CONTACTED',t:'checkbox'},{k:'text2',l:'CONTACT METHOD',t:'text'},{k:'action_taken',l:'ACTION TAKEN',t:'text',wide:1},
+   {k:'date2',l:'NEXT FOLLOW-UP',t:'date'},{k:'status',l:'STATUS',t:'select',opts:['OPEN','RESOLVED','REFERRED','CLOSED']}],
+  cols:[['follow_up_date','DATE'],['sdms_code','SDMS'],['student_name','STUDENT'],['absence_type','TYPE'],['reason','REASON'],['status','STATUS']]},
+ DOD_GUIDANCE:{title:'GUIDANCE & COUNSELLING',student:false,color:'#1264a3',fields:[
+   {k:'date',l:'SESSION DATE',t:'date'},{k:'type1',l:'SESSION TYPE',t:'select',opts:['INDIVIDUAL','GROUP','MENTORSHIP']},
+   {k:'text1',l:'ISSUE CATEGORY',t:'text'},{k:'reason',l:'REASON',t:'text',wide:1},{k:'action_taken',l:'ACTION TAKEN',t:'text',wide:1},
+   {k:'text2',l:'REFERRAL',t:'text'},{k:'date2',l:'FOLLOW-UP DATE',t:'date'},{k:'outcome',l:'OUTCOME',t:'text'},
+   {k:'status',l:'STATUS',t:'select',opts:['OPEN','FOLLOW_UP','CLOSED','REFERRED']}],
+  cols:[['session_date','DATE'],['student_name','STUDENT'],['session_type','TYPE'],['issue_category','ISSUE'],['status','STATUS']]},
+ DOD_WELFARE:{title:'STUDENT WELFARE',student:true,color:'#0f7a4a',fields:[
+   {k:'date',l:'CONTACT DATE',t:'date'},{k:'type1',l:'CONTACT TYPE',t:'text'},{k:'reason',l:'CONCERN',t:'text',wide:1},
+   {k:'text1',l:'PARENT CONTACT',t:'text'},{k:'text2',l:'DISCUSSION',t:'text',wide:1},{k:'action_taken',l:'COMMITMENT',t:'text'},
+   {k:'date2',l:'NEXT FOLLOW-UP',t:'date'},{k:'status',l:'STATUS',t:'select',opts:['OPEN','FOLLOW_UP','RESOLVED','REFERRED','CLOSED']}],
+  cols:[['contact_date','DATE'],['sdms_code','SDMS'],['student_name','STUDENT'],['concern','CONCERN'],['status','STATUS']]},
+ DOD_PERMISSIONS:{title:'STUDENT PERMISSIONS / MOVEMENT',student:true,color:'#9a6700',fields:[
+   {k:'date',l:'PERMISSION DATE',t:'date'},{k:'type1',l:'TYPE',t:'select',opts:['LEAVE_SCHOOL','LATE_ARRIVAL','EARLY_DEPARTURE','MEDICAL','FAMILY','OTHER']},
+   {k:'reason',l:'REASON',t:'text',wide:1},{k:'text1',l:'DESTINATION',t:'text'},{k:'time1',l:'OUT TIME',t:'time'},{k:'time2',l:'EXPECTED RETURN',t:'time'},
+   {k:'bool1',l:'PARENT CONTACTED',t:'checkbox'},{k:'status',l:'STATUS',t:'select',opts:['REQUESTED','APPROVED','REJECTED','RETURNED','CANCELLED']}],
+  cols:[['permission_date','DATE'],['sdms_code','SDMS'],['student_name','STUDENT'],['permission_type','TYPE'],['destination','DESTINATION'],['status','STATUS']]},
+ DOD_SAFETY:{title:'SAFETY / INCIDENTS',student:false,color:'#c62828',fields:[
+   {k:'date',l:'INCIDENT DATE',t:'date'},{k:'text1',l:'LOCATION',t:'text'},{k:'type1',l:'INCIDENT TYPE',t:'text'},
+   {k:'reason',l:'DESCRIPTION',t:'text',wide:1},{k:'action_taken',l:'ACTION TAKEN',t:'text',wide:1},{k:'text2',l:'REFERRED TO',t:'text'},
+   {k:'status',l:'STATUS',t:'select',opts:['OPEN','FOLLOW_UP','CLOSED','REFERRED']}],
+  cols:[['incident_date','DATE'],['location','LOCATION'],['incident_type','TYPE'],['status','STATUS']]},
+ DOD_HYGIENE:{title:'HYGIENE / SANITATION',student:false,color:'#0f7a4a',fields:[
+   {k:'date',l:'INSPECTION DATE',t:'date'},{k:'text1',l:'AREA',t:'text'},{k:'type1',l:'CLEANLINESS',t:'select',opts:['GOOD','ACCEPTABLE','POOR','CRITICAL']},
+   {k:'type2',l:'SAFETY STATUS',t:'select',opts:['SAFE','ATTENTION','UNSAFE','CRITICAL']},{k:'reason',l:'ISSUE FOUND',t:'text',wide:1},
+   {k:'action_taken',l:'CORRECTIVE ACTION',t:'text',wide:1},{k:'text2',l:'RESPONSIBLE PERSON',t:'text'},{k:'date2',l:'DEADLINE',t:'date'},
+   {k:'status',l:'FOLLOW-UP STATUS',t:'select',opts:['PENDING','IN_PROGRESS','COMPLETED','NOT_REQUIRED']}],
+  cols:[['inspection_date','DATE'],['area','AREA'],['cleanliness_status','CLEANLINESS'],['safety_status','SAFETY'],['follow_up_status','STATUS']]},
+ DOD_FEEDING:{title:'FEEDING INSPECTIONS',student:false,color:'#9a6700',fields:[
+   {k:'date',l:'INSPECTION DATE',t:'date'},{k:'text1',l:'AREA',t:'text'},{k:'type1',l:'HYGIENE STATUS',t:'text'},
+   {k:'type2',l:'FOOD QUALITY',t:'text'},{k:'reason',l:'ISSUE FOUND',t:'text',wide:1},{k:'action_taken',l:'CORRECTIVE ACTION',t:'text',wide:1},
+   {k:'text2',l:'RESPONSIBLE PERSON',t:'text'},{k:'date2',l:'DEADLINE',t:'date'},
+   {k:'status',l:'FOLLOW-UP STATUS',t:'select',opts:['PENDING','IN_PROGRESS','RESOLVED','CLOSED']}],
+  cols:[['inspection_date','DATE'],['area','AREA'],['hygiene_status','HYGIENE'],['food_quality_status','FOOD QUALITY'],['follow_up_status','STATUS']]},
+ DOD_LEADERS:{title:'STUDENT LEADERS',student:true,color:'#1264a3',fields:[
+   {k:'text1',l:'POSITION',t:'text'},{k:'date',l:'START DATE',t:'date'},{k:'date2',l:'END DATE',t:'date'},
+   {k:'status',l:'STATUS',t:'select',opts:['ACTIVE','INACTIVE','COMPLETED','REMOVED']}],
+  cols:[['sdms_code','SDMS'],['student_name','STUDENT'],['position','POSITION'],['start_date','START'],['status','STATUS']]},
+ DOD_MEDICAL:{title:'MEDICAL / SICK BAY',student:true,color:'#c62828',fields:[
+   {k:'date',l:'RECORD DATE',t:'date'},{k:'type1',l:'CONDITION TYPE',t:'text'},{k:'reason',l:'COMPLAINT',t:'text',wide:1},
+   {k:'action_taken',l:'ACTION TAKEN',t:'text',wide:1},{k:'text2',l:'REFERRED TO',t:'text'},{k:'bool1',l:'EMERGENCY CONTACTED',t:'checkbox'},
+   {k:'date2',l:'FOLLOW-UP DATE',t:'date'},{k:'status',l:'STATUS',t:'select',opts:['OPEN','FOLLOW_UP','CLOSED','REFERRED']}],
+  cols:[['record_date','DATE'],['sdms_code','SDMS'],['student_name','STUDENT'],['condition_type','CONDITION'],['status','STATUS']]},
+ DOD_SPECIAL_NEEDS:{title:'SPECIAL NEEDS',student:true,color:'#0f7a4a',fields:[
+   {k:'type1',l:'SPECIAL NEED TYPE',t:'text'},{k:'text1',l:'IMPAIRMENT TYPE',t:'text'},{k:'text2',l:'OTHER DISEASE',t:'text'},
+   {k:'type2',l:'SEVERITY',t:'text'},{k:'reason',l:'SUPPORT PLAN',t:'text',wide:1},{k:'action_taken',l:'ASSISTIVE DEVICE',t:'text'},
+   {k:'outcome',l:'ACCOMMODATION',t:'text',wide:1},{k:'date',l:'LAST REVIEW',t:'date'},{k:'date2',l:'NEXT REVIEW',t:'date'},
+   {k:'status',l:'STATUS',t:'text'}],
+  cols:[['sdms_code','SDMS'],['student_name','STUDENT'],['special_need_type','TYPE'],['severity','SEVERITY'],['next_review_date','NEXT REVIEW']]},
+ DOD_VISITORS:{title:'VISITORS & GATE',student:false,color:'#9a6700',fields:[
+   {k:'date',l:'VISIT DATE',t:'date'},{k:'text1',l:'VISITOR NAME',t:'text'},{k:'text2',l:'PHONE',t:'text'},
+   {k:'type1',l:'ID NUMBER',t:'text'},{k:'reason',l:'PURPOSE',t:'text',wide:1},{k:'action_taken',l:'PERSON TO VISIT',t:'text'},
+   {k:'time1',l:'TIME IN',t:'time'},{k:'status',l:'STATUS',t:'select',opts:['IN','OUT','DENIED','CANCELLED']}],
+  cols:[['visit_date','DATE'],['visitor_name','VISITOR'],['purpose','PURPOSE'],['status','STATUS']]},
+ DOD_REWARDS:{title:'BEHAVIOUR REWARDS',student:true,color:'#0f7a4a',fields:[
+   {k:'date',l:'REWARD DATE',t:'date'},{k:'type1',l:'REWARD TYPE',t:'text'},{k:'reason',l:'REASON',t:'text',wide:1},
+   {k:'num1',l:'POINTS',t:'number'}],
+  cols:[['reward_date','DATE'],['sdms_code','SDMS'],['student_name','STUDENT'],['reward_type','TYPE'],['points','POINTS']]},
+ DOD_DOCUMENTS:{title:'DOCUMENTS & EVIDENCE',student:false,color:'#1264a3',fields:[
+   {k:'type1',l:'CATEGORY',t:'text'},{k:'text1',l:'TITLE',t:'text',wide:1},{k:'text2',l:'REFERENCE NO',t:'text'},
+   {k:'date',l:'DOCUMENT DATE',t:'date'},{k:'type2',l:'CONFIDENTIALITY',t:'select',opts:['PUBLIC','INTERNAL','RESTRICTED','CONFIDENTIAL']},
+   {k:'reason',l:'FILE URL',t:'text',wide:1},{k:'action_taken',l:'NOTES',t:'text',wide:1}],
+  cols:[['document_date','DATE'],['category','CATEGORY'],['title','TITLE'],['confidentiality','CONFIDENTIALITY']]},
+ DOD_COMMITTEE:{title:'DISCIPLINE COMMITTEE',student:false,color:'#c62828',fields:[
+   {k:'date',l:'MEETING DATE',t:'date'},{k:'text1',l:'AGENDA',t:'text',wide:1},{k:'text2',l:'MEMBERS PRESENT',t:'text',wide:1},
+   {k:'reason',l:'MINUTES',t:'text',wide:1}],
+  cols:[['meeting_date','DATE'],['agenda','AGENDA'],['members_present','MEMBERS']]},
+ DOD_APPEALS:{title:'DISCIPLINE APPEALS',student:true,color:'#c62828',fields:[
+   {k:'date',l:'APPEAL DATE',t:'date'},{k:'reason',l:'APPEAL REASON',t:'text',wide:1},{k:'text1',l:'REVIEW NOTES',t:'text',wide:1},
+   {k:'status',l:'DECISION',t:'select',opts:['PENDING','UPHELD','REVISED','REJECTED','WITHDRAWN']}],
+  cols:[['appeal_date','DATE'],['sdms_code','SDMS'],['student_name','STUDENT'],['decision','DECISION']]},
+ DOD_CLUB_ACTIVITY:{title:'CLUBS & CO-CURRICULAR ACTIVITIES',student:false,color:'#1264a3',
+  extraNote:'CLUB CODE required (see Clubs setup) instead of SDMS.',fields:[
+   {k:'text2',l:'CLUB CODE',t:'text'},{k:'date',l:'ACTIVITY DATE',t:'date'},{k:'text1',l:'TITLE',t:'text',wide:1},
+   {k:'num1',l:'ATTENDANCE COUNT',t:'number'},{k:'reason',l:'ACHIEVEMENT',t:'text'},{k:'action_taken',l:'CHALLENGE',t:'text'},
+   {k:'outcome',l:'FOLLOW-UP',t:'text',wide:1}],
+  cols:[['activity_date','DATE'],['club_code','CLUB'],['title','TITLE'],['attendance_count','ATTENDANCE']]},
+ DOD_ITORERO:{title:'ITORERO / VALUES',student:false,color:'#9a6700',fields:[
+   {k:'date',l:'ACTIVITY DATE',t:'date'},{k:'type1',l:'TYPE',t:'select',opts:['ITORERO','VALUES']},{k:'text1',l:'TITLE',t:'text',wide:1},
+   {k:'text2',l:'THEME',t:'text'},{k:'num1',l:'EXPECTED PARTICIPANTS',t:'number'},{k:'num2',l:'ACTUAL PARTICIPANTS',t:'number'},
+   {k:'outcome',l:'OUTCOME',t:'text',wide:1}],
+  cols:[['activity_date','DATE'],['title','TITLE'],['theme','THEME'],['actual_participants','PARTICIPANTS']]},
+ DOD_UMUGANDA:{title:'UMUGANDA / CIVIC ENGAGEMENT',student:false,color:'#0f7a4a',fields:[
+   {k:'date',l:'ACTIVITY DATE',t:'date'},{k:'type1',l:'TYPE',t:'select',opts:['UMUGANDA','CITIZENSHIP','COMMUNITY_SERVICE']},
+   {k:'text1',l:'TITLE',t:'text',wide:1},{k:'text2',l:'THEME',t:'text'},{k:'num1',l:'EXPECTED PARTICIPANTS',t:'number'},
+   {k:'num2',l:'ACTUAL PARTICIPANTS',t:'number'},{k:'outcome',l:'OUTCOME',t:'text',wide:1}],
+  cols:[['activity_date','DATE'],['title','TITLE'],['theme','THEME'],['actual_participants','PARTICIPANTS']]}
+};
+
+function fieldHtml(f,id){
+ const w=f.wide?'flex:1;min-width:220px':'';
+ if(f.t==='select')return `<div style="${w}"><label style="display:block;font-size:12px;font-weight:700">${esc(f.l)}</label><select id="${id}" style="padding:8px;border:1px solid #ccc;border-radius:6px;width:100%">${f.opts.map(o=>'<option value="'+esc(o)+'">'+esc(o)+'</option>').join('')}</select></div>`;
+ if(f.t==='checkbox')return `<div><label style="display:block;font-size:12px;font-weight:700"><input type="checkbox" id="${id}"> ${esc(f.l)}</label></div>`;
+ const type=f.t==='date'?'date':f.t==='time'?'time':f.t==='number'?'number':'text';
+ return `<div style="${w}"><label style="display:block;font-size:12px;font-weight:700">${esc(f.l)}</label><input type="${type}" id="${id}" style="padding:8px;border:1px solid #ccc;border-radius:6px;width:100%"></div>`;
+}
+
+V.r186_generic_activity=function(mount,ctx,key){
+ const cfg=CFG[key];
+ if(!cfg){mount.innerHTML='<div class="r132-card" style="padding:16px">Not configured.</div>';return}
+ const studentField=cfg.student?`<div><label style="display:block;font-size:12px;font-weight:700">SDMS CODE *</label><input id="r186gaSdms" placeholder="e.g. 280902200108" style="padding:8px;border:1px solid #ccc;border-radius:6px;width:160px"></div><div><label style="display:block;font-size:12px;font-weight:700">STUDENT</label><div id="r186gaName" style="padding:8px;min-width:160px;color:#65758a">— type SDMS then Tab —</div></div>`:'';
+ mount.innerHTML=`<div class="r132-card" style="padding:16px;border-left:6px solid ${cfg.color}">
+  <h2 style="margin:0 0 4px">${esc(cfg.title)}</h2>
+  ${cfg.extraNote?'<p style="margin:0 0 8px;color:#9a6700"><b>Note:</b> '+esc(cfg.extraNote)+'</p>':''}
+  <div id="r186gaForm" style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;border:1px solid #dce4ee;border-radius:8px;padding:14px;margin-bottom:16px">
+   ${studentField}
+   ${cfg.fields.map(f=>fieldHtml(f,'r186ga_'+f.k)).join('')}
+   <div><button type="button" id="r186gaSave" style="background:${cfg.color};color:#fff;border:0;border-radius:6px;padding:10px 18px;font-weight:800;cursor:pointer">SAVE</button></div>
+  </div>
+  <div id="r186gaMsg" style="margin-bottom:10px;font-size:13px"></div>
+  <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px" id="r186gaTable">
+   <thead><tr style="background:${cfg.color};color:#fff">${cfg.cols.map(c=>'<th style="padding:8px;text-align:left">'+esc(c[1])+'</th>').join('')}</tr></thead>
+   <tbody><tr><td colspan="${cfg.cols.length}" style="padding:14px;text-align:center;color:#65758a">Loading…</td></tr></tbody>
+  </table></div>
+ </div>`;
+ let studentOk=!cfg.student;
+ if(cfg.student){
+  const sdmsInp=q('#r186gaSdms',mount),nameBox=q('#r186gaName',mount);
+  sdmsInp.addEventListener('blur',async()=>{
+   const code=sdmsInp.value.trim();
+   if(!code){nameBox.textContent='— type SDMS then Tab —';studentOk=false;return}
+   nameBox.textContent='Looking up…';
+   try{
+    const d=await rpc('r18677_student_identity_details_by_sdms',{p_sdms_code:code});
+    if(d&&d.student_id){studentOk=true;nameBox.textContent=(d.full_name||'')+' — '+(d.class_code||'')}
+    else{studentOk=false;nameBox.textContent='NOT FOUND — check SDMS code';nameBox.style.color='#c62828'}
+   }catch(e){studentOk=false;nameBox.textContent='LOOKUP FAILED';nameBox.style.color='#c62828'}
+  });
+ }
+ async function loadTable(){
+  const tbody=q('#r186gaTable tbody',mount);
+  try{
+   const rows=await rpc('r186_activity_list',{p_key:key});
+   if(!rows||!rows.length){tbody.innerHTML='<tr><td colspan="'+cfg.cols.length+'" style="padding:14px;text-align:center;color:#65758a">No records yet.</td></tr>';return}
+   tbody.innerHTML=rows.map(r=>'<tr style="border-bottom:1px solid #eee">'+cfg.cols.map(c=>'<td style="padding:8px">'+esc(r[c[0]])+'</td>').join('')+'</tr>').join('');
+  }catch(e){tbody.innerHTML='<tr><td colspan="'+cfg.cols.length+'" style="padding:14px;color:#c62828">FAILED TO LOAD: '+esc(e.message||e)+'</td></tr>'}
+ }
+ q('#r186gaSave',mount).addEventListener('click',async()=>{
+  const msg=q('#r186gaMsg',mount);
+  if(cfg.student&&!studentOk){msg.style.color='#c62828';msg.textContent='Enter a valid SDMS code first.';return}
+  const payload={};
+  if(cfg.student)payload.sdms_code=q('#r186gaSdms',mount).value.trim();
+  cfg.fields.forEach(f=>{
+   const el=q('#r186ga_'+f.k,mount);
+   payload[f.k]=f.t==='checkbox'?el.checked:el.value;
+  });
+  msg.style.color='#65758a';msg.textContent='Saving…';
+  try{
+   await rpc('r186_activity_save',{p_key:key,p_payload:payload});
+   msg.style.color='#0f7a4a';msg.textContent='SAVED.';
+   if(cfg.student){q('#r186gaSdms',mount).value='';q('#r186gaName',mount).textContent='— type SDMS then Tab —';q('#r186gaName',mount).style.color='';studentOk=false}
+   cfg.fields.forEach(f=>{const el=q('#r186ga_'+f.k,mount);if(f.t==='checkbox')el.checked=false;else if(f.t!=='select')el.value=''});
+   loadTable();
+  }catch(e){msg.style.color='#c62828';msg.textContent='SAVE FAILED: '+(e.message||e)}
+ });
+ loadTable();
+};
+
+if(typeof V.r127_operational==='function'){
+ const prevOperational2=V.r127_operational;
+ V.r127_operational=function(m,c,p){
+  const k=String((p&&(p.key||p.serviceKey))||'').toUpperCase();
+  if(CFG[k])return V.r186_generic_activity(m,c,k);
+  return prevOperational2(m,c,p);
+ };
+}
+
+/* card color accents on DOD grid, matched by title text, safe retry-based injection */
+(function colorDodCards(){
+ const COLORS={
+  'ABSENTEES & FOLLOW-UP':'#c62828','DISCIPLINE CASES':'#c62828','SAFETY / INCIDENTS':'#c62828',
+  'MEDICAL / SICK BAY':'#c62828','DISCIPLINE COMMITTEE':'#c62828','DISCIPLINE APPEALS':'#c62828',
+  'GUIDANCE & COUNSELLING':'#1264a3','STUDENT LEADERS':'#1264a3','DOCUMENTS & EVIDENCE':'#1264a3',
+  'CLUBS & CO-CURRICULAR ACTIVITIES':'#1264a3','CLUB ACTIVITIES':'#1264a3',
+  'STUDENT WELFARE':'#0f7a4a','SPECIAL NEEDS':'#0f7a4a','BEHAVIOUR REWARDS':'#0f7a4a','UMUGANDA / CIVIC ENGAGEMENT':'#0f7a4a',
+  'STUDENT PERMISSIONS / MOVEMENT':'#9a6700','HYGIENE / SANITATION':'#9a6700','FEEDING INSPECTIONS':'#9a6700',
+  'VISITORS & GATE':'#9a6700','ITORERO / VALUES':'#9a6700','DUTY TEACHER LOG':'#9a6700','CONDUCT MARKS':'#0f7a4a'
+ };
+ function tint(hex,pct){const n=parseInt(hex.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255;
+  const mr=Math.round(r+(255-r)*pct),mg=Math.round(g+(255-g)*pct),mb=Math.round(b+(255-b)*pct);
+  return 'rgb('+mr+','+mg+','+mb+')';}
+ function apply(){
+  qa('.r132-card').forEach(card=>{
+   if(card.dataset.r186Colored)return;
+   const h=card.querySelector('h3');if(!h)return;
+   const t=(h.textContent||'').trim().toUpperCase();
+   const c=COLORS[t];if(!c)return;
+   card.style.borderLeft='6px solid '+c;
+   card.style.background=tint(c,.94);
+   card.dataset.r186Colored='1';
+  });
+ }
+ let n=0;const iv=setInterval(()=>{apply();if(++n>40)clearInterval(iv)},250);
+ document.addEventListener('click',()=>setTimeout(apply,150),true);
+})();
+})();
+
+/* ===== R186.94 GENERIC DOD SERVICE BUILDER — forms+tables for 14 previously-stub services ===== */
+(function(){
+'use strict';
+if(!window.GSM_VIEWS)return;
+const V=window.GSM_VIEWS;
+function q(s,r){return (r||document).querySelector(s)}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function rpc(n,a){if(window.GSM_LIVE&&typeof window.GSM_LIVE.rpc==='function')return window.GSM_LIVE.rpc(n,a||{});return Promise.reject(new Error('LIVE SUPABASE CONNECTION REQUIRED'))}
+
+/* field types: text, date, time, number, select, checkbox, student(sdms lookup) */
+function fieldHtml(f){
+ const base='style="padding:8px;border:1px solid #ccc;border-radius:6px"';
+ if(f.type==='student')return `<div><label style="display:block;font-size:12px;font-weight:700">SDMS CODE *</label><input id="r186f_${f.id}" placeholder="SDMS code" ${base} style="${base.replace('style="','')};width:150px"><div id="r186fname_${f.id}" style="font-size:12px;color:#65758a;margin-top:2px">— type SDMS then Tab —</div></div>`;
+ if(f.type==='select')return `<div><label style="display:block;font-size:12px;font-weight:700">${esc(f.label)}${f.required?' *':''}</label><select id="r186f_${f.id}" ${base}>${f.options.map(o=>'<option value="'+esc(o)+'">'+esc(o)+'</option>').join('')}</select></div>`;
+ if(f.type==='checkbox')return `<div style="align-self:center"><label style="font-size:12px;font-weight:700"><input type="checkbox" id="r186f_${f.id}"> ${esc(f.label)}</label></div>`;
+ const type=f.type||'text';
+ return `<div${f.wide?' style="flex:1;min-width:220px"':''}><label style="display:block;font-size:12px;font-weight:700">${esc(f.label)}${f.required?' *':''}</label><input type="${type}" id="r186f_${f.id}" ${base}${f.wide?' style="'+base.replace('style="','')+';width:100%"':''}></div>`;
+}
+
+function buildService(mount,ctx,cfg){
+ mount.innerHTML=`<div class="r132-card" style="padding:16px;border-top:4px solid ${cfg.color}">
+  <h2 style="margin:0 0 4px;color:${cfg.color}">${esc(cfg.title)}</h2>
+  <p style="margin:0 0 16px">${esc(cfg.desc)}</p>
+  <div id="r186Form" style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;border:1px solid #dce4ee;border-radius:8px;padding:14px;margin-bottom:16px">
+   ${cfg.fields.map(fieldHtml).join('')}
+   <div><button type="button" id="r186Save" style="background:${cfg.color};color:#fff;border:0;border-radius:6px;padding:10px 18px;font-weight:800;cursor:pointer">SAVE</button></div>
+  </div>
+  <div id="r186Msg" style="margin-bottom:10px;font-size:13px"></div>
+  <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">
+   <thead><tr style="background:${cfg.color};color:#fff">${cfg.columns.map(c=>'<th style="padding:8px;text-align:left">'+esc(c.label)+'</th>').join('')}</tr></thead>
+   <tbody id="r186Tbody"><tr><td colspan="${cfg.columns.length}" style="padding:14px;text-align:center;color:#65758a">Loading…</td></tr></tbody>
+  </table></div>
+ </div>`;
+ const studentIds={};
+ cfg.fields.filter(f=>f.type==='student').forEach(f=>{
+  const inp=q('#r186f_'+f.id,mount),box=q('#r186fname_'+f.id,mount);
+  inp.addEventListener('blur',async()=>{
+   const code=inp.value.trim();
+   if(!code){box.textContent='— type SDMS then Tab —';studentIds[f.id]=null;return}
+   box.textContent='Looking up…';box.style.color='#65758a';
+   try{
+    const d=await rpc('r18677_student_identity_details_by_sdms',{p_sdms_code:code});
+    if(d&&d.student_id){studentIds[f.id]=d.student_id;box.textContent=(d.full_name||'')+' — '+(d.class_code||'')}
+    else{studentIds[f.id]=null;box.textContent='NOT FOUND';box.style.color='#c62828'}
+   }catch(e){studentIds[f.id]=null;box.textContent='LOOKUP FAILED';box.style.color='#c62828'}
+  });
+ });
+ async function loadTable(){
+  const tbody=q('#r186Tbody',mount);
+  try{
+   const rows=await rpc(cfg.listRpc,{});
+   if(!rows||!rows.length){tbody.innerHTML='<tr><td colspan="'+cfg.columns.length+'" style="padding:14px;text-align:center;color:#65758a">No records yet.</td></tr>';return}
+   tbody.innerHTML=rows.map(r=>'<tr style="border-bottom:1px solid #eee">'+cfg.columns.map(c=>'<td style="padding:8px">'+esc(r[c.key])+'</td>').join('')+'</tr>').join('');
+  }catch(e){tbody.innerHTML='<tr><td colspan="'+cfg.columns.length+'" style="padding:14px;color:#c62828">FAILED TO LOAD: '+esc(e.message||e)+'</td></tr>'}
+ }
+ q('#r186Save',mount).addEventListener('click',async()=>{
+  const msg=q('#r186Msg',mount);
+  const payload={};
+  for(const f of cfg.fields){
+   if(f.type==='student'){
+    if(f.required&&!studentIds[f.id]){msg.style.color='#c62828';msg.textContent='Enter a valid SDMS code for '+f.label+'.';return}
+    payload[f.key||'student_id']=studentIds[f.id]||null;
+   }else if(f.type==='checkbox'){
+    payload[f.key||f.id]=q('#r186f_'+f.id,mount).checked;
+   }else{
+    const v=q('#r186f_'+f.id,mount).value.trim?q('#r186f_'+f.id,mount).value.trim():q('#r186f_'+f.id,mount).value;
+    if(f.required&&!v){msg.style.color='#c62828';msg.textContent=f.label+' is required.';return}
+    payload[f.key||f.id]=v||null;
+   }
+  }
+  msg.style.color='#65758a';msg.textContent='Saving…';
+  try{
+   await rpc(cfg.saveRpc,{p_payload:payload});
+   msg.style.color='#0f7a4a';msg.textContent='SAVED.';
+   cfg.fields.forEach(f=>{
+    if(f.type==='student'){q('#r186f_'+f.id,mount).value='';q('#r186fname_'+f.id,mount).textContent='— type SDMS then Tab —';q('#r186fname_'+f.id,mount).style.color='';studentIds[f.id]=null}
+    else if(f.type==='checkbox')q('#r186f_'+f.id,mount).checked=false;
+    else if(f.type!=='select')q('#r186f_'+f.id,mount).value='';
+   });
+   loadTable();
+  }catch(e){msg.style.color='#c62828';msg.textContent='SAVE FAILED: '+(e.message||e)}
+ });
+ loadTable();
+}
+
+const CONFIGS={
+ DOD_ABSENTEE:{title:'ABSENTEES & FOLLOW-UP',desc:'Persistent absence, parent contact, intervention and risk.',color:'#c62828',
+  saveRpc:'r127_save_absentee_followup',listRpc:'r186_absentee_followups_list',
+  fields:[{id:'s1',type:'student',required:true,key:'student_id'},{id:'d1',type:'date',label:'FOLLOW-UP DATE',key:'follow_up_date'},
+   {id:'t1',type:'text',label:'ABSENCE TYPE',key:'absence_type'},{id:'r1',type:'text',label:'REASON',key:'reason',wide:true},
+   {id:'c1',type:'checkbox',label:'PARENT CONTACTED',key:'parent_contacted'},{id:'m1',type:'text',label:'CONTACT METHOD',key:'contact_method'},
+   {id:'a1',type:'text',label:'ACTION TAKEN',key:'action_taken',wide:true},{id:'n1',type:'date',label:'NEXT FOLLOW-UP',key:'next_follow_up_date'},
+   {id:'st1',type:'select',label:'STATUS',key:'status',options:['OPEN','RESOLVED','REFERRED','CLOSED']}],
+  columns:[{key:'follow_up_date',label:'DATE'},{key:'sdms_code',label:'SDMS'},{key:'student_name',label:'STUDENT'},{key:'absence_type',label:'TYPE'},{key:'reason',label:'REASON'},{key:'status',label:'STATUS'}]},
+ DOD_COUNSELLING:{title:'GUIDANCE & COUNSELLING',desc:'Counselling sessions, referrals and follow-up.',color:'#6a1b9a',
+  saveRpc:'r127_save_counselling_session',listRpc:'r186_counselling_sessions_list',
+  fields:[{id:'s1',type:'student',key:'student_id'},{id:'d1',type:'date',label:'SESSION DATE',key:'session_date'},
+   {id:'ty1',type:'select',label:'TYPE',key:'session_type',required:true,options:['INDIVIDUAL','GROUP','MENTORSHIP']},
+   {id:'ic1',type:'text',label:'ISSUE CATEGORY',key:'issue_category'},{id:'r1',type:'text',label:'REASON',key:'reason',wide:true},
+   {id:'a1',type:'text',label:'ACTION TAKEN',key:'action_taken',wide:true},{id:'rf1',type:'text',label:'REFERRAL',key:'referral'},
+   {id:'f1',type:'date',label:'FOLLOW-UP DATE',key:'follow_up_date'},{id:'o1',type:'text',label:'OUTCOME',key:'outcome'},
+   {id:'st1',type:'select',label:'STATUS',key:'status',options:['OPEN','FOLLOW_UP','CLOSED','REFERRED']}],
+  columns:[{key:'session_date',label:'DATE'},{key:'sdms_code',label:'SDMS'},{key:'student_name',label:'STUDENT'},{key:'session_type',label:'TYPE'},{key:'issue_category',label:'ISSUE'},{key:'status',label:'STATUS'}]},
+ DOD_REWARDS:{title:'BEHAVIOUR REWARDS',desc:'Positive behaviour, attendance and improvement recognition.',color:'#0f7a4a',
+  saveRpc:'r127_save_behaviour_reward',listRpc:'r186_behaviour_rewards_list',
+  fields:[{id:'s1',type:'student',required:true,key:'student_id'},{id:'d1',type:'date',label:'REWARD DATE',key:'reward_date'},
+   {id:'ty1',type:'text',label:'REWARD TYPE',key:'reward_type',required:true},{id:'r1',type:'text',label:'REASON',key:'reason',required:true,wide:true},
+   {id:'p1',type:'number',label:'POINTS',key:'points'}],
+  columns:[{key:'reward_date',label:'DATE'},{key:'sdms_code',label:'SDMS'},{key:'student_name',label:'STUDENT'},{key:'reward_type',label:'TYPE'},{key:'reason',label:'REASON'},{key:'points',label:'POINTS'}]},
+ DOD_PERMISSIONS:{title:'STUDENT PERMISSIONS / MOVEMENT',desc:'Controlled student OUT/RETURN movement and permission.',color:'#1264a3',
+  saveRpc:'r126_save_student_permission',listRpc:'r186_student_permissions_list',
+  fields:[{id:'s1',type:'student',required:true,key:'student_id'},{id:'d1',type:'date',label:'PERMISSION DATE',key:'permission_date'},
+   {id:'ty1',type:'select',label:'TYPE',key:'permission_type',required:true,options:['LEAVE_SCHOOL','LATE_ARRIVAL','EARLY_DEPARTURE','MEDICAL','FAMILY','OTHER']},
+   {id:'r1',type:'text',label:'REASON',key:'reason',required:true,wide:true},{id:'de1',type:'text',label:'DESTINATION',key:'destination'},
+   {id:'o1',type:'time',label:'OUT TIME',key:'out_time'},{id:'e1',type:'time',label:'EXPECTED RETURN',key:'expected_return_time'},
+   {id:'c1',type:'checkbox',label:'PARENT CONTACTED',key:'parent_guardian_contacted'}],
+  columns:[{key:'permission_date',label:'DATE'},{key:'sdms_code',label:'SDMS'},{key:'student_name',label:'STUDENT'},{key:'permission_type',label:'TYPE'},{key:'destination',label:'DESTINATION'},{key:'status',label:'STATUS'}]},
+ DOD_SAFETY:{title:'SAFETY / INCIDENTS',desc:'Safety incidents, corrective action and closure.',color:'#c62828',
+  saveRpc:'r127_save_safety_incident',listRpc:'r186_safety_incidents_list',
+  fields:[{id:'d1',type:'date',label:'INCIDENT DATE',key:'incident_date'},{id:'l1',type:'text',label:'LOCATION',key:'location'},
+   {id:'ty1',type:'text',label:'INCIDENT TYPE',key:'incident_type',required:true},{id:'de1',type:'text',label:'DESCRIPTION',key:'description',wide:true},
+   {id:'a1',type:'text',label:'ACTION TAKEN',key:'action_taken',wide:true},{id:'r1',type:'text',label:'REFERRED TO',key:'referred_to'},
+   {id:'st1',type:'select',label:'STATUS',key:'status',options:['OPEN','FOLLOW_UP','CLOSED','REFERRED']}],
+  columns:[{key:'incident_date',label:'DATE'},{key:'location',label:'LOCATION'},{key:'incident_type',label:'TYPE'},{key:'action_taken',label:'ACTION'},{key:'status',label:'STATUS'}]},
+ DOD_HYGIENE:{title:'HYGIENE / SANITATION',desc:'Classroom, compound and sanitation inspections.',color:'#0d3b70',
+  saveRpc:'r127_save_hygiene_inspection',listRpc:'r186_hygiene_inspections_list',
+  fields:[{id:'d1',type:'date',label:'INSPECTION DATE',key:'inspection_date'},{id:'a1',type:'text',label:'AREA',key:'area',required:true},
+   {id:'cl1',type:'select',label:'CLEANLINESS',key:'cleanliness_status',options:['GOOD','ACCEPTABLE','POOR','CRITICAL']},
+   {id:'sa1',type:'select',label:'SAFETY',key:'safety_status',options:['SAFE','ATTENTION','UNSAFE','CRITICAL']},
+   {id:'i1',type:'text',label:'ISSUE FOUND',key:'issue_found',wide:true},{id:'c1',type:'text',label:'CORRECTIVE ACTION',key:'corrective_action',wide:true},
+   {id:'rp1',type:'text',label:'RESPONSIBLE PERSON',key:'responsible_person'},{id:'dl1',type:'date',label:'DEADLINE',key:'deadline'}],
+  columns:[{key:'inspection_date',label:'DATE'},{key:'area',label:'AREA'},{key:'cleanliness_status',label:'CLEAN'},{key:'safety_status',label:'SAFE'},{key:'follow_up_status',label:'STATUS'}]},
+ DOD_DUTY_LOG:{title:'DUTY TEACHER LOG',desc:'Duty observations, actions and handover.',color:'#0d3b70',
+  saveRpc:'r127_save_duty_teacher_log',listRpc:'r186_duty_teacher_logs_list',
+  fields:[{id:'d1',type:'date',label:'DUTY DATE',key:'duty_date'},{id:'o1',type:'text',label:'OBSERVATIONS',key:'observations',wide:true},
+   {id:'i1',type:'text',label:'INCIDENTS',key:'incidents',wide:true},{id:'a1',type:'text',label:'ACTION TAKEN',key:'action_taken',wide:true},
+   {id:'h1',type:'text',label:'HANDOVER NOTES',key:'handover_notes',wide:true},
+   {id:'st1',type:'select',label:'STATUS',key:'status',options:['OPEN','SUBMITTED','CLOSED']}],
+  columns:[{key:'duty_date',label:'DATE'},{key:'staff_name',label:'STAFF'},{key:'observations',label:'OBSERVATIONS'},{key:'status',label:'STATUS'}]},
+ DOD_FEEDING:{title:'FEEDING INSPECTIONS',desc:'Kitchen/feeding inspection, findings and corrective action.',color:'#9a6700',
+  saveRpc:'r127_save_feeding_inspection',listRpc:'r186_feeding_inspections_list',
+  fields:[{id:'d1',type:'date',label:'INSPECTION DATE',key:'inspection_date'},{id:'a1',type:'text',label:'AREA',key:'area'},
+   {id:'h1',type:'text',label:'HYGIENE STATUS',key:'hygiene_status'},{id:'q1',type:'text',label:'FOOD QUALITY',key:'food_quality_status'},
+   {id:'i1',type:'text',label:'ISSUE FOUND',key:'issue_found',wide:true},{id:'c1',type:'text',label:'CORRECTIVE ACTION',key:'corrective_action',wide:true},
+   {id:'rp1',type:'text',label:'RESPONSIBLE PERSON',key:'responsible_person'},{id:'dl1',type:'date',label:'DEADLINE',key:'deadline'}],
+  columns:[{key:'inspection_date',label:'DATE'},{key:'area',label:'AREA'},{key:'hygiene_status',label:'HYGIENE'},{key:'food_quality_status',label:'QUALITY'},{key:'follow_up_status',label:'STATUS'}]},
+ DOD_LEADERS:{title:'STUDENT LEADERS',desc:'Student leadership assignments and status.',color:'#1264a3',
+  saveRpc:'r127_save_student_leader',listRpc:'r186_student_leaders_list',
+  fields:[{id:'s1',type:'student',required:true,key:'student_id'},{id:'p1',type:'text',label:'POSITION',key:'position',required:true},
+   {id:'d1',type:'date',label:'START DATE',key:'start_date'},{id:'e1',type:'date',label:'END DATE',key:'end_date'},
+   {id:'st1',type:'select',label:'STATUS',key:'status',options:['ACTIVE','INACTIVE','COMPLETED','REMOVED']}],
+  columns:[{key:'sdms_code',label:'SDMS'},{key:'student_name',label:'STUDENT'},{key:'position',label:'POSITION'},{key:'start_date',label:'START'},{key:'status',label:'STATUS'}]},
+ DOD_VISITORS:{title:'VISITORS & GATE',desc:'Visitor check-in/out, purpose and destination.',color:'#0d3b70',
+  saveRpc:'r127_save_visitor_gate_entry',listRpc:'r186_visitor_gate_log_list',
+  fields:[{id:'d1',type:'date',label:'VISIT DATE',key:'visit_date'},{id:'n1',type:'text',label:'VISITOR NAME',key:'visitor_name',required:true},
+   {id:'ph1',type:'text',label:'PHONE',key:'phone'},{id:'id1',type:'text',label:'ID NUMBER',key:'id_number'},
+   {id:'p1',type:'text',label:'PURPOSE',key:'purpose',required:true,wide:true},{id:'pv1',type:'text',label:'PERSON TO VISIT',key:'person_to_visit'},
+   {id:'ti1',type:'time',label:'TIME IN',key:'time_in'}],
+  columns:[{key:'visit_date',label:'DATE'},{key:'visitor_name',label:'VISITOR'},{key:'purpose',label:'PURPOSE'},{key:'person_to_visit',label:'TO SEE'},{key:'status',label:'STATUS'}]},
+ DOD_PARENT_WELFARE:{title:'STUDENT WELFARE',desc:'Parent, learner-support and welfare follow-up.',color:'#6a1b9a',
+  saveRpc:'r127_save_parent_welfare_followup',listRpc:'r186_parent_welfare_followups_list',
+  fields:[{id:'s1',type:'student',required:true,key:'student_id'},{id:'d1',type:'date',label:'CONTACT DATE',key:'contact_date'},
+   {id:'ty1',type:'text',label:'CONTACT TYPE',key:'contact_type'},{id:'c1',type:'text',label:'CONCERN',key:'concern',required:true,wide:true},
+   {id:'p1',type:'text',label:'PARENT CONTACT',key:'parent_contact'},{id:'ds1',type:'text',label:'DISCUSSION',key:'discussion',wide:true},
+   {id:'cm1',type:'text',label:'COMMITMENT',key:'commitment',wide:true},{id:'f1',type:'date',label:'NEXT FOLLOW-UP',key:'next_follow_up_date'},
+   {id:'st1',type:'select',label:'STATUS',key:'status',options:['OPEN','FOLLOW_UP','RESOLVED','REFERRED','CLOSED']}],
+  columns:[{key:'contact_date',label:'DATE'},{key:'sdms_code',label:'SDMS'},{key:'student_name',label:'STUDENT'},{key:'concern',label:'CONCERN'},{key:'status',label:'STATUS'}]},
+ DOD_COMMITTEE:{title:'DISCIPLINE COMMITTEE',desc:'Meetings, cases, decisions and recommendations.',color:'#c62828',
+  saveRpc:'r127_save_discipline_committee_meeting',listRpc:'r186_discipline_committee_meetings_list',
+  fields:[{id:'d1',type:'date',label:'MEETING DATE',key:'meeting_date',required:true},{id:'a1',type:'text',label:'AGENDA',key:'agenda',wide:true},
+   {id:'m1',type:'text',label:'MEMBERS PRESENT',key:'members_present',wide:true},{id:'mn1',type:'text',label:'MINUTES',key:'minutes',wide:true}],
+  columns:[{key:'meeting_date',label:'DATE'},{key:'agenda',label:'AGENDA'},{key:'members_present',label:'MEMBERS'}]},
+ DOD_UMUGANDA:{title:'UMUGANDA / CIVIC ENGAGEMENT',desc:'Participation, outcomes and civic engagement evidence.',color:'#0f7a4a',
+  saveRpc:'r127_save_student_life_activity',listRpc:'r186_student_life_activities_list',
+  fields:[{id:'d1',type:'date',label:'ACTIVITY DATE',key:'activity_date',required:true},
+   {id:'ty1',type:'select',label:'TYPE',key:'activity_type',required:true,options:['UMUGANDA','CLUB','VALUES','CULTURE','ITORERO','CITIZENSHIP','COMMUNITY_SERVICE','SPORTS','OTHER']},
+   {id:'t1',type:'text',label:'TITLE',key:'title',required:true,wide:true},{id:'th1',type:'text',label:'THEME',key:'theme'},
+   {id:'ep1',type:'number',label:'EXPECTED PARTICIPANTS',key:'expected_participants'},{id:'ap1',type:'number',label:'ACTUAL PARTICIPANTS',key:'actual_participants'},
+   {id:'o1',type:'text',label:'OUTCOME',key:'outcome',wide:true}],
+  columns:[{key:'activity_date',label:'DATE'},{key:'activity_type',label:'TYPE'},{key:'title',label:'TITLE'},{key:'actual_participants',label:'PARTICIPANTS'}]},
+ DOD_SPECIAL_NEEDS:{title:'SPECIAL NEEDS',desc:'Learner support and special-needs register.',color:'#9a6700',
+  saveRpc:'r127_save_special_needs_profile',listRpc:'r186_special_needs_register_list',
+  fields:[{id:'s1',type:'student',required:true,key:'student_id'},{id:'t1',type:'text',label:'NEED TYPE',key:'special_need_type',required:true},
+   {id:'i1',type:'text',label:'IMPAIRMENT TYPE',key:'impairment_type'},{id:'sv1',type:'select',label:'SEVERITY',key:'severity',options:['MILD','MODERATE','SEVERE']},
+   {id:'sp1',type:'text',label:'SUPPORT PLAN',key:'support_plan',wide:true},{id:'ac1',type:'text',label:'ACCOMMODATION',key:'accommodation',wide:true}],
+  columns:[{key:'sdms_code',label:'SDMS'},{key:'student_name',label:'STUDENT'},{key:'special_need_type',label:'NEED TYPE'},{key:'severity',label:'SEVERITY'}]}
+};
+
+Object.keys(CONFIGS).forEach(key=>{
+ V['r186_svc_'+key]=function(m,c){buildService(m,c,CONFIGS[key])};
+});
+
+if(typeof V.r127_operational==='function'){
+ const prevOp2=V.r127_operational;
+ V.r127_operational=function(m,c,p){
+  const k=String((p&&(p.key||p.serviceKey))||'').toUpperCase();
+  if(CONFIGS[k])return V['r186_svc_'+k](m,c);
+  return prevOp2(m,c,p);
+ };
+}
+})();
+
+/* ===== R186.95 ROUTING-PATH FIX — old bespoke view names (r119_discipline, r119_permissions) never pointed
+   at real functions, so those two cards never reached our r127_operational wrapper at all. Also, there are
+   TWO different SYSTEM MANAGEMENT screens in this app (r133_system and r18638_system) — add the DATA RESET
+   TOOLS card to both, so it appears regardless of which menu path the user takes. ===== */
+(function(){
+'use strict';
+if(!window.GSM_VIEWS)return;
+const V=window.GSM_VIEWS;
+function q(s,r){return (r||document).querySelector(s)}
+
+if(typeof V.r186_discipline_cases==='function')V.r119_discipline=function(m,c){return V.r186_discipline_cases(m,c)};
+if(typeof V.r186_svc_DOD_PERMISSIONS==='function')V.r119_permissions=function(m,c){return V.r186_svc_DOD_PERMISSIONS(m,c)};
+
+if(typeof V.r18638_system==='function'&&typeof V.r186_reset_tools==='function'){
+ const prevSys2=V.r18638_system;
+ V.r18638_system=function(mount,ctx){
+  const ret=prevSys2(mount,ctx);
+  let tries=0;
+  const tryInject=()=>{
+   tries++;
+   const grid=q('#r39SysCards',mount),viewer=q('#r38SysView',mount);
+   if(!grid||!viewer){if(tries<20)setTimeout(tryInject,150);return}
+   if(q('[data-r186-reset-card2]',mount))return;
+   const btn=document.createElement('button');
+   btn.className='r18638-card';
+   btn.setAttribute('data-r186-reset-card2','1');
+   btn.style.borderColor='#c62828';
+   btn.innerHTML='<b style="color:#c62828">\u26a0 DATA RESET TOOLS</b><span>Permanently delete marks, attendance or students. SUPER_ADMIN only. Cannot be undone.</span>';
+   btn.onclick=()=>{V.r186_reset_tools(viewer,ctx);viewer.scrollIntoView({behavior:'smooth',block:'start'})};
+   grid.appendChild(btn);
+  };
+  setTimeout(tryInject,80);
+  return ret;
+ };
+}
 })();
