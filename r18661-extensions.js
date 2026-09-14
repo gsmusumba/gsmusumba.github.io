@@ -9105,3 +9105,417 @@ if(typeof V.r127_operational==='function'){
  };
 }
 })();
+
+/* ===== R186.94 GENERIC DOD ACTIVITY FORMS — build out all remaining stub services + card colors ===== */
+(function(){
+'use strict';
+const V=window.GSM_VIEWS;
+function q(s,r){return (r||document).querySelector(s)}
+function qa(s,r){return Array.from((r||document).querySelectorAll(s))}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function rpc(n,a){if(window.GSM_LIVE&&typeof window.GSM_LIVE.rpc==='function')return window.GSM_LIVE.rpc(n,a||{});return Promise.reject(new Error('LIVE SUPABASE CONNECTION REQUIRED'))}
+
+// field types: sdms | date | text | select | checkbox | number | time
+const CFG={
+ DOD_ABSENTEE:{title:'ABSENTEES & FOLLOW-UP',student:true,color:'#c62828',fields:[
+   {k:'date',l:'FOLLOW-UP DATE',t:'date'},{k:'type1',l:'ABSENCE TYPE',t:'text'},{k:'reason',l:'REASON',t:'text',wide:1},
+   {k:'bool1',l:'PARENT CONTACTED',t:'checkbox'},{k:'text2',l:'CONTACT METHOD',t:'text'},{k:'action_taken',l:'ACTION TAKEN',t:'text',wide:1},
+   {k:'date2',l:'NEXT FOLLOW-UP',t:'date'},{k:'status',l:'STATUS',t:'select',opts:['OPEN','RESOLVED','REFERRED','CLOSED']}],
+  cols:[['follow_up_date','DATE'],['sdms_code','SDMS'],['student_name','STUDENT'],['absence_type','TYPE'],['reason','REASON'],['status','STATUS']]},
+ DOD_GUIDANCE:{title:'GUIDANCE & COUNSELLING',student:false,color:'#1264a3',fields:[
+   {k:'date',l:'SESSION DATE',t:'date'},{k:'type1',l:'SESSION TYPE',t:'select',opts:['INDIVIDUAL','GROUP','MENTORSHIP']},
+   {k:'text1',l:'ISSUE CATEGORY',t:'text'},{k:'reason',l:'REASON',t:'text',wide:1},{k:'action_taken',l:'ACTION TAKEN',t:'text',wide:1},
+   {k:'text2',l:'REFERRAL',t:'text'},{k:'date2',l:'FOLLOW-UP DATE',t:'date'},{k:'outcome',l:'OUTCOME',t:'text'},
+   {k:'status',l:'STATUS',t:'select',opts:['OPEN','FOLLOW_UP','CLOSED','REFERRED']}],
+  cols:[['session_date','DATE'],['student_name','STUDENT'],['session_type','TYPE'],['issue_category','ISSUE'],['status','STATUS']]},
+ DOD_WELFARE:{title:'STUDENT WELFARE',student:true,color:'#0f7a4a',fields:[
+   {k:'date',l:'CONTACT DATE',t:'date'},{k:'type1',l:'CONTACT TYPE',t:'text'},{k:'reason',l:'CONCERN',t:'text',wide:1},
+   {k:'text1',l:'PARENT CONTACT',t:'text'},{k:'text2',l:'DISCUSSION',t:'text',wide:1},{k:'action_taken',l:'COMMITMENT',t:'text'},
+   {k:'date2',l:'NEXT FOLLOW-UP',t:'date'},{k:'status',l:'STATUS',t:'select',opts:['OPEN','FOLLOW_UP','RESOLVED','REFERRED','CLOSED']}],
+  cols:[['contact_date','DATE'],['sdms_code','SDMS'],['student_name','STUDENT'],['concern','CONCERN'],['status','STATUS']]},
+ DOD_PERMISSIONS:{title:'STUDENT PERMISSIONS / MOVEMENT',student:true,color:'#9a6700',fields:[
+   {k:'date',l:'PERMISSION DATE',t:'date'},{k:'type1',l:'TYPE',t:'select',opts:['LEAVE_SCHOOL','LATE_ARRIVAL','EARLY_DEPARTURE','MEDICAL','FAMILY','OTHER']},
+   {k:'reason',l:'REASON',t:'text',wide:1},{k:'text1',l:'DESTINATION',t:'text'},{k:'time1',l:'OUT TIME',t:'time'},{k:'time2',l:'EXPECTED RETURN',t:'time'},
+   {k:'bool1',l:'PARENT CONTACTED',t:'checkbox'},{k:'status',l:'STATUS',t:'select',opts:['REQUESTED','APPROVED','REJECTED','RETURNED','CANCELLED']}],
+  cols:[['permission_date','DATE'],['sdms_code','SDMS'],['student_name','STUDENT'],['permission_type','TYPE'],['destination','DESTINATION'],['status','STATUS']]},
+ DOD_SAFETY:{title:'SAFETY / INCIDENTS',student:false,color:'#c62828',fields:[
+   {k:'date',l:'INCIDENT DATE',t:'date'},{k:'text1',l:'LOCATION',t:'text'},{k:'type1',l:'INCIDENT TYPE',t:'text'},
+   {k:'reason',l:'DESCRIPTION',t:'text',wide:1},{k:'action_taken',l:'ACTION TAKEN',t:'text',wide:1},{k:'text2',l:'REFERRED TO',t:'text'},
+   {k:'status',l:'STATUS',t:'select',opts:['OPEN','FOLLOW_UP','CLOSED','REFERRED']}],
+  cols:[['incident_date','DATE'],['location','LOCATION'],['incident_type','TYPE'],['status','STATUS']]},
+ DOD_HYGIENE:{title:'HYGIENE / SANITATION',student:false,color:'#0f7a4a',fields:[
+   {k:'date',l:'INSPECTION DATE',t:'date'},{k:'text1',l:'AREA',t:'text'},{k:'type1',l:'CLEANLINESS',t:'select',opts:['GOOD','ACCEPTABLE','POOR','CRITICAL']},
+   {k:'type2',l:'SAFETY STATUS',t:'select',opts:['SAFE','ATTENTION','UNSAFE','CRITICAL']},{k:'reason',l:'ISSUE FOUND',t:'text',wide:1},
+   {k:'action_taken',l:'CORRECTIVE ACTION',t:'text',wide:1},{k:'text2',l:'RESPONSIBLE PERSON',t:'text'},{k:'date2',l:'DEADLINE',t:'date'},
+   {k:'status',l:'FOLLOW-UP STATUS',t:'select',opts:['PENDING','IN_PROGRESS','COMPLETED','NOT_REQUIRED']}],
+  cols:[['inspection_date','DATE'],['area','AREA'],['cleanliness_status','CLEANLINESS'],['safety_status','SAFETY'],['follow_up_status','STATUS']]},
+ DOD_FEEDING:{title:'FEEDING INSPECTIONS',student:false,color:'#9a6700',fields:[
+   {k:'date',l:'INSPECTION DATE',t:'date'},{k:'text1',l:'AREA',t:'text'},{k:'type1',l:'HYGIENE STATUS',t:'text'},
+   {k:'type2',l:'FOOD QUALITY',t:'text'},{k:'reason',l:'ISSUE FOUND',t:'text',wide:1},{k:'action_taken',l:'CORRECTIVE ACTION',t:'text',wide:1},
+   {k:'text2',l:'RESPONSIBLE PERSON',t:'text'},{k:'date2',l:'DEADLINE',t:'date'},
+   {k:'status',l:'FOLLOW-UP STATUS',t:'select',opts:['PENDING','IN_PROGRESS','RESOLVED','CLOSED']}],
+  cols:[['inspection_date','DATE'],['area','AREA'],['hygiene_status','HYGIENE'],['food_quality_status','FOOD QUALITY'],['follow_up_status','STATUS']]},
+ DOD_LEADERS:{title:'STUDENT LEADERS',student:true,color:'#1264a3',fields:[
+   {k:'text1',l:'POSITION',t:'text'},{k:'date',l:'START DATE',t:'date'},{k:'date2',l:'END DATE',t:'date'},
+   {k:'status',l:'STATUS',t:'select',opts:['ACTIVE','INACTIVE','COMPLETED','REMOVED']}],
+  cols:[['sdms_code','SDMS'],['student_name','STUDENT'],['position','POSITION'],['start_date','START'],['status','STATUS']]},
+ DOD_MEDICAL:{title:'MEDICAL / SICK BAY',student:true,color:'#c62828',fields:[
+   {k:'date',l:'RECORD DATE',t:'date'},{k:'type1',l:'CONDITION TYPE',t:'text'},{k:'reason',l:'COMPLAINT',t:'text',wide:1},
+   {k:'action_taken',l:'ACTION TAKEN',t:'text',wide:1},{k:'text2',l:'REFERRED TO',t:'text'},{k:'bool1',l:'EMERGENCY CONTACTED',t:'checkbox'},
+   {k:'date2',l:'FOLLOW-UP DATE',t:'date'},{k:'status',l:'STATUS',t:'select',opts:['OPEN','FOLLOW_UP','CLOSED','REFERRED']}],
+  cols:[['record_date','DATE'],['sdms_code','SDMS'],['student_name','STUDENT'],['condition_type','CONDITION'],['status','STATUS']]},
+ DOD_SPECIAL_NEEDS:{title:'SPECIAL NEEDS',student:true,color:'#0f7a4a',fields:[
+   {k:'type1',l:'SPECIAL NEED TYPE',t:'text'},{k:'text1',l:'IMPAIRMENT TYPE',t:'text'},{k:'text2',l:'OTHER DISEASE',t:'text'},
+   {k:'type2',l:'SEVERITY',t:'text'},{k:'reason',l:'SUPPORT PLAN',t:'text',wide:1},{k:'action_taken',l:'ASSISTIVE DEVICE',t:'text'},
+   {k:'outcome',l:'ACCOMMODATION',t:'text',wide:1},{k:'date',l:'LAST REVIEW',t:'date'},{k:'date2',l:'NEXT REVIEW',t:'date'},
+   {k:'status',l:'STATUS',t:'text'}],
+  cols:[['sdms_code','SDMS'],['student_name','STUDENT'],['special_need_type','TYPE'],['severity','SEVERITY'],['next_review_date','NEXT REVIEW']]},
+ DOD_VISITORS:{title:'VISITORS & GATE',student:false,color:'#9a6700',fields:[
+   {k:'date',l:'VISIT DATE',t:'date'},{k:'text1',l:'VISITOR NAME',t:'text'},{k:'text2',l:'PHONE',t:'text'},
+   {k:'type1',l:'ID NUMBER',t:'text'},{k:'reason',l:'PURPOSE',t:'text',wide:1},{k:'action_taken',l:'PERSON TO VISIT',t:'text'},
+   {k:'time1',l:'TIME IN',t:'time'},{k:'status',l:'STATUS',t:'select',opts:['IN','OUT','DENIED','CANCELLED']}],
+  cols:[['visit_date','DATE'],['visitor_name','VISITOR'],['purpose','PURPOSE'],['status','STATUS']]},
+ DOD_REWARDS:{title:'BEHAVIOUR REWARDS',student:true,color:'#0f7a4a',fields:[
+   {k:'date',l:'REWARD DATE',t:'date'},{k:'type1',l:'REWARD TYPE',t:'text'},{k:'reason',l:'REASON',t:'text',wide:1},
+   {k:'num1',l:'POINTS',t:'number'}],
+  cols:[['reward_date','DATE'],['sdms_code','SDMS'],['student_name','STUDENT'],['reward_type','TYPE'],['points','POINTS']]},
+ DOD_DOCUMENTS:{title:'DOCUMENTS & EVIDENCE',student:false,color:'#1264a3',fields:[
+   {k:'type1',l:'CATEGORY',t:'text'},{k:'text1',l:'TITLE',t:'text',wide:1},{k:'text2',l:'REFERENCE NO',t:'text'},
+   {k:'date',l:'DOCUMENT DATE',t:'date'},{k:'type2',l:'CONFIDENTIALITY',t:'select',opts:['PUBLIC','INTERNAL','RESTRICTED','CONFIDENTIAL']},
+   {k:'reason',l:'FILE URL',t:'text',wide:1},{k:'action_taken',l:'NOTES',t:'text',wide:1}],
+  cols:[['document_date','DATE'],['category','CATEGORY'],['title','TITLE'],['confidentiality','CONFIDENTIALITY']]},
+ DOD_COMMITTEE:{title:'DISCIPLINE COMMITTEE',student:false,color:'#c62828',fields:[
+   {k:'date',l:'MEETING DATE',t:'date'},{k:'text1',l:'AGENDA',t:'text',wide:1},{k:'text2',l:'MEMBERS PRESENT',t:'text',wide:1},
+   {k:'reason',l:'MINUTES',t:'text',wide:1}],
+  cols:[['meeting_date','DATE'],['agenda','AGENDA'],['members_present','MEMBERS']]},
+ DOD_APPEALS:{title:'DISCIPLINE APPEALS',student:true,color:'#c62828',fields:[
+   {k:'date',l:'APPEAL DATE',t:'date'},{k:'reason',l:'APPEAL REASON',t:'text',wide:1},{k:'text1',l:'REVIEW NOTES',t:'text',wide:1},
+   {k:'status',l:'DECISION',t:'select',opts:['PENDING','UPHELD','REVISED','REJECTED','WITHDRAWN']}],
+  cols:[['appeal_date','DATE'],['sdms_code','SDMS'],['student_name','STUDENT'],['decision','DECISION']]},
+ DOD_CLUB_ACTIVITY:{title:'CLUBS & CO-CURRICULAR ACTIVITIES',student:false,color:'#1264a3',
+  extraNote:'CLUB CODE required (see Clubs setup) instead of SDMS.',fields:[
+   {k:'text2',l:'CLUB CODE',t:'text'},{k:'date',l:'ACTIVITY DATE',t:'date'},{k:'text1',l:'TITLE',t:'text',wide:1},
+   {k:'num1',l:'ATTENDANCE COUNT',t:'number'},{k:'reason',l:'ACHIEVEMENT',t:'text'},{k:'action_taken',l:'CHALLENGE',t:'text'},
+   {k:'outcome',l:'FOLLOW-UP',t:'text',wide:1}],
+  cols:[['activity_date','DATE'],['club_code','CLUB'],['title','TITLE'],['attendance_count','ATTENDANCE']]},
+ DOD_ITORERO:{title:'ITORERO / VALUES',student:false,color:'#9a6700',fields:[
+   {k:'date',l:'ACTIVITY DATE',t:'date'},{k:'type1',l:'TYPE',t:'select',opts:['ITORERO','VALUES']},{k:'text1',l:'TITLE',t:'text',wide:1},
+   {k:'text2',l:'THEME',t:'text'},{k:'num1',l:'EXPECTED PARTICIPANTS',t:'number'},{k:'num2',l:'ACTUAL PARTICIPANTS',t:'number'},
+   {k:'outcome',l:'OUTCOME',t:'text',wide:1}],
+  cols:[['activity_date','DATE'],['title','TITLE'],['theme','THEME'],['actual_participants','PARTICIPANTS']]},
+ DOD_UMUGANDA:{title:'UMUGANDA / CIVIC ENGAGEMENT',student:false,color:'#0f7a4a',fields:[
+   {k:'date',l:'ACTIVITY DATE',t:'date'},{k:'type1',l:'TYPE',t:'select',opts:['UMUGANDA','CITIZENSHIP','COMMUNITY_SERVICE']},
+   {k:'text1',l:'TITLE',t:'text',wide:1},{k:'text2',l:'THEME',t:'text'},{k:'num1',l:'EXPECTED PARTICIPANTS',t:'number'},
+   {k:'num2',l:'ACTUAL PARTICIPANTS',t:'number'},{k:'outcome',l:'OUTCOME',t:'text',wide:1}],
+  cols:[['activity_date','DATE'],['title','TITLE'],['theme','THEME'],['actual_participants','PARTICIPANTS']]}
+};
+
+function fieldHtml(f,id){
+ const w=f.wide?'flex:1;min-width:220px':'';
+ if(f.t==='select')return `<div style="${w}"><label style="display:block;font-size:12px;font-weight:700">${esc(f.l)}</label><select id="${id}" style="padding:8px;border:1px solid #ccc;border-radius:6px;width:100%">${f.opts.map(o=>'<option value="'+esc(o)+'">'+esc(o)+'</option>').join('')}</select></div>`;
+ if(f.t==='checkbox')return `<div><label style="display:block;font-size:12px;font-weight:700"><input type="checkbox" id="${id}"> ${esc(f.l)}</label></div>`;
+ const type=f.t==='date'?'date':f.t==='time'?'time':f.t==='number'?'number':'text';
+ return `<div style="${w}"><label style="display:block;font-size:12px;font-weight:700">${esc(f.l)}</label><input type="${type}" id="${id}" style="padding:8px;border:1px solid #ccc;border-radius:6px;width:100%"></div>`;
+}
+
+V.r186_generic_activity=function(mount,ctx,key){
+ const cfg=CFG[key];
+ if(!cfg){mount.innerHTML='<div class="r132-card" style="padding:16px">Not configured.</div>';return}
+ const studentField=cfg.student?`<div><label style="display:block;font-size:12px;font-weight:700">SDMS CODE *</label><input id="r186gaSdms" placeholder="e.g. 280902200108" style="padding:8px;border:1px solid #ccc;border-radius:6px;width:160px"></div><div><label style="display:block;font-size:12px;font-weight:700">STUDENT</label><div id="r186gaName" style="padding:8px;min-width:160px;color:#65758a">— type SDMS then Tab —</div></div>`:'';
+ mount.innerHTML=`<div class="r132-card" style="padding:16px;border-left:6px solid ${cfg.color}">
+  <h2 style="margin:0 0 4px">${esc(cfg.title)}</h2>
+  ${cfg.extraNote?'<p style="margin:0 0 8px;color:#9a6700"><b>Note:</b> '+esc(cfg.extraNote)+'</p>':''}
+  <div id="r186gaForm" style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;border:1px solid #dce4ee;border-radius:8px;padding:14px;margin-bottom:16px">
+   ${studentField}
+   ${cfg.fields.map(f=>fieldHtml(f,'r186ga_'+f.k)).join('')}
+   <div><button type="button" id="r186gaSave" style="background:${cfg.color};color:#fff;border:0;border-radius:6px;padding:10px 18px;font-weight:800;cursor:pointer">SAVE</button></div>
+  </div>
+  <div id="r186gaMsg" style="margin-bottom:10px;font-size:13px"></div>
+  <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px" id="r186gaTable">
+   <thead><tr style="background:${cfg.color};color:#fff">${cfg.cols.map(c=>'<th style="padding:8px;text-align:left">'+esc(c[1])+'</th>').join('')}</tr></thead>
+   <tbody><tr><td colspan="${cfg.cols.length}" style="padding:14px;text-align:center;color:#65758a">Loading…</td></tr></tbody>
+  </table></div>
+ </div>`;
+ let studentOk=!cfg.student;
+ if(cfg.student){
+  const sdmsInp=q('#r186gaSdms',mount),nameBox=q('#r186gaName',mount);
+  sdmsInp.addEventListener('blur',async()=>{
+   const code=sdmsInp.value.trim();
+   if(!code){nameBox.textContent='— type SDMS then Tab —';studentOk=false;return}
+   nameBox.textContent='Looking up…';
+   try{
+    const d=await rpc('r18677_student_identity_details_by_sdms',{p_sdms_code:code});
+    if(d&&d.student_id){studentOk=true;nameBox.textContent=(d.full_name||'')+' — '+(d.class_code||'')}
+    else{studentOk=false;nameBox.textContent='NOT FOUND — check SDMS code';nameBox.style.color='#c62828'}
+   }catch(e){studentOk=false;nameBox.textContent='LOOKUP FAILED';nameBox.style.color='#c62828'}
+  });
+ }
+ async function loadTable(){
+  const tbody=q('#r186gaTable tbody',mount);
+  try{
+   const rows=await rpc('r186_activity_list',{p_key:key});
+   if(!rows||!rows.length){tbody.innerHTML='<tr><td colspan="'+cfg.cols.length+'" style="padding:14px;text-align:center;color:#65758a">No records yet.</td></tr>';return}
+   tbody.innerHTML=rows.map(r=>'<tr style="border-bottom:1px solid #eee">'+cfg.cols.map(c=>'<td style="padding:8px">'+esc(r[c[0]])+'</td>').join('')+'</tr>').join('');
+  }catch(e){tbody.innerHTML='<tr><td colspan="'+cfg.cols.length+'" style="padding:14px;color:#c62828">FAILED TO LOAD: '+esc(e.message||e)+'</td></tr>'}
+ }
+ q('#r186gaSave',mount).addEventListener('click',async()=>{
+  const msg=q('#r186gaMsg',mount);
+  if(cfg.student&&!studentOk){msg.style.color='#c62828';msg.textContent='Enter a valid SDMS code first.';return}
+  const payload={};
+  if(cfg.student)payload.sdms_code=q('#r186gaSdms',mount).value.trim();
+  cfg.fields.forEach(f=>{
+   const el=q('#r186ga_'+f.k,mount);
+   payload[f.k]=f.t==='checkbox'?el.checked:el.value;
+  });
+  msg.style.color='#65758a';msg.textContent='Saving…';
+  try{
+   await rpc('r186_activity_save',{p_key:key,p_payload:payload});
+   msg.style.color='#0f7a4a';msg.textContent='SAVED.';
+   if(cfg.student){q('#r186gaSdms',mount).value='';q('#r186gaName',mount).textContent='— type SDMS then Tab —';q('#r186gaName',mount).style.color='';studentOk=false}
+   cfg.fields.forEach(f=>{const el=q('#r186ga_'+f.k,mount);if(f.t==='checkbox')el.checked=false;else if(f.t!=='select')el.value=''});
+   loadTable();
+  }catch(e){msg.style.color='#c62828';msg.textContent='SAVE FAILED: '+(e.message||e)}
+ });
+ loadTable();
+};
+
+if(typeof V.r127_operational==='function'){
+ const prevOperational2=V.r127_operational;
+ V.r127_operational=function(m,c,p){
+  const k=String((p&&(p.key||p.serviceKey))||'').toUpperCase();
+  if(CFG[k])return V.r186_generic_activity(m,c,k);
+  return prevOperational2(m,c,p);
+ };
+}
+
+/* card color accents on DOD grid, matched by title text, safe retry-based injection */
+(function colorDodCards(){
+ const COLORS={
+  'ABSENTEES & FOLLOW-UP':'#c62828','DISCIPLINE CASES':'#c62828','SAFETY / INCIDENTS':'#c62828',
+  'MEDICAL / SICK BAY':'#c62828','DISCIPLINE COMMITTEE':'#c62828','DISCIPLINE APPEALS':'#c62828',
+  'GUIDANCE & COUNSELLING':'#1264a3','STUDENT LEADERS':'#1264a3','DOCUMENTS & EVIDENCE':'#1264a3',
+  'CLUBS & CO-CURRICULAR ACTIVITIES':'#1264a3','CLUB ACTIVITIES':'#1264a3',
+  'STUDENT WELFARE':'#0f7a4a','SPECIAL NEEDS':'#0f7a4a','BEHAVIOUR REWARDS':'#0f7a4a','UMUGANDA / CIVIC ENGAGEMENT':'#0f7a4a',
+  'STUDENT PERMISSIONS / MOVEMENT':'#9a6700','HYGIENE / SANITATION':'#9a6700','FEEDING INSPECTIONS':'#9a6700',
+  'VISITORS & GATE':'#9a6700','ITORERO / VALUES':'#9a6700','DUTY TEACHER LOG':'#9a6700','CONDUCT MARKS':'#0f7a4a'
+ };
+ function tint(hex,pct){const n=parseInt(hex.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255;
+  const mr=Math.round(r+(255-r)*pct),mg=Math.round(g+(255-g)*pct),mb=Math.round(b+(255-b)*pct);
+  return 'rgb('+mr+','+mg+','+mb+')';}
+ function apply(){
+  qa('.r132-card').forEach(card=>{
+   if(card.dataset.r186Colored)return;
+   const h=card.querySelector('h3');if(!h)return;
+   const t=(h.textContent||'').trim().toUpperCase();
+   const c=COLORS[t];if(!c)return;
+   card.style.borderLeft='6px solid '+c;
+   card.style.background=tint(c,.94);
+   card.dataset.r186Colored='1';
+  });
+ }
+ let n=0;const iv=setInterval(()=>{apply();if(++n>40)clearInterval(iv)},250);
+ document.addEventListener('click',()=>setTimeout(apply,150),true);
+})();
+})();
+
+/* ===== R186.94 GENERIC DOD SERVICE BUILDER — forms+tables for 14 previously-stub services ===== */
+(function(){
+'use strict';
+if(!window.GSM_VIEWS)return;
+const V=window.GSM_VIEWS;
+function q(s,r){return (r||document).querySelector(s)}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function rpc(n,a){if(window.GSM_LIVE&&typeof window.GSM_LIVE.rpc==='function')return window.GSM_LIVE.rpc(n,a||{});return Promise.reject(new Error('LIVE SUPABASE CONNECTION REQUIRED'))}
+
+/* field types: text, date, time, number, select, checkbox, student(sdms lookup) */
+function fieldHtml(f){
+ const base='style="padding:8px;border:1px solid #ccc;border-radius:6px"';
+ if(f.type==='student')return `<div><label style="display:block;font-size:12px;font-weight:700">SDMS CODE *</label><input id="r186f_${f.id}" placeholder="SDMS code" ${base} style="${base.replace('style="','')};width:150px"><div id="r186fname_${f.id}" style="font-size:12px;color:#65758a;margin-top:2px">— type SDMS then Tab —</div></div>`;
+ if(f.type==='select')return `<div><label style="display:block;font-size:12px;font-weight:700">${esc(f.label)}${f.required?' *':''}</label><select id="r186f_${f.id}" ${base}>${f.options.map(o=>'<option value="'+esc(o)+'">'+esc(o)+'</option>').join('')}</select></div>`;
+ if(f.type==='checkbox')return `<div style="align-self:center"><label style="font-size:12px;font-weight:700"><input type="checkbox" id="r186f_${f.id}"> ${esc(f.label)}</label></div>`;
+ const type=f.type||'text';
+ return `<div${f.wide?' style="flex:1;min-width:220px"':''}><label style="display:block;font-size:12px;font-weight:700">${esc(f.label)}${f.required?' *':''}</label><input type="${type}" id="r186f_${f.id}" ${base}${f.wide?' style="'+base.replace('style="','')+';width:100%"':''}></div>`;
+}
+
+function buildService(mount,ctx,cfg){
+ mount.innerHTML=`<div class="r132-card" style="padding:16px;border-top:4px solid ${cfg.color}">
+  <h2 style="margin:0 0 4px;color:${cfg.color}">${esc(cfg.title)}</h2>
+  <p style="margin:0 0 16px">${esc(cfg.desc)}</p>
+  <div id="r186Form" style="display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;border:1px solid #dce4ee;border-radius:8px;padding:14px;margin-bottom:16px">
+   ${cfg.fields.map(fieldHtml).join('')}
+   <div><button type="button" id="r186Save" style="background:${cfg.color};color:#fff;border:0;border-radius:6px;padding:10px 18px;font-weight:800;cursor:pointer">SAVE</button></div>
+  </div>
+  <div id="r186Msg" style="margin-bottom:10px;font-size:13px"></div>
+  <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">
+   <thead><tr style="background:${cfg.color};color:#fff">${cfg.columns.map(c=>'<th style="padding:8px;text-align:left">'+esc(c.label)+'</th>').join('')}</tr></thead>
+   <tbody id="r186Tbody"><tr><td colspan="${cfg.columns.length}" style="padding:14px;text-align:center;color:#65758a">Loading…</td></tr></tbody>
+  </table></div>
+ </div>`;
+ const studentIds={};
+ cfg.fields.filter(f=>f.type==='student').forEach(f=>{
+  const inp=q('#r186f_'+f.id,mount),box=q('#r186fname_'+f.id,mount);
+  inp.addEventListener('blur',async()=>{
+   const code=inp.value.trim();
+   if(!code){box.textContent='— type SDMS then Tab —';studentIds[f.id]=null;return}
+   box.textContent='Looking up…';box.style.color='#65758a';
+   try{
+    const d=await rpc('r18677_student_identity_details_by_sdms',{p_sdms_code:code});
+    if(d&&d.student_id){studentIds[f.id]=d.student_id;box.textContent=(d.full_name||'')+' — '+(d.class_code||'')}
+    else{studentIds[f.id]=null;box.textContent='NOT FOUND';box.style.color='#c62828'}
+   }catch(e){studentIds[f.id]=null;box.textContent='LOOKUP FAILED';box.style.color='#c62828'}
+  });
+ });
+ async function loadTable(){
+  const tbody=q('#r186Tbody',mount);
+  try{
+   const rows=await rpc(cfg.listRpc,{});
+   if(!rows||!rows.length){tbody.innerHTML='<tr><td colspan="'+cfg.columns.length+'" style="padding:14px;text-align:center;color:#65758a">No records yet.</td></tr>';return}
+   tbody.innerHTML=rows.map(r=>'<tr style="border-bottom:1px solid #eee">'+cfg.columns.map(c=>'<td style="padding:8px">'+esc(r[c.key])+'</td>').join('')+'</tr>').join('');
+  }catch(e){tbody.innerHTML='<tr><td colspan="'+cfg.columns.length+'" style="padding:14px;color:#c62828">FAILED TO LOAD: '+esc(e.message||e)+'</td></tr>'}
+ }
+ q('#r186Save',mount).addEventListener('click',async()=>{
+  const msg=q('#r186Msg',mount);
+  const payload={};
+  for(const f of cfg.fields){
+   if(f.type==='student'){
+    if(f.required&&!studentIds[f.id]){msg.style.color='#c62828';msg.textContent='Enter a valid SDMS code for '+f.label+'.';return}
+    payload[f.key||'student_id']=studentIds[f.id]||null;
+   }else if(f.type==='checkbox'){
+    payload[f.key||f.id]=q('#r186f_'+f.id,mount).checked;
+   }else{
+    const v=q('#r186f_'+f.id,mount).value.trim?q('#r186f_'+f.id,mount).value.trim():q('#r186f_'+f.id,mount).value;
+    if(f.required&&!v){msg.style.color='#c62828';msg.textContent=f.label+' is required.';return}
+    payload[f.key||f.id]=v||null;
+   }
+  }
+  msg.style.color='#65758a';msg.textContent='Saving…';
+  try{
+   await rpc(cfg.saveRpc,{p_payload:payload});
+   msg.style.color='#0f7a4a';msg.textContent='SAVED.';
+   cfg.fields.forEach(f=>{
+    if(f.type==='student'){q('#r186f_'+f.id,mount).value='';q('#r186fname_'+f.id,mount).textContent='— type SDMS then Tab —';q('#r186fname_'+f.id,mount).style.color='';studentIds[f.id]=null}
+    else if(f.type==='checkbox')q('#r186f_'+f.id,mount).checked=false;
+    else if(f.type!=='select')q('#r186f_'+f.id,mount).value='';
+   });
+   loadTable();
+  }catch(e){msg.style.color='#c62828';msg.textContent='SAVE FAILED: '+(e.message||e)}
+ });
+ loadTable();
+}
+
+const CONFIGS={
+ DOD_ABSENTEE:{title:'ABSENTEES & FOLLOW-UP',desc:'Persistent absence, parent contact, intervention and risk.',color:'#c62828',
+  saveRpc:'r127_save_absentee_followup',listRpc:'r186_absentee_followups_list',
+  fields:[{id:'s1',type:'student',required:true,key:'student_id'},{id:'d1',type:'date',label:'FOLLOW-UP DATE',key:'follow_up_date'},
+   {id:'t1',type:'text',label:'ABSENCE TYPE',key:'absence_type'},{id:'r1',type:'text',label:'REASON',key:'reason',wide:true},
+   {id:'c1',type:'checkbox',label:'PARENT CONTACTED',key:'parent_contacted'},{id:'m1',type:'text',label:'CONTACT METHOD',key:'contact_method'},
+   {id:'a1',type:'text',label:'ACTION TAKEN',key:'action_taken',wide:true},{id:'n1',type:'date',label:'NEXT FOLLOW-UP',key:'next_follow_up_date'},
+   {id:'st1',type:'select',label:'STATUS',key:'status',options:['OPEN','RESOLVED','REFERRED','CLOSED']}],
+  columns:[{key:'follow_up_date',label:'DATE'},{key:'sdms_code',label:'SDMS'},{key:'student_name',label:'STUDENT'},{key:'absence_type',label:'TYPE'},{key:'reason',label:'REASON'},{key:'status',label:'STATUS'}]},
+ DOD_COUNSELLING:{title:'GUIDANCE & COUNSELLING',desc:'Counselling sessions, referrals and follow-up.',color:'#6a1b9a',
+  saveRpc:'r127_save_counselling_session',listRpc:'r186_counselling_sessions_list',
+  fields:[{id:'s1',type:'student',key:'student_id'},{id:'d1',type:'date',label:'SESSION DATE',key:'session_date'},
+   {id:'ty1',type:'select',label:'TYPE',key:'session_type',required:true,options:['INDIVIDUAL','GROUP','MENTORSHIP']},
+   {id:'ic1',type:'text',label:'ISSUE CATEGORY',key:'issue_category'},{id:'r1',type:'text',label:'REASON',key:'reason',wide:true},
+   {id:'a1',type:'text',label:'ACTION TAKEN',key:'action_taken',wide:true},{id:'rf1',type:'text',label:'REFERRAL',key:'referral'},
+   {id:'f1',type:'date',label:'FOLLOW-UP DATE',key:'follow_up_date'},{id:'o1',type:'text',label:'OUTCOME',key:'outcome'},
+   {id:'st1',type:'select',label:'STATUS',key:'status',options:['OPEN','FOLLOW_UP','CLOSED','REFERRED']}],
+  columns:[{key:'session_date',label:'DATE'},{key:'sdms_code',label:'SDMS'},{key:'student_name',label:'STUDENT'},{key:'session_type',label:'TYPE'},{key:'issue_category',label:'ISSUE'},{key:'status',label:'STATUS'}]},
+ DOD_REWARDS:{title:'BEHAVIOUR REWARDS',desc:'Positive behaviour, attendance and improvement recognition.',color:'#0f7a4a',
+  saveRpc:'r127_save_behaviour_reward',listRpc:'r186_behaviour_rewards_list',
+  fields:[{id:'s1',type:'student',required:true,key:'student_id'},{id:'d1',type:'date',label:'REWARD DATE',key:'reward_date'},
+   {id:'ty1',type:'text',label:'REWARD TYPE',key:'reward_type',required:true},{id:'r1',type:'text',label:'REASON',key:'reason',required:true,wide:true},
+   {id:'p1',type:'number',label:'POINTS',key:'points'}],
+  columns:[{key:'reward_date',label:'DATE'},{key:'sdms_code',label:'SDMS'},{key:'student_name',label:'STUDENT'},{key:'reward_type',label:'TYPE'},{key:'reason',label:'REASON'},{key:'points',label:'POINTS'}]},
+ DOD_PERMISSIONS:{title:'STUDENT PERMISSIONS / MOVEMENT',desc:'Controlled student OUT/RETURN movement and permission.',color:'#1264a3',
+  saveRpc:'r126_save_student_permission',listRpc:'r186_student_permissions_list',
+  fields:[{id:'s1',type:'student',required:true,key:'student_id'},{id:'d1',type:'date',label:'PERMISSION DATE',key:'permission_date'},
+   {id:'ty1',type:'select',label:'TYPE',key:'permission_type',required:true,options:['LEAVE_SCHOOL','LATE_ARRIVAL','EARLY_DEPARTURE','MEDICAL','FAMILY','OTHER']},
+   {id:'r1',type:'text',label:'REASON',key:'reason',required:true,wide:true},{id:'de1',type:'text',label:'DESTINATION',key:'destination'},
+   {id:'o1',type:'time',label:'OUT TIME',key:'out_time'},{id:'e1',type:'time',label:'EXPECTED RETURN',key:'expected_return_time'},
+   {id:'c1',type:'checkbox',label:'PARENT CONTACTED',key:'parent_guardian_contacted'}],
+  columns:[{key:'permission_date',label:'DATE'},{key:'sdms_code',label:'SDMS'},{key:'student_name',label:'STUDENT'},{key:'permission_type',label:'TYPE'},{key:'destination',label:'DESTINATION'},{key:'status',label:'STATUS'}]},
+ DOD_SAFETY:{title:'SAFETY / INCIDENTS',desc:'Safety incidents, corrective action and closure.',color:'#c62828',
+  saveRpc:'r127_save_safety_incident',listRpc:'r186_safety_incidents_list',
+  fields:[{id:'d1',type:'date',label:'INCIDENT DATE',key:'incident_date'},{id:'l1',type:'text',label:'LOCATION',key:'location'},
+   {id:'ty1',type:'text',label:'INCIDENT TYPE',key:'incident_type',required:true},{id:'de1',type:'text',label:'DESCRIPTION',key:'description',wide:true},
+   {id:'a1',type:'text',label:'ACTION TAKEN',key:'action_taken',wide:true},{id:'r1',type:'text',label:'REFERRED TO',key:'referred_to'},
+   {id:'st1',type:'select',label:'STATUS',key:'status',options:['OPEN','FOLLOW_UP','CLOSED','REFERRED']}],
+  columns:[{key:'incident_date',label:'DATE'},{key:'location',label:'LOCATION'},{key:'incident_type',label:'TYPE'},{key:'action_taken',label:'ACTION'},{key:'status',label:'STATUS'}]},
+ DOD_HYGIENE:{title:'HYGIENE / SANITATION',desc:'Classroom, compound and sanitation inspections.',color:'#0d3b70',
+  saveRpc:'r127_save_hygiene_inspection',listRpc:'r186_hygiene_inspections_list',
+  fields:[{id:'d1',type:'date',label:'INSPECTION DATE',key:'inspection_date'},{id:'a1',type:'text',label:'AREA',key:'area',required:true},
+   {id:'cl1',type:'select',label:'CLEANLINESS',key:'cleanliness_status',options:['GOOD','ACCEPTABLE','POOR','CRITICAL']},
+   {id:'sa1',type:'select',label:'SAFETY',key:'safety_status',options:['SAFE','ATTENTION','UNSAFE','CRITICAL']},
+   {id:'i1',type:'text',label:'ISSUE FOUND',key:'issue_found',wide:true},{id:'c1',type:'text',label:'CORRECTIVE ACTION',key:'corrective_action',wide:true},
+   {id:'rp1',type:'text',label:'RESPONSIBLE PERSON',key:'responsible_person'},{id:'dl1',type:'date',label:'DEADLINE',key:'deadline'}],
+  columns:[{key:'inspection_date',label:'DATE'},{key:'area',label:'AREA'},{key:'cleanliness_status',label:'CLEAN'},{key:'safety_status',label:'SAFE'},{key:'follow_up_status',label:'STATUS'}]},
+ DOD_DUTY_LOG:{title:'DUTY TEACHER LOG',desc:'Duty observations, actions and handover.',color:'#0d3b70',
+  saveRpc:'r127_save_duty_teacher_log',listRpc:'r186_duty_teacher_logs_list',
+  fields:[{id:'d1',type:'date',label:'DUTY DATE',key:'duty_date'},{id:'o1',type:'text',label:'OBSERVATIONS',key:'observations',wide:true},
+   {id:'i1',type:'text',label:'INCIDENTS',key:'incidents',wide:true},{id:'a1',type:'text',label:'ACTION TAKEN',key:'action_taken',wide:true},
+   {id:'h1',type:'text',label:'HANDOVER NOTES',key:'handover_notes',wide:true},
+   {id:'st1',type:'select',label:'STATUS',key:'status',options:['OPEN','SUBMITTED','CLOSED']}],
+  columns:[{key:'duty_date',label:'DATE'},{key:'staff_name',label:'STAFF'},{key:'observations',label:'OBSERVATIONS'},{key:'status',label:'STATUS'}]},
+ DOD_FEEDING:{title:'FEEDING INSPECTIONS',desc:'Kitchen/feeding inspection, findings and corrective action.',color:'#9a6700',
+  saveRpc:'r127_save_feeding_inspection',listRpc:'r186_feeding_inspections_list',
+  fields:[{id:'d1',type:'date',label:'INSPECTION DATE',key:'inspection_date'},{id:'a1',type:'text',label:'AREA',key:'area'},
+   {id:'h1',type:'text',label:'HYGIENE STATUS',key:'hygiene_status'},{id:'q1',type:'text',label:'FOOD QUALITY',key:'food_quality_status'},
+   {id:'i1',type:'text',label:'ISSUE FOUND',key:'issue_found',wide:true},{id:'c1',type:'text',label:'CORRECTIVE ACTION',key:'corrective_action',wide:true},
+   {id:'rp1',type:'text',label:'RESPONSIBLE PERSON',key:'responsible_person'},{id:'dl1',type:'date',label:'DEADLINE',key:'deadline'}],
+  columns:[{key:'inspection_date',label:'DATE'},{key:'area',label:'AREA'},{key:'hygiene_status',label:'HYGIENE'},{key:'food_quality_status',label:'QUALITY'},{key:'follow_up_status',label:'STATUS'}]},
+ DOD_LEADERS:{title:'STUDENT LEADERS',desc:'Student leadership assignments and status.',color:'#1264a3',
+  saveRpc:'r127_save_student_leader',listRpc:'r186_student_leaders_list',
+  fields:[{id:'s1',type:'student',required:true,key:'student_id'},{id:'p1',type:'text',label:'POSITION',key:'position',required:true},
+   {id:'d1',type:'date',label:'START DATE',key:'start_date'},{id:'e1',type:'date',label:'END DATE',key:'end_date'},
+   {id:'st1',type:'select',label:'STATUS',key:'status',options:['ACTIVE','INACTIVE','COMPLETED','REMOVED']}],
+  columns:[{key:'sdms_code',label:'SDMS'},{key:'student_name',label:'STUDENT'},{key:'position',label:'POSITION'},{key:'start_date',label:'START'},{key:'status',label:'STATUS'}]},
+ DOD_VISITORS:{title:'VISITORS & GATE',desc:'Visitor check-in/out, purpose and destination.',color:'#0d3b70',
+  saveRpc:'r127_save_visitor_gate_entry',listRpc:'r186_visitor_gate_log_list',
+  fields:[{id:'d1',type:'date',label:'VISIT DATE',key:'visit_date'},{id:'n1',type:'text',label:'VISITOR NAME',key:'visitor_name',required:true},
+   {id:'ph1',type:'text',label:'PHONE',key:'phone'},{id:'id1',type:'text',label:'ID NUMBER',key:'id_number'},
+   {id:'p1',type:'text',label:'PURPOSE',key:'purpose',required:true,wide:true},{id:'pv1',type:'text',label:'PERSON TO VISIT',key:'person_to_visit'},
+   {id:'ti1',type:'time',label:'TIME IN',key:'time_in'}],
+  columns:[{key:'visit_date',label:'DATE'},{key:'visitor_name',label:'VISITOR'},{key:'purpose',label:'PURPOSE'},{key:'person_to_visit',label:'TO SEE'},{key:'status',label:'STATUS'}]},
+ DOD_PARENT_WELFARE:{title:'STUDENT WELFARE',desc:'Parent, learner-support and welfare follow-up.',color:'#6a1b9a',
+  saveRpc:'r127_save_parent_welfare_followup',listRpc:'r186_parent_welfare_followups_list',
+  fields:[{id:'s1',type:'student',required:true,key:'student_id'},{id:'d1',type:'date',label:'CONTACT DATE',key:'contact_date'},
+   {id:'ty1',type:'text',label:'CONTACT TYPE',key:'contact_type'},{id:'c1',type:'text',label:'CONCERN',key:'concern',required:true,wide:true},
+   {id:'p1',type:'text',label:'PARENT CONTACT',key:'parent_contact'},{id:'ds1',type:'text',label:'DISCUSSION',key:'discussion',wide:true},
+   {id:'cm1',type:'text',label:'COMMITMENT',key:'commitment',wide:true},{id:'f1',type:'date',label:'NEXT FOLLOW-UP',key:'next_follow_up_date'},
+   {id:'st1',type:'select',label:'STATUS',key:'status',options:['OPEN','FOLLOW_UP','RESOLVED','REFERRED','CLOSED']}],
+  columns:[{key:'contact_date',label:'DATE'},{key:'sdms_code',label:'SDMS'},{key:'student_name',label:'STUDENT'},{key:'concern',label:'CONCERN'},{key:'status',label:'STATUS'}]},
+ DOD_COMMITTEE:{title:'DISCIPLINE COMMITTEE',desc:'Meetings, cases, decisions and recommendations.',color:'#c62828',
+  saveRpc:'r127_save_discipline_committee_meeting',listRpc:'r186_discipline_committee_meetings_list',
+  fields:[{id:'d1',type:'date',label:'MEETING DATE',key:'meeting_date',required:true},{id:'a1',type:'text',label:'AGENDA',key:'agenda',wide:true},
+   {id:'m1',type:'text',label:'MEMBERS PRESENT',key:'members_present',wide:true},{id:'mn1',type:'text',label:'MINUTES',key:'minutes',wide:true}],
+  columns:[{key:'meeting_date',label:'DATE'},{key:'agenda',label:'AGENDA'},{key:'members_present',label:'MEMBERS'}]},
+ DOD_UMUGANDA:{title:'UMUGANDA / CIVIC ENGAGEMENT',desc:'Participation, outcomes and civic engagement evidence.',color:'#0f7a4a',
+  saveRpc:'r127_save_student_life_activity',listRpc:'r186_student_life_activities_list',
+  fields:[{id:'d1',type:'date',label:'ACTIVITY DATE',key:'activity_date',required:true},
+   {id:'ty1',type:'select',label:'TYPE',key:'activity_type',required:true,options:['UMUGANDA','CLUB','VALUES','CULTURE','ITORERO','CITIZENSHIP','COMMUNITY_SERVICE','SPORTS','OTHER']},
+   {id:'t1',type:'text',label:'TITLE',key:'title',required:true,wide:true},{id:'th1',type:'text',label:'THEME',key:'theme'},
+   {id:'ep1',type:'number',label:'EXPECTED PARTICIPANTS',key:'expected_participants'},{id:'ap1',type:'number',label:'ACTUAL PARTICIPANTS',key:'actual_participants'},
+   {id:'o1',type:'text',label:'OUTCOME',key:'outcome',wide:true}],
+  columns:[{key:'activity_date',label:'DATE'},{key:'activity_type',label:'TYPE'},{key:'title',label:'TITLE'},{key:'actual_participants',label:'PARTICIPANTS'}]},
+ DOD_SPECIAL_NEEDS:{title:'SPECIAL NEEDS',desc:'Learner support and special-needs register.',color:'#9a6700',
+  saveRpc:'r127_save_special_needs_profile',listRpc:'r186_special_needs_register_list',
+  fields:[{id:'s1',type:'student',required:true,key:'student_id'},{id:'t1',type:'text',label:'NEED TYPE',key:'special_need_type',required:true},
+   {id:'i1',type:'text',label:'IMPAIRMENT TYPE',key:'impairment_type'},{id:'sv1',type:'select',label:'SEVERITY',key:'severity',options:['MILD','MODERATE','SEVERE']},
+   {id:'sp1',type:'text',label:'SUPPORT PLAN',key:'support_plan',wide:true},{id:'ac1',type:'text',label:'ACCOMMODATION',key:'accommodation',wide:true}],
+  columns:[{key:'sdms_code',label:'SDMS'},{key:'student_name',label:'STUDENT'},{key:'special_need_type',label:'NEED TYPE'},{key:'severity',label:'SEVERITY'}]}
+};
+
+Object.keys(CONFIGS).forEach(key=>{
+ V['r186_svc_'+key]=function(m,c){buildService(m,c,CONFIGS[key])};
+});
+
+if(typeof V.r127_operational==='function'){
+ const prevOp2=V.r127_operational;
+ V.r127_operational=function(m,c,p){
+  const k=String((p&&(p.key||p.serviceKey))||'').toUpperCase();
+  if(CONFIGS[k])return V['r186_svc_'+k](m,c);
+  return prevOp2(m,c,p);
+ };
+}
+})();
