@@ -1,0 +1,13 @@
+GS MUSUMBA R186.98 — BACKUP / RELEASE MANAGEMENT CENTER
+
+Changes:
+- Added professional Backup / Release Management center.
+- Added one-click System Backup Package export.
+- Added one-click approved Timetable backup export.
+- Added Browser Data backup export.
+- Added exact Supabase CLI database-backup guide.
+- Routed BACKUP / RELEASE MANAGEMENT to the new backup center.
+- Bumped frontend cache/release references from R186.97 to R186.98.
+
+Important:
+The browser backup package is an application/evidence export. A complete PostgreSQL/Supabase database dump still requires the protected Supabase CLI/server backup path. No database password or service-role secret is embedded in the frontend.

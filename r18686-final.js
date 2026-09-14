@@ -347,7 +347,7 @@
   setTimeout(()=>run(document),650);
 })();
 
-/* ===== R186.97 FINAL PRINT SAFETY NET =====
+/* ===== R186.98 FINAL PRINT SAFETY NET =====
    Do not depend on popup windows for timetable printing.  Direct browser print is
    more reliable on Cloudflare Pages and still uses the official print pipeline. */
 (function(){

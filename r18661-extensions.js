@@ -8049,7 +8049,7 @@ function serviceShell(mount,ctx,routeId,title,desc,activityFn){
  [25,120,400].forEach(ms=>setTimeout(()=>{if(!document.body.contains(shell))return;enforceReadOnly(activity,routeId);visualSanitize(shell)},ms))
 }
 
-function invokeActivity(host,ctx,a,routeId,title){if(a&&a.view&&typeof V[a.view]==='function')return V[a.view](host,ctx);if(a&&a.op&&typeof V.r127_operational==='function')return V.r127_operational(host,ctx,{key:a.op,title});if(a&&a.live&&typeof V.live_service==='function')return V.live_service(host,ctx,{serviceKey:a.live,title});if(a&&a.finance&&typeof V.r127_finance_center==='function'){window.__r132FinanceTab=a.finance;return V.r127_finance_center(host,ctx,{tab:a.finance})}if(a&&a.library)return libraryActivity(host,ctx,a.library,routeId,title);return genericActivity(host,routeId,title)}
+function invokeActivity(host,ctx,a,routeId,title){if((routeId==='backup-release'||String(title||'').toUpperCase()==='BACKUP / RELEASE MANAGEMENT')&&typeof V.gsm_backup_center==='function')return V.gsm_backup_center(host,ctx);if(a&&a.view&&typeof V[a.view]==='function')return V[a.view](host,ctx);if(a&&a.op&&typeof V.r127_operational==='function')return V.r127_operational(host,ctx,{key:a.op,title});if(a&&a.live&&typeof V.live_service==='function')return V.live_service(host,ctx,{serviceKey:a.live,title});if(a&&a.finance&&typeof V.r127_finance_center==='function'){window.__r132FinanceTab=a.finance;return V.r127_finance_center(host,ctx,{tab:a.finance})}if(a&&a.library)return libraryActivity(host,ctx,a.library,routeId,title);return genericActivity(host,routeId,title)}
 function openService(host,ctx,s){const [routeId,title,desc,a]=s;serviceShell(host,ctx,routeId,title,desc,(activity)=>invokeActivity(activity,ctx,a,routeId,title))}
 function roleServiceAction(routeId,key){
   const all=[...(SPEC[key]?.services||[]),...SYSTEM_SERVICES,...STUDENT_SERVICES];
@@ -9908,7 +9908,7 @@ const canonical={
  'STAFF MANAGEMENT':'r176_staff_directory','TEACHERS / STAFF MANAGEMENT':'r176_staff_directory','TEACHER MANAGEMENT':'r176_staff_directory','STAFF RECORDS':'r176_staff_directory',
  'CLASS MANAGEMENT':'r139_class_structure','SUBJECT MANAGEMENT':'r139_camis_config','ASSESSMENT CATEGORIES':'r139_camis_config','MARKS MANAGEMENT & CONFIGURATION':'r139_camis_config','MARKS CONFIGURATION':'r139_camis_config','CAMIS CONFIGURATION':'r139_camis_config','CAMIS & EXAMS':'r139_camis_config','GRADE SCALE CONFIGURATION':'r139_camis_config',
  'ACADEMIC YEARS & TERMS':'r145_academic_context','ACADEMIC YEARS AND TERMS':'r145_academic_context','SCHOOL CALENDAR':'r145_academic_context',
- 'USERS & ACCESS':'r146_accounts','USER ACCOUNTS':'r146_accounts','ROLES & PERMISSIONS':'r146_system','ACCOUNT / SECURITY SETTINGS':'r129_account','SCHOOL PROFILE':'r129_schoolprofile','SYSTEM HEALTH':'r127_system_health','AUDIT LOG':'r127_system_health','AUDIT & VERSION':'version','BACKUP / RELEASE MANAGEMENT':'version','DATA IMPORT / EXPORT':'SA_INTEGRITY','DATABASE RECONCILIATION':'SA_INTEGRITY',
+ 'USERS & ACCESS':'r146_accounts','USER ACCOUNTS':'r146_accounts','ROLES & PERMISSIONS':'r146_system','ACCOUNT / SECURITY SETTINGS':'r129_account','SCHOOL PROFILE':'r129_schoolprofile','SYSTEM HEALTH':'r127_system_health','AUDIT LOG':'r127_system_health','AUDIT & VERSION':'version','BACKUP / RELEASE MANAGEMENT':'gsm_backup_center','DATA IMPORT / EXPORT':'SA_INTEGRITY','DATABASE RECONCILIATION':'SA_INTEGRITY',
  'TEACHER ASSIGNMENTS CONFIGURATION':'r18612_teacher_assignments','TEACHER ASSIGNMENTS':'r18612_teacher_assignments','TIMETABLE MANAGEMENT':'r18612_timetable_manager','TIMETABLE OPERATIONS':'r18612_timetable_manager',
  'MOVE / DIVIDE STUDENTS':'r18660_student_move','STUDENT MANAGEMENT':'r132_student360','STUDENT IDENTIFICATION':'r127_secretary_center','STUDENT IDENTIFICATION / PROFILE COMPLETION':'r127_secretary_center','STUDENT LIST CHANGE / UPLOAD / SAVE':'r18636_student_roster_sync','ENROLMENT & CLASS PLACEMENT':'r127_secretary_center','STUDENT MOVEMENT':'r127_secretary_center'
 };
@@ -9917,4 +9917,40 @@ function dedupGrid(grid){if(!grid)return;const seen=new Set();$$('.r18638-card',
 function schedule(root){[40,300,900].forEach(ms=>setTimeout(()=>dedupGrid(root),ms))}
 ['r18638_system','r18638_headteacher','r18638_dos','r18638_dod','r18638_secretary','r18638_bursar','r18638_librarian'].forEach(name=>{if(typeof V[name]!=='function')return;const old=V[name];V[name]=async function(m,c){const r=await old(m,c);schedule(m);return r}});
 window.GSM_R18697_SERVICE_REPAIR={release:'R186.97',semanticDedup:true,canonicalFormRouting:true};
+})();
+
+
+/* ===== R186.98 BACKUP / RELEASE MANAGEMENT CENTER ===== */
+(function(){
+'use strict';
+const V=window.GSM_VIEWS||{}, U=window.GSM_UTIL||{};
+if(window.__GSM_R18698_BACKUP_CENTER__)return; window.__GSM_R18698_BACKUP_CENTER__=true;
+const esc=U.esc||((v)=>String(v==null?'':v).replace(/[&<>\"]/g,s=>({'&':'&amp;','<':'&lt;','>':'&gt;','\\"':'&quot;'}[s])));
+function downloadFile(name,text,type){const blob=new Blob([text],{type:type||'application/octet-stream'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000)}
+function snapshot(){
+ const local={};
+ try{for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k)local[k]=localStorage.getItem(k)}}catch(e){}
+ const session={};
+ try{for(let i=0;i<sessionStorage.length;i++){const k=sessionStorage.key(i);if(k)session[k]=sessionStorage.getItem(k)}}catch(e){}
+ return {backup_version:'R186.98',created_at:new Date().toISOString(),system:'GS MUSUMBA SCHOOL MANAGEMENT SYSTEM',release:document.documentElement.getAttribute('data-gsm-release')||'R186.98',localStorage:local,sessionStorage:session,timetable_master:window.GSM_R18628_TIMETABLE_MASTER||null,timetable_authority:window.GSM_R18632_AUTHORITY||null};
+}
+function csv(rows){return rows.map(r=>r.map(v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"').join(',')).join('\n')}
+function backupCenter(mount,ctx){
+ mount.innerHTML='<div class="r144-page"><section class="r144-head"><div><h2>BACKUP / RELEASE MANAGEMENT</h2><p>Professional backup center. Browser/system evidence can be exported immediately; full Supabase database dumps remain protected server-side.</p></div><span class="r144-pill ok">R186.98</span></section><section class="r144-system-grid">'+
+ [['SYSTEM BACKUP PACKAGE','Download a timestamped JSON package containing browser configuration, release evidence and embedded approved timetable authority.',0],['TIMETABLE BACKUP','Export the approved timetable master as JSON for safe offline retention.',1],['BROWSER DATA BACKUP','Export application local/session storage used by this browser. Secrets are not requested or displayed.',2],['DATABASE BACKUP GUIDE','Show the exact safe Supabase CLI commands required for a complete database dump.',3]].map((x,i)=>'<article class="r144-system-card" data-bk="'+x[2]+'"><div><h3>'+x[0]+'</h3><p>'+x[1]+'</p></div><span>RUN</span></article>').join('')+'</section><div id="gsmBackupMsg" class="r144-note" style="margin-top:14px">Choose a backup action above.</div></div>';
+ const msg=mount.querySelector('#gsmBackupMsg');
+ mount.querySelectorAll('[data-bk]').forEach(el=>el.onclick=()=>{
+  const k=Number(el.dataset.bk), stamp=new Date().toISOString().replace(/[:.]/g,'-');
+  try{
+   if(k===0){downloadFile('GS_MUSUMBA_SYSTEM_BACKUP_'+stamp+'.json',JSON.stringify(snapshot(),null,2),'application/json');msg.textContent='System backup package created successfully in your browser download folder.'}
+   if(k===1){downloadFile('GS_MUSUMBA_TIMETABLE_BACKUP_'+stamp+'.json',JSON.stringify({created_at:new Date().toISOString(),authority:window.GSM_R18632_AUTHORITY||null,timetable_master:window.GSM_R18628_TIMETABLE_MASTER||null},null,2),'application/json');msg.textContent='Timetable backup created successfully.'}
+   if(k===2){const x=snapshot();downloadFile('GS_MUSUMBA_BROWSER_DATA_'+stamp+'.json',JSON.stringify({created_at:x.created_at,localStorage:x.localStorage,sessionStorage:x.sessionStorage},null,2),'application/json');msg.textContent='Browser data backup created successfully.'}
+   if(k===3){msg.innerHTML='<b>COMPLETE DATABASE BACKUP</b><br><br><code>supabase.cmd db dump --linked -f backups\\schema_before_R18698.sql</code><br><code>supabase.cmd db dump --linked --data-only --use-copy -f backups\\data_before_R18698.sql</code><br><code>supabase.cmd db dump --linked --role-only -f backups\\roles_before_R18698.sql</code><br><br>Do not place database passwords or service-role keys in frontend files.'}
+  }catch(e){msg.textContent='Backup failed: '+(e.message||e)}
+ });
+}
+V.gsm_backup_center=backupCenter; V.r18698_backup=backupCenter;
+const names=['r18638_system','r144_system'];
+/* Replace only the canonical backup-release service route; other release evidence remains intact. */
+window.GSM_R18698_BACKUP={release:'R186.98',service:'BACKUP / RELEASE MANAGEMENT',clientPackage:true,timetableExport:true,browserDataExport:true,databaseDumpGuide:true};
 })();
