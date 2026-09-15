@@ -1,0 +1,35 @@
+GS MUSUMBA — STUDENT UPLOAD + GLOBAL STUDENT SYNCHRONIZATION AUDIT / R186.90
+================================================================================
+AUDIT DATE: 2026-09-15
+SOURCE APPLICATION: GS MUSUMBA FINAL DEPLOY (R186.89 baseline)
+
+R186.90 IMPLEMENTATION
+----------------------
+1. Student Upload remains the controlled master-student import service.
+2. SDMS CODE remains the unique student match key.
+3. The existing live RPC r18661_import_students remains responsible for validated
+   upsert/update, class movement and preservation of existing records.
+4. After a successful commit, the application now performs an automatic live
+   student-directory refresh through r18676_student_directory.
+5. A global `gsm-students-synchronized` event is emitted so student-aware services
+   can refresh their current view without requiring manual data re-entry.
+6. The current service is automatically refreshed after successful synchronization.
+7. The sync layer records a lightweight synchronization marker in localStorage.
+8. Attendance, marks, discipline and history are NOT rewritten by the client sync
+   layer; the existing live database remains the source of truth.
+9. No automatic deletion/deactivation is introduced by this change.
+10. XLSX/CSV/TSV/TXT import, validation, preview, reconciliation and error report
+    behavior from R186.89 are preserved.
+
+IMPORTANT
+---------
+This package changes the web application code only. The actual student records are
+saved by the application's live database RPC when the authorized user commits an
+import. The included website does not contain the user's ALL STUDENTS.xlsx file.
+
+TECHNICAL CHECK
+---------------
+- r186-core.js: Node syntax check PASS.
+- r18661-extensions.js: Node syntax check PASS.
+- r18661-loader.js: Node syntax check PASS.
+- r18686-final.js: Node syntax check PASS.

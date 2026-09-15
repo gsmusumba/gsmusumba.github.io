@@ -340,3 +340,49 @@
   setTimeout(()=>run(document),100);
   setTimeout(()=>run(document),650);
 })();
+
+
+/* ===== R186.90 GLOBAL STUDENT MASTER SYNCHRONIZATION =====
+   Upload -> Save -> Synchronize. The live database remains the single source of truth.
+   Existing attendance, marks and history are never rewritten by the client sync layer. */
+(function(){
+'use strict';
+if(window.__GSM_R18690_GLOBAL_STUDENT_SYNC__)return;
+window.__GSM_R18690_GLOBAL_STUDENT_SYNC__=true;
+const L=window.GSM_LIVE||{};
+const rpc=(name,args={})=>L&&typeof L.rpc==='function'?L.rpc(name,args):Promise.reject(new Error('LIVE_RPC_UNAVAILABLE'));
+const SYNC_KEY='gsm_student_master_sync_r18690';
+
+async function refresh(meta={}){
+  const d=await rpc('r18676_student_directory',{
+    p_query:null,p_class_id:null,p_level:null,p_sex:null,p_sort:'NAME_ASC',p_limit:50000
+  });
+  const rows=(d&&d.rows)||[];
+  window.__GSM_STUDENT_DIRECTORY_CACHE__={rows,scope:d&&d.scope||'ALL',synced_at:new Date().toISOString()};
+  try{localStorage.setItem(SYNC_KEY,JSON.stringify({
+    synced_at:new Date().toISOString(),
+    reason:meta.reason||'REFRESH',
+    processed:Number(meta.result&&meta.result.processed||0),
+    created:Number(meta.result&&meta.result.created||0),
+    updated:Number(meta.result&&meta.result.updated||0),
+    moved:Number(meta.result&&meta.result.moved||0),
+    students:rows.length
+  }))}catch(_){}
+  try{window.dispatchEvent(new CustomEvent('gsm-students-synchronized',{detail:{
+    rows,reason:meta.reason||'REFRESH',result:meta.result||null
+  }}))}catch(_){}
+  return {rows,scope:d&&d.scope||'ALL'};
+}
+
+window.GSM_GLOBAL_STUDENT_SYNC={refresh,release:'R186.90',sourceOfTruth:'LIVE_DATABASE',matchKey:'SDMS_CODE',
+  preserves:['attendance','marks','discipline','history','existing_enrolments']};
+
+document.addEventListener('gsm-students-synchronized',function(e){
+  try{
+    const detail=e&&e.detail||{};
+    document.documentElement.setAttribute('data-gsm-students-synced','1');
+    document.documentElement.setAttribute('data-gsm-students-sync-time',new Date().toISOString());
+    window.__GSM_LAST_STUDENT_SYNC__=detail;
+  }catch(_){}
+});
+})();
