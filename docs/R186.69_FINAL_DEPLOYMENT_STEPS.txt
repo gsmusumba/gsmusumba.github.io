@@ -1,0 +1,24 @@
+GS MUSUMBA R186.69 — SAFE FULL REPLACEMENT
+
+1. KEEP THE CURRENT .git FOLDER. It contains the GitHub repository connection/history.
+2. Before deleting anything, create a safety branch in VS Code Terminal:
+   git branch backup-before-r18669-clean
+3. Download/extract this ZIP OUTSIDE the current repository first.
+4. In the current repository folder, delete old working files/folders but DO NOT delete the hidden .git folder.
+5. Copy ALL files/folders from this ZIP into the repository root. Do not change names or move runtime files into frontend/.
+6. In VS Code Terminal run:
+   git status --short
+   git add -A
+   git status
+   git commit -m "R186.69 clean final production deployment"
+   git push origin main
+7. Open https://gsmusumba.github.io/ and press Ctrl+Shift+R.
+8. GitHub > repository > Actions: latest Pages deployment must be green.
+9. Google Search Console > URL Inspection > https://gsmusumba.github.io/ > Request Indexing.
+10. Google Search Console > Sitemaps > submit sitemap.xml.
+
+ROLLBACK
+If anything unexpected happens:
+   git reset --hard backup-before-r18669-clean
+   git push --force-with-lease origin main
+Only use rollback if the new deployment is actually broken.

@@ -1,0 +1,42 @@
+GS MUSUMBA R186.69 CLEAN FULL FINAL QA
+
+PASS — exists index.html
+PASS — exists GS_MUSUMBA_OFFICIAL_LOGO.jpg
+PASS — exists r186-core.js
+PASS — exists r186-qa.html
+PASS — exists r18661-app.css
+PASS — exists r18661-extensions.js
+PASS — exists r18661-loader.js
+PASS — exists r18661-login.css
+PASS — exists sw.js
+PASS — exists robots.txt
+PASS — exists sitemap.xml
+PASS — exists .nojekyll
+PASS — exists .gitignore
+PASS — production title exact
+PASS — canonical root
+PASS — index is indexable
+PASS — qa is noindex
+PASS — favicon/logo metadata
+PASS — open graph title
+PASS — robots blocks qa
+PASS — sitemap root
+PASS — index references r18661-login.css
+PASS — index references r18661-loader.js
+PASS — index references r186-core.js
+PASS — index references GS_MUSUMBA_OFFICIAL_LOGO.jpg
+PASS — loader references r18661-app.css
+PASS — loader references r18661-extensions.js
+PASS — service worker release
+PASS — service worker excludes supabase cache
+PASS — index HTML parse
+PASS — qa HTML parse
+PASS — no /frontend runtime dependency
+PASS — logo nonempty
+
+PASS: 33/33
+FAIL: 0/33
+PASS — Node syntax r186-core.js
+PASS — Node syntax r18661-loader.js
+PASS — Node syntax r18661-extensions.js
+PASS — Node syntax sw.js
