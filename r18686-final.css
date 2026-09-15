@@ -430,3 +430,9 @@
   #appShell #main .r18669-attendance-roster tbody td::before{content:none!important}
   #appShell #main .t160-status-select,#appShell #main .t160-note{width:auto!important;min-width:110px!important}
 }
+
+/* R186.99 — full student identification upload table */
+#appShell #main .r18636-full-roster{overflow:auto!important;max-width:100%!important;max-height:70vh!important;-webkit-overflow-scrolling:touch!important}
+#appShell #main .r18636-full-roster table{min-width:1500px!important;width:max-content!important}
+#appShell #main .r18636-full-roster th,#appShell #main .r18636-full-roster td{white-space:nowrap!important;padding:6px 8px!important;font-size:11px!important}
+#appShell #main .r18636-full-roster th{position:sticky;top:0;z-index:2}
