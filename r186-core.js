@@ -25,6 +25,20 @@ function byId(id){return document.getElementById(id)} function qs(sel,root){retu
 function debounce(fn,ms){let t;return function(...a){clearTimeout(t);t=setTimeout(()=>fn.apply(this,a),ms||180)}}
 function toast(msg){const t=byId("toast");if(!t)return;t.textContent=msg;t.classList.add("show");clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove("show"),2600)}
 const REF={profileMap:Object.fromEntries((DATA.profile||[]).map(r=>[r.FIELD,r.VALUE])),years:DATA.years||[],terms:DATA.terms||[],classes:DATA.classes||[],subjects:DATA.subjects||[],staff:DATA.staff||[],students:DATA.students||[],enrollments:DATA.enrollments||[],roles:DATA.roles||[]};
+/* R186.89 — 20 academic-year reference horizon. Live context remains backend-authoritative. */
+(function(){
+  const existing=new Set(REF.years.map(y=>String(y.NAME)));
+  for(let start=2025;start<=2044;start++){
+    const name=start+'-'+(start+1);
+    if(!existing.has(name)) REF.years.push({ACADEMIC_YEAR_ID:'AY-'+start,NAME:name,START_DATE:start+'-09-01',END_DATE:(start+1)+'-07-31',STATUS:'PLANNED',LOCKED:'NO'});
+  }
+  const termNames=['TERM 1','TERM 2','TERM 3'];
+  const termKeys=new Set(REF.terms.map(t=>String(t.ACADEMIC_YEAR)+'|'+String(t.TERM_NAME)));
+  for(let start=2025;start<=2044;start++){
+    const ay=start+'-'+(start+1);
+    termNames.forEach((tn,i)=>{const k=ay+'|'+tn;if(!termKeys.has(k)) REF.terms.push({TERM_ID:'T'+(i+1)+'-'+start,ACADEMIC_YEAR:ay,TERM_NAME:tn,START_DATE:null,END_DATE:null,STATUS:'PLANNED'});});
+  }
+})();
 function schoolField(f){return REF.profileMap[f]||""}
 function activeYearName(){const a=REF.years.find(y=>String(y.STATUS).toUpperCase()==="ACTIVE");return a?a.NAME:(REF.years[0]?REF.years[0].NAME:"")}
 function termsForYear(ay){return REF.terms.filter(t=>t.ACADEMIC_YEAR===ay)}

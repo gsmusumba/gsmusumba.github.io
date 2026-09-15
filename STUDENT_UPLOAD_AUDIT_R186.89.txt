@@ -1,0 +1,31 @@
+GS MUSUMBA — STUDENT UPLOAD + ACADEMIC CONTEXT AUDIT / R186.89
+===============================================================
+
+AUDIT DATE: 2026-09-15
+SOURCE FILE: GS_MUSUMBA_STUDENT_IDENTIFICATION_SDMS_990.csv
+
+REAL DATA CHECK
+---------------
+- Source data rows: 990 (plus header).
+- Source columns: 12.
+- Duplicate SDMS CODE values: 0.
+- The supplied export contains 114 deterministic P4 formatting/column-shift rows where the name and gender were merged and age appeared in the SEX cell.
+- R186.89 repairs only those rows when the evidence is explicit (Male/Female token in the name + numeric age in the SEX cell + blank AGE). No guessing is used.
+
+R186.89 FIXES
+-------------
+1. Marks Entry now attempts to recover missing academic_year_id / term_id from the existing live assignment-matrix authority before calling the marks operational-context RPC.
+2. Marks Entry still refuses to load if the backend truly has no active academic context; it reports the real backend requirement instead of silently using a wrong year/term.
+3. Academic-year reference horizon is 20 school years: 2025-2026 through 2044-2045. Live write context remains backend-authoritative.
+4. Student Upload accepts the user's exact schema variants: SN (optional), Code/SDMS CODE, Names/FULL NAME, Gender/SEX, Age, Father, Mother, Boarding Type, District, Sector, Cell, Village, Class FORM/SOURCE CLASS.
+5. Added LOAD INCLUDED 990 for the official bundled student file.
+6. Added deterministic repair for the 114 malformed P4 source rows described above.
+7. Full payload continues to be sent to r18661_import_students; preview is required before commit.
+8. No automatic student deletion. Existing attendance, marks, health/history and enrolment records are preserved by the import workflow.
+
+TECHNICAL CHECK
+---------------
+- r186-core.js: Node syntax check PASS.
+- r18661-extensions.js: Node syntax check PASS.
+- r18661-loader.js: Node syntax check PASS.
+- r18686-final.js: Node syntax check PASS.
