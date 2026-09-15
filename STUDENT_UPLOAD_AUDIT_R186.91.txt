@@ -1,0 +1,3 @@
+GS MUSUMBA R186.91 - XLSX STUDENT UPLOAD FIX
+
+Fixed XLSX parsing in Student List Change / Upload / Save. The uploader now reads standard .xlsx OOXML directly in supported modern browsers instead of treating the ZIP container as text. Maps SN, Code, Names, Gender to NO., SDMS CODE, STUDENT NAME, SEX. After SAVE & SYNCHRONIZE, the global student directory refresh is triggered. Existing profile/enrolment/history data is preserved by the existing RPC.
