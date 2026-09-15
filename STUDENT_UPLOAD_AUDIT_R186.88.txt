@@ -1,0 +1,38 @@
+GS MUSUMBA — STUDENT UPLOAD AUDIT / R186.88
+============================================
+
+AUDIT DATE: 2026-09-15
+SOURCE FILE: GS_MUSUMBA_STUDENT_IDENTIFICATION_SDMS_990.csv
+
+REAL DATA CHECK
+---------------
+- Rows in source file: 990
+- Columns in source file: 12
+- Duplicate SDMS CODE values: 0
+- Required identification fields are checked before server validation.
+- The source file contains 114 rows with an invalid SEX value. These rows are not silently repaired or imported.
+- The 114 affected rows are in the P4 portion of the source export and show shifted/misaligned values (for example, a numeric age appears in SEX while AGE is blank).
+
+R186.88 STUDENT UPLOAD CHANGES
+------------------------------
+1. Full identification schema supported:
+   SDMS CODE, FULL NAME, SEX, AGE, FATHER / GUARDIAN, MOTHER / GUARDIAN,
+   BOARDING TYPE, DISTRICT, SECTOR, CELL, VILLAGE, SOURCE CLASS.
+2. Safe CSV/TSV/TXT parsing with quoted-field support; no naive comma split.
+3. XLSX upload remains supported by the existing browser parser.
+4. Local validation now checks SDMS, name, sex, source class, age range and duplicate SDMS codes.
+5. Full-row preview shows age, boarding, source class and location.
+6. Server preview/validation receives the complete identification payload, not only four fields.
+7. Error report download added for invalid/duplicate rows.
+8. Full roster reconciliation remains available and does not automatically delete/deactivate students.
+9. Commit remains blocked until validation passes.
+10. Existing attendance and marks logic was not intentionally changed by this audit.
+11. Cache/release marker bumped to R186.88.
+
+IMPORTANT
+---------
+The supplied source CSV itself contains 114 malformed SEX values. The application intentionally flags them instead of guessing or changing student identity data. Correct the source rows and upload again before committing those rows.
+
+TECHNICAL CHECK
+---------------
+- All JavaScript files pass Node syntax validation.
