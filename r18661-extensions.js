@@ -7904,7 +7904,26 @@ V.r18660_student_move=async function(host){
  host.querySelectorAll('.r18660-mode').forEach(b=>b.onclick=()=>{mode=b.dataset.mode;if(mode==='ALL')applyAll();else if(mode==='RANGE')applyRange();else{syncSelectionMode();draw()}});el('r60ApplyRange').onclick=applyRange;el('r60Clear').onclick=()=>{mode='CUSTOM';selected.clear();syncSelectionMode();draw()};el('r60Move').onclick=moveSelected;syncSelectionMode();
 };
 
-function genericActivity(host,routeId,title){host.innerHTML='<div class="r18638-report-status" id="r18641GenericNotice"><b>'+esc(title)+'</b><br>This screen has no separate data-entry form. Its records are shown through the <b>VIEW / REPORT</b> menu above.<br>Pick <b>REPORT 1</b>, <b>REPORT 2</b> or <b>ANALYSIS</b> from that drop-down, choose a period, then press <b>APPLY / REFRESH</b> to see the live evidence.<div class="r18638-report-actions r18638-no-print" style="margin-top:10px"><button type="button" class="r18638-btn white" id="r18641JumpReport">GO TO VIEW / REPORT ↑</button></div></div>';const jump=host.querySelector('#r18641JumpReport');if(jump)jump.onclick=()=>{const shell=host.closest('.r18638-service-shell');const sel=shell&&shell.querySelector('#r39ReportSelect');if(sel){sel.scrollIntoView({behavior:'smooth',block:'center'});sel.focus();}}}
+function genericActivity(host,routeId,title){
+ host.innerHTML='<div class="r18638-report-status" id="r18641GenericNotice"><b>'+esc(title)+'</b><br>This screen has no separate data-entry form. Its records are shown through the <b>VIEW / REPORT</b> menu above.<br>Pick <b>REPORT 1</b>, <b>REPORT 2</b> or <b>ANALYSIS</b> from that drop-down, choose a period, then press <b>APPLY / REFRESH</b> to see the live evidence.<div class="r18638-report-actions r18638-no-print" style="margin-top:10px"><button type="button" class="r18638-btn white" id="r18641JumpReport">GO TO VIEW / REPORT ↑</button></div></div>';
+ const jump=host.querySelector('#r18641JumpReport');
+ if(jump)jump.onclick=()=>{
+   const shell=host.closest('.r18638-service-shell');
+   const pane=shell&&shell.querySelector('.r18638-report-pane');
+   const bar=shell&&shell.querySelector('.r18638-service-tabs');
+   const sel=shell&&shell.querySelector('#r39ReportSelect');
+   const reveal=()=>{
+     if(pane){pane.hidden=false;pane.scrollIntoView({behavior:'smooth',block:'start'});}
+     if(sel){sel.disabled=false;sel.focus();return true;}
+     return false;
+   };
+   if(reveal())return;
+   jump.disabled=true;jump.textContent='OPENING VIEW / REPORT…';
+   let tries=0;
+   const wait=()=>{if(reveal()||tries++>=30){jump.disabled=false;jump.textContent='GO TO VIEW / REPORT ↑';return;}setTimeout(wait,150)};
+   wait();
+ };
+}
 
 /* -------------------------- ROLE / MODULE VIEWS -------------------------- */
 V.r18638_headteacher=(m,c)=>roleCenter(m,c,'HEADTEACHER');V.r18638_dos=(m,c)=>roleCenter(m,c,'DOS');V.r18638_dod=(m,c)=>roleCenter(m,c,'DOD');V.r18638_secretary=(m,c)=>roleCenter(m,c,'SECRETARY');V.r18638_bursar=(m,c)=>roleCenter(m,c,'BURSAR');V.r18638_librarian=(m,c)=>roleCenter(m,c,'LIBRARIAN');
