@@ -8324,10 +8324,44 @@ V.marksentry=function(mount,c){
 };
 
 /* ========================= MINIMAL STUDENT ROSTER SYNC ========================= */
+function r18636ColIndex(ref){let n=0;for(const c of String(ref||'').match(/[A-Z]+/i)?.[0]||''){n=n*26+(c.toUpperCase().charCodeAt(0)-64)}return Math.max(0,n-1)}
+async function r18636UnzipEntries(buf){
+ const b=new Uint8Array(buf),dv=new DataView(buf);let eocd=-1;for(let i=b.length-22;i>=Math.max(0,b.length-66000);i--){if(dv.getUint32(i,true)===0x06054b50){eocd=i;break}}if(eocd<0)throw new Error('This does not look like a valid XLSX file.');
+ const count=dv.getUint16(eocd+10,true),off=dv.getUint32(eocd+16,true);let p=off;const out=new Map();const td=new TextDecoder();
+ for(let k=0;k<count;k++){if(dv.getUint32(p,true)!==0x02014b50)break;const method=dv.getUint16(p+10,true),cs=dv.getUint32(p+20,true),nl=dv.getUint16(p+28,true),el=dv.getUint16(p+30,true),cl=dv.getUint16(p+32,true),lo=dv.getUint32(p+42,true),name=td.decode(b.slice(p+46,p+46+nl));out.set(name,{method,cs,lo});p+=46+nl+el+cl}
+ async function read(name){const e=out.get(name);if(!e)return null;const lp=e.lo;if(dv.getUint32(lp,true)!==0x04034b50)throw new Error('Invalid XLSX local header.');const nl=dv.getUint16(lp+26,true),el=dv.getUint16(lp+28,true),start=lp+30+nl+el,bytes=b.slice(start,start+e.cs);if(e.method===0)return td.decode(bytes);if(e.method===8){if(!('DecompressionStream'in window))throw new Error('This browser cannot open XLSX directly. Save the file as CSV UTF-8 and upload again.');const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'));return td.decode(await new Response(stream).arrayBuffer())}throw new Error('Unsupported XLSX compression method.');}
+ return {names:[...out.keys()],read};
+}
+/* Reads an .xlsx roster (either the simple NO/SDMS/NAME/SEX layout, or the
+   official per-class SDMS export which has 5-6 metadata rows — including a
+   "Class:" row — above the real header) and returns text in the same
+   "NO.,SDMS CODE,STUDENT NAME,SEX" shape parseRosterText already expects,
+   so the rest of this tool (preview, save) is untouched. SEX is optional:
+   the official per-class export doesn't include it, and this tool never
+   changes class placement, so a blank SEX just leaves that field alone. */
+async function r18636XlsxToRosterText(file){
+ const z=await r18636UnzipEntries(await file.arrayBuffer()),ss=[];const sx=await z.read('xl/sharedStrings.xml');if(sx){const doc=new DOMParser().parseFromString(sx,'application/xml');doc.querySelectorAll('si').forEach(si=>ss.push(si.textContent||''))}
+ const sheet=z.names.filter(n=>/^xl\/worksheets\/sheet\d+\.xml$/i.test(n)).sort()[0];if(!sheet)throw new Error('No worksheet found in this XLSX file.');const xml=await z.read(sheet),doc=new DOMParser().parseFromString(xml,'application/xml'),matrix=[];
+ doc.querySelectorAll('sheetData row').forEach(re=>{const r=[];re.querySelectorAll('c').forEach(c=>{const idx=r18636ColIndex(c.getAttribute('r')),t=c.getAttribute('t'),v=c.querySelector('v')?.textContent??'',inline=c.querySelector('is')?.textContent??'';r[idx]=t==='s'?ss[Number(v)]??'':t==='inlineStr'?inline:v});matrix.push(r)});
+ const nh=v=>String(v||'').trim().toUpperCase().replace(/[._-]+/g,' ').replace(/\s+/g,' ');
+ const codeHeads=['SDMS CODE','SDMS','STUDENT ID','STUDENT CODE','CODE'],nameHeads=['FULL NAME','STUDENT NAME','NAME','NAMES'],sexHeads=['SEX','GENDER'];
+ let hRow=-1;for(let r=0;r<Math.min(matrix.length,20);r++){const h=(matrix[r]||[]).map(nh);if(h.some(x=>codeHeads.includes(x))&&h.some(x=>nameHeads.includes(x))){hRow=r;break}}
+ const out=[];
+ if(hRow>=0){
+  const h=matrix[hRow].map(nh),ix=names=>{for(const n of names){const i=h.indexOf(n);if(i>=0)return i}return -1};
+  const iSd=ix(codeHeads),iNm=ix(nameHeads),iSx=ix(sexHeads);
+  matrix.slice(hRow+1).filter(r=>r&&r.some(x=>String(x||'').trim())).forEach((r,i)=>out.push([i+1,String(r[iSd]||'').trim(),String(r[iNm]||'').trim(),iSx>=0?String(r[iSx]||'').trim():'']));
+ }else{
+  const first=matrix.find(r=>r&&r.some(x=>String(x||'').trim()))||[];
+  if(!(first.length>=3&&/^\d{6,}$/.test(String(first[1]||'').trim())))throw new Error('Could not find SDMS CODE / STUDENT NAME columns in this file.');
+  matrix.filter(r=>r&&r.some(x=>String(x||'').trim())).forEach((r,i)=>out.push([r[0]||i+1,String(r[1]||'').trim(),String(r[2]||'').trim(),r.length>3?String(r[3]||'').trim():'']));
+ }
+ return ['NO.,SDMS CODE,STUDENT NAME,SEX'].concat(out.map(r=>r.map(c=>/[",\n]/.test(String(c))?'"'+String(c).replace(/"/g,'""')+'"':c).join(','))).join('\n');
+}
 function parseCsvLine(line,sep){const out=[];let cur='',q=false;for(let i=0;i<line.length;i++){const ch=line[i];if(ch==='"'){if(q&&line[i+1]==='"'){cur+='"';i++}else q=!q}else if(ch===sep&&!q){out.push(cur.trim());cur=''}else cur+=ch}out.push(cur.trim());return out}
 function parseRosterText(text){const lines=String(text||'').replace(/\r/g,'').split('\n').filter(x=>x.trim()),out=[];if(!lines.length)return out;const sep=lines[0].includes('\t')?'\t':',';let start=0,heads=parseCsvLine(lines[0],sep).map(up);if(heads.some(h=>h.includes('SDMS'))){start=1}for(let i=start;i<lines.length;i++){const a=parseCsvLine(lines[i],sep);if(a.length<3)continue;const offset=a.length>=4?1:0;out.push({no:offset?a[0]:i-start+1,sdms_code:a[offset]||'',student_name:a[offset+1]||'',sex:a[offset+2]||''})}return out}
-V.r18636_student_roster_sync=function(mount){pageTitle('STUDENT LIST · CHANGE / UPLOAD / SAVE');let rows=[],source='MANUAL_STUDENT_LIST';mount.innerHTML=`<div class="r18636-panel"><h3>STUDENT LIST SYNCHRONIZATION</h3><p><b>AUTHORIZED COLUMNS ONLY:</b> NO. · SDMS CODE · STUDENT NAME · SEX. Matching uses SDMS. Existing full profiles, parents, addresses, health/special-needs, class placement and history are preserved.</p><div class="r18636-tools-row r18636-no-print"><button id="r18636RosterChange" class="r18636-btn-yellow">CHANGE LIST</button><button id="r18636RosterUpload" class="r18636-btn-blue">UPLOAD LIST</button><button id="r18636RosterPreview" class="r18636-btn-white">PREVIEW</button><button id="r18636RosterSave" class="r18636-btn-green">SAVE & SYNCHRONIZE</button><button id="r18636RosterClear" class="r18636-btn-red">CLEAR</button><input id="r18636RosterFile" type="file" accept=".csv,.txt" hidden></div><textarea id="r18636RosterText" class="r18636-roster-text" placeholder="NO.,SDMS CODE,STUDENT NAME,SEX\n1,123456,STUDENT NAME,M\n2,123457,STUDENT NAME,F"></textarea><div id="r18636RosterState" class="r18636-marks-status">Paste a list or upload CSV/TXT, then PREVIEW before SAVE & SYNCHRONIZE.</div></div><div class="r18636-table-wrap"><table><thead><tr><th class="r18636-col-no">NO.</th><th class="r18636-col-sdms">SDMS CODE</th><th class="r18636-col-name">STUDENT NAME</th><th class="r18636-col-sex">SEX</th></tr></thead><tbody id="r18636RosterRows"><tr><td colspan="4">No preview yet.</td></tr></tbody></table></div>`;const e=id=>$('#'+id,mount);function draw(){rows=parseRosterText(e('r18636RosterText').value);e('r18636RosterRows').innerHTML=rows.length?rows.map((r,i)=>'<tr><td>'+esc(r.no||i+1)+'</td><td><b>'+esc(r.sdms_code)+'</b></td><td class="name">'+esc(r.student_name)+'</td><td>'+esc(mf(r.sex))+'</td></tr>').join(''):'<tr><td colspan="4">No valid rows found.</td></tr>';e('r18636RosterState').textContent=rows.length+' ROW(S) READY FOR VALIDATION. Full profiles will not be overwritten.'}
- e('r18636RosterChange').onclick=()=>{e('r18636RosterText').focus();e('r18636RosterText').select()};e('r18636RosterUpload').onclick=()=>e('r18636RosterFile').click();e('r18636RosterFile').onchange=()=>{const f=e('r18636RosterFile').files[0];if(!f)return;source=f.name;const rd=new FileReader();rd.onload=()=>{e('r18636RosterText').value=String(rd.result||'');draw()};rd.readAsText(f)};e('r18636RosterPreview').onclick=draw;e('r18636RosterClear').onclick=()=>{rows=[];e('r18636RosterText').value='';e('r18636RosterRows').innerHTML='<tr><td colspan="4">No preview yet.</td></tr>';e('r18636RosterState').textContent='List cleared.'};e('r18636RosterSave').onclick=async()=>{draw();if(!rows.length)return;e('r18636RosterSave').disabled=true;e('r18636RosterState').textContent='SYNCHRONIZING BY SDMS…';try{const d=await rpc('r18636_sync_student_roster',{p_rows:rows.map(r=>({sdms_code:r.sdms_code,student_name:r.student_name,sex:mf(r.sex)})),p_source_file:source});e('r18636RosterState').textContent='DONE · '+d.processed+' processed · '+d.updated+' updated · '+d.created+' created · '+d.unchanged+' unchanged · '+d.invalid+' invalid. Existing full profiles and enrolments preserved.';toast('Student list synchronized.')}catch(x){e('r18636RosterState').classList.add('bad');e('r18636RosterState').textContent=err(x)}finally{e('r18636RosterSave').disabled=false}}
+V.r18636_student_roster_sync=function(mount){pageTitle('STUDENT LIST · CHANGE / UPLOAD / SAVE');let rows=[],source='MANUAL_STUDENT_LIST';mount.innerHTML=`<div class="r18636-panel"><h3>STUDENT LIST SYNCHRONIZATION</h3><p><b>AUTHORIZED COLUMNS ONLY:</b> NO. · SDMS CODE · STUDENT NAME · SEX. Matching uses SDMS. Existing full profiles, parents, addresses, health/special-needs, class placement and history are preserved.</p><div class="r18636-tools-row r18636-no-print"><button id="r18636RosterChange" class="r18636-btn-yellow">CHANGE LIST</button><button id="r18636RosterUpload" class="r18636-btn-blue">UPLOAD LIST</button><button id="r18636RosterPreview" class="r18636-btn-white">PREVIEW</button><button id="r18636RosterSave" class="r18636-btn-green">SAVE & SYNCHRONIZE</button><button id="r18636RosterClear" class="r18636-btn-red">CLEAR</button><input id="r18636RosterFile" type="file" accept=".csv,.txt,.xlsx" hidden></div><textarea id="r18636RosterText" class="r18636-roster-text" placeholder="NO.,SDMS CODE,STUDENT NAME,SEX\n1,123456,STUDENT NAME,M\n2,123457,STUDENT NAME,F"></textarea><div id="r18636RosterState" class="r18636-marks-status">Paste a list or upload CSV/TXT/XLSX, then PREVIEW before SAVE & SYNCHRONIZE.</div></div><div class="r18636-table-wrap"><table><thead><tr><th class="r18636-col-no">NO.</th><th class="r18636-col-sdms">SDMS CODE</th><th class="r18636-col-name">STUDENT NAME</th><th class="r18636-col-sex">SEX</th></tr></thead><tbody id="r18636RosterRows"><tr><td colspan="4">No preview yet.</td></tr></tbody></table></div>`;const e=id=>$('#'+id,mount);function draw(){rows=parseRosterText(e('r18636RosterText').value);e('r18636RosterRows').innerHTML=rows.length?rows.map((r,i)=>'<tr><td>'+esc(r.no||i+1)+'</td><td><b>'+esc(r.sdms_code)+'</b></td><td class="name">'+esc(r.student_name)+'</td><td>'+esc(mf(r.sex))+'</td></tr>').join(''):'<tr><td colspan="4">No valid rows found.</td></tr>';e('r18636RosterState').textContent=rows.length+' ROW(S) READY FOR VALIDATION. Full profiles will not be overwritten.'}
+ e('r18636RosterChange').onclick=()=>{e('r18636RosterText').focus();e('r18636RosterText').select()};e('r18636RosterUpload').onclick=()=>e('r18636RosterFile').click();e('r18636RosterFile').onchange=async()=>{const f=e('r18636RosterFile').files[0];if(!f)return;source=f.name;if(f.name.toLowerCase().endsWith('.xlsx')){e('r18636RosterState').textContent='Reading '+f.name+'…';try{e('r18636RosterText').value=await r18636XlsxToRosterText(f);draw()}catch(x){e('r18636RosterState').classList.add('bad');e('r18636RosterState').textContent='COULD NOT READ THIS XLSX FILE: '+(x&&x.message||x)}return}const rd=new FileReader();rd.onload=()=>{e('r18636RosterText').value=String(rd.result||'');draw()};rd.readAsText(f)};e('r18636RosterPreview').onclick=draw;e('r18636RosterClear').onclick=()=>{rows=[];e('r18636RosterText').value='';e('r18636RosterRows').innerHTML='<tr><td colspan="4">No preview yet.</td></tr>';e('r18636RosterState').textContent='List cleared.'};e('r18636RosterSave').onclick=async()=>{draw();if(!rows.length)return;const ayId=ctx().ayId;if(!ayId){e('r18636RosterState').classList.add('bad');e('r18636RosterState').textContent='NO ACTIVE ACADEMIC YEAR CONTEXT FOUND. Set the academic year at the top of the page, then try again.';return}e('r18636RosterSave').disabled=true;e('r18636RosterState').textContent='SYNCHRONIZING BY SDMS…';try{const d=await rpc('r18636_sync_student_roster',{p_academic_year_id:ayId,p_rows:rows.map(r=>({sdms_code:r.sdms_code,student_name:r.student_name,sex:mf(r.sex)})),p_source_file:source});e('r18636RosterState').textContent='DONE · '+d.processed+' processed · '+d.updated+' updated · '+d.created+' created · '+d.unchanged+' unchanged · '+d.invalid+' invalid. Existing full profiles and enrolments preserved.';toast('Student list synchronized.')}catch(x){e('r18636RosterState').classList.add('bad');e('r18636RosterState').textContent=err(x)}finally{e('r18636RosterSave').disabled=false}}
 };
 
 /* ========================= STAFF MEETING / TRAINING ATTENDANCE LIST ========================= */
@@ -9446,11 +9480,47 @@ function dl(name,text,type='text/csv;charset=utf-8'){const a=document.createElem
 function csvCell(v){return '"'+String(v==null?'':v).replace(/"/g,'""')+'"'}
 function normSex(v){v=String(v||'').trim().toUpperCase();if(['M','MALE','BOY'].includes(v))return'MALE';if(['F','FEMALE','GIRL'].includes(v))return'FEMALE';return v}
 function normHeader(v){return String(v||'').trim().toUpperCase().replace(/[._-]+/g,' ').replace(/\s+/g,' ')}
-function mapRows(matrix){
- if(!matrix.length)return[];const h=matrix[0].map(normHeader),ix=(names)=>{for(const n of names){const i=h.indexOf(n);if(i>=0)return i}return-1};
- const iSd=ix(['SDMS CODE','SDMS','STUDENT ID','STUDENT CODE']),iNm=ix(['FULL NAME','STUDENT NAME','NAME']),iSx=ix(['SEX','GENDER']),iCl=ix(['CLASS','CLASS CODE','CURRENT CLASS']);
- if([iSd,iNm,iSx,iCl].some(i=>i<0))throw new Error('Required columns: SDMS CODE, FULL NAME, SEX, CLASS.');
- return matrix.slice(1).filter(r=>r.some(x=>String(x||'').trim())).map((r,i)=>({row_no:i+2,sdms_code:String(r[iSd]||'').trim(),full_name:String(r[iNm]||'').trim(),sex:normSex(r[iSx]),class_code:String(r[iCl]||'').trim().toUpperCase()}));
+const R18661_CODE_HEADS=['SDMS CODE','SDMS','STUDENT ID','STUDENT CODE','CODE'];
+const R18661_NAME_HEADS=['FULL NAME','STUDENT NAME','NAME','NAMES'];
+const R18661_SEX_HEADS=['SEX','GENDER'];
+const R18661_CLASS_HEADS=['CLASS','CLASS CODE','CURRENT CLASS'];
+function r18661FindHeaderRow(matrix){
+ const limit=Math.min(matrix.length,20);
+ for(let r=0;r<limit;r++){const h=(matrix[r]||[]).map(normHeader);if(h.some(x=>R18661_CODE_HEADS.includes(x))&&h.some(x=>R18661_NAME_HEADS.includes(x)))return r}
+ return -1;
+}
+function r18661FindClassLabel(matrix,headerRow){
+ for(let r=0;r<headerRow;r++){const row=matrix[r]||[],a=normHeader(row[0]).replace(/:$/,'');if(a==='CLASS'){const v=String(row[1]||'').trim();if(v)return v.toUpperCase()}}
+ return '';
+}
+function r18661LooksLikeCode(v){return /^\d{6,}$/.test(String(v||'').trim())}
+/* mapRows: tolerant SDMS workbook mapper. Finds the header row anywhere in the
+   first 20 rows (official SDMS class exports put it after 5-6 metadata rows),
+   accepts a few header spellings (CODE/NAMES as well as the full labels),
+   and — when there is no per-row CLASS column — falls back to a "Class:"
+   metadata label if one is present in the file (the official per-class SDMS
+   export format). opts.requireSex / opts.requireClass (default true) let a
+   caller that doesn't need those columns (e.g. the roster sync tool) accept
+   files that omit them instead of throwing. */
+function mapRows(matrix,opts){
+ opts=opts||{};const requireSex=opts.requireSex!==false,requireClass=opts.requireClass!==false;
+ if(!matrix.length)return[];
+ const hRow=r18661FindHeaderRow(matrix);
+ if(hRow<0){
+  const first=matrix.find(r=>r&&r.some(x=>String(x||'').trim()))||[];
+  if(first.length>=3&&r18661LooksLikeCode(first[1])){
+   if(requireClass)throw new Error('No header row and no CLASS column/label found. Add a CLASS column, or a "Class:" row, or upload from the Student List Synchronization tool instead.');
+   return matrix.filter(r=>r&&r.some(x=>String(x||'').trim())).map((r,i)=>({row_no:r[0]||i+1,sdms_code:String(r[1]||'').trim(),full_name:String(r[2]||'').trim(),sex:r.length>3?normSex(r[3]):'',class_code:''}));
+  }
+  throw new Error('Required columns: SDMS CODE, FULL NAME, SEX, CLASS.');
+ }
+ const h=matrix[hRow].map(normHeader),ix=(names)=>{for(const n of names){const i=h.indexOf(n);if(i>=0)return i}return-1};
+ const iSd=ix(R18661_CODE_HEADS),iNm=ix(R18661_NAME_HEADS),iSx=ix(R18661_SEX_HEADS),iCl=ix(R18661_CLASS_HEADS);
+ if(iSd<0||iNm<0)throw new Error('Required columns: SDMS CODE, FULL NAME.');
+ if(requireSex&&iSx<0)throw new Error('No SEX/GENDER column found in this file. Add one, or merge SEX in from your master student list first.');
+ const defaultClass=iCl<0?r18661FindClassLabel(matrix,hRow):'';
+ if(requireClass&&iCl<0&&!defaultClass)throw new Error('No CLASS column and no "Class:" label found in this file. Add a CLASS column.');
+ return matrix.slice(hRow+1).filter(r=>r&&r.some(x=>String(x||'').trim())).map((r,i)=>({row_no:hRow+2+i,sdms_code:String(r[iSd]||'').trim(),full_name:String(r[iNm]||'').trim(),sex:iSx>=0?normSex(r[iSx]):'',class_code:(iCl>=0?String(r[iCl]||'').trim():defaultClass).toUpperCase()}));
 }
 function parseDelimited(text){
  text=String(text||'').replace(/^\uFEFF/,'');const rows=[];let row=[],cell='',q=false;const sep=(text.split(/\r?\n/,1)[0]||'').includes('\t')?'\t':',';
@@ -9465,12 +9535,13 @@ async function unzipEntries(buf){
  async function read(name){const e=out.get(name);if(!e)return null;const lp=e.lo;if(dv.getUint32(lp,true)!==0x04034b50)throw new Error('Invalid XLSX local header.');const nl=dv.getUint16(lp+26,true),el=dv.getUint16(lp+28,true),start=lp+30+nl+el,bytes=b.slice(start,start+e.cs);if(e.method===0)return td.decode(bytes);if(e.method===8){if(!('DecompressionStream'in window))throw new Error('This browser cannot open XLSX directly. Save the file as CSV UTF-8 and upload again.');const stream=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'));return td.decode(await new Response(stream).arrayBuffer())}throw new Error('Unsupported XLSX compression method.');}
  return {names:[...out.keys()],read};
 }
-async function parseXlsx(file){
+async function xlsxMatrix(file){
  const z=await unzipEntries(await file.arrayBuffer()),ss=[];const sx=await z.read('xl/sharedStrings.xml');if(sx){const doc=new DOMParser().parseFromString(sx,'application/xml');doc.querySelectorAll('si').forEach(si=>ss.push(si.textContent||''))}
  const sheet=z.names.filter(n=>/^xl\/worksheets\/sheet\d+\.xml$/i.test(n)).sort()[0];if(!sheet)throw new Error('No worksheet found in XLSX.');const xml=await z.read(sheet),doc=new DOMParser().parseFromString(xml,'application/xml'),matrix=[];
- doc.querySelectorAll('sheetData row').forEach(re=>{const r=[];re.querySelectorAll('c').forEach(c=>{const idx=colIndex(c.getAttribute('r')),t=c.getAttribute('t'),v=c.querySelector('v')?.textContent??'',inline=c.querySelector('is')?.textContent??'';r[idx]=t==='s'?ss[Number(v)]??'':t==='inlineStr'?inline:v});matrix.push(r)});return mapRows(matrix);
+ doc.querySelectorAll('sheetData row').forEach(re=>{const r=[];re.querySelectorAll('c').forEach(c=>{const idx=colIndex(c.getAttribute('r')),t=c.getAttribute('t'),v=c.querySelector('v')?.textContent??'',inline=c.querySelector('is')?.textContent??'';r[idx]=t==='s'?ss[Number(v)]??'':t==='inlineStr'?inline:v});matrix.push(r)});return matrix;
 }
-async function fileRows(file){const n=file.name.toLowerCase();if(n.endsWith('.xlsx'))return parseXlsx(file);return mapRows(parseDelimited(await file.text()))}
+async function parseXlsx(file,opts){return mapRows(await xlsxMatrix(file),opts)}
+async function fileRows(file,opts){const n=file.name.toLowerCase();if(n.endsWith('.xlsx'))return parseXlsx(file,opts);return mapRows(parseDelimited(await file.text()),opts)}
 function localValidate(rows){const seen=new Set();return rows.map(r=>{let error='';if(!r.sdms_code||!r.full_name||!['MALE','FEMALE'].includes(r.sex)||!r.class_code)error='Missing/invalid required value';else if(seen.has(r.sdms_code))error='Duplicate SDMS code in file';seen.add(r.sdms_code);return Object.assign({},r,{local_status:error?'INVALID':'READY',local_message:error})})}
 
 V.studentupload=function(mount){
