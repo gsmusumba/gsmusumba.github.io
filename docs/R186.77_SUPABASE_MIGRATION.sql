@@ -1,0 +1,2 @@
+-- R186.77 migrations were applied to production Supabase. See R186.77_DEEP_AUDIT_AND_FIXES.txt for scope.
+-- Critical policy: uploads match SDMS CODE + STUDENT NAME; existing master names are never overwritten on mismatch.

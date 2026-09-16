@@ -1,8 +1,0 @@
-GS MUSUMBA R186.92 - STUDENT ROSTER RPC FALLBACK
-
-1. XLSX roster parsing retains authorized display fields plus source class and full import fields from standard ALL STUDENTS.xlsx columns.
-2. Student List Change / Upload / Save first uses the intended r18636_sync_student_roster RPC.
-3. If that RPC is absent from the Supabase schema cache, the service safely falls back to the existing r18661_import_students transactional import when SOURCE CLASS is present.
-4. Existing profile/enrolment/history preservation remains governed by the existing live import RPC; no automatic deletion is introduced.
-5. Global student synchronization refresh/event is triggered after a successful save.
-6. Loader cache version bumped to R186.92 so browsers fetch the corrected extension.

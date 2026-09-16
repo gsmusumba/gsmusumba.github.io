@@ -1,0 +1,22 @@
+GS MUSUMBA SCHOOL MANAGEMENT SYSTEM — R191.1 FORM / FILTER / SEARCH HOTFIX
+
+DATE: 2026-09-16
+
+FIXED
+1. Marks Monitoring dependent filters: Level -> Class, Class/Subject -> Teacher/Subject options are narrowed from live monitoring rows.
+2. Subject Attendance Monitoring dependent filters: Level/Class/Subject/Teacher selections now keep related dropdown values consistent.
+3. Absentee Monitoring: Class dropdown is narrowed by selected Level.
+4. Student Directory: Class dropdown is narrowed by selected Level; invalid class selection is cleared automatically.
+5. Added CLEAR FILTERS controls to the affected monitoring screens.
+6. Existing search, sort and pagination handlers are retained.
+7. No RPC names were replaced and no legacy service renderer was deleted.
+8. JavaScript syntax validated with Node.js.
+
+DATABASE FIXED
+9. r186_reset_delete_students() now explicitly clears student-linked library_loans and r18635_student_exit_authority records before deleting students, removing the previously identified NO ACTION / RESTRICT FK blockers.
+10. historical_enrolment_reconstruction remains CASCADE-linked and is reported in reset audit details.
+11. Reset remains SUPER_ADMIN-only; the migration changes the function definition only and does not execute a reset.
+
+NOT CLAIMED
+- Browser authenticated E2E is still required for final PASS status of forms, dropdowns, filters, saves and reload persistence.
+- No production student/library/exit records were deleted by this migration.

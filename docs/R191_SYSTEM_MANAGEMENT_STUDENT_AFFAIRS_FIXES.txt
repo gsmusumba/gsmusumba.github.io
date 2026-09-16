@@ -1,0 +1,25 @@
+GS MUSUMBA SCHOOL MANAGEMENT SYSTEM — R191 FIXES
+
+Backend (Supabase)
+- Student importer R186.77 retained and remains canonical for whole-school + single-class upload.
+- Class movement now accepts ACTIVE and PLANNED target classes in the authenticated academic context.
+- Conduct summary now uses the authenticated bootstrap academic year instead of requiring ACTIVE academic year, and falls back to the first term when no active term exists.
+- Permissions and counselling list RPCs now require a staff session and authorized DOD/leadership roles.
+- All active report catalog records now have A4 paper size and a default orientation; report cards/student cards are portrait, other reports landscape.
+
+Frontend
+- Added explicit live routes/menu entries for:
+  SYSTEM MANAGEMENT
+  MARKS ANALYSIS
+  VIEW MARKS
+  STUDENTS CONDUCT
+  MOVEMENT & PERMISSION
+  GUIDANCE & COUNSELLING
+- Existing tested services are reused rather than duplicated.
+- Added compact form/mobile overflow CSS hooks.
+- Cache-busting query version changed to R191.
+
+Validation
+- JavaScript syntax check passed for r18661-extensions.js and r18661-loader.js.
+- Existing Supabase timetable/assignment data was not deleted.
+- Current student/enrollment/marks/conduct/permission/counselling tables are empty, so authenticated write E2E must be performed with real staff login after deployment.

@@ -1,0 +1,11 @@
+GS MUSUMBA SMS — R186.75 FINAL COMPACT / CONTRAST HOTFIX
+
+1. Old Quick Actions dashboard first-paint removed. Final role dashboard is the only dashboard rendered after authentication.
+2. Final CSS/JS workspace starts loading in parallel with login and saved-session restore.
+3. Obsolete 15px + forced-white global reset is overridden by one high-specificity R186.75 visual authority.
+4. System-wide fonts, inputs, headings, cards and tables are compacted without changing data logic.
+5. Blue/green/gold/red semantic backgrounds and foreground contrast restored.
+6. Super Admin / DOS / Teacher dashboard KPI contrast and spacing corrected.
+7. 1 cm first column applies only to actual NO./NO/# columns.
+8. Tables with <=8 columns auto-fit laptop width; specialist wide tables keep controlled internal scrolling.
+9. Supabase RPC, RLS, saves, formulas, permissions, printing, uploads, timetable, marks and report-card logic are unchanged.

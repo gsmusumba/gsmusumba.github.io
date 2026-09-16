@@ -1,0 +1,17 @@
+GS MUSUMBA R186.77 — DEEP AUDIT AND FIXES
+
+FIXED:
+1. False mobile Script error banner: opaque generic Script error is suppressed; real same-origin runtime errors remain visible/logged.
+2. Route services use full-screen focus with BACK/CLOSE and compact top context.
+3. Nested service viewers open as full-screen overlays rather than continuing below parent cards.
+4. Mobile timetable uses controlled horizontal swipe with readable PERIOD/TIME and day columns.
+5. Student tables keep NO. and SDMS visible while wide details scroll.
+6. Student Identification includes Reported Age, Boarding/Day and District in addition to DOB, guardians and Sector/Cell/Village.
+7. Teacher profile upload template requires SDMS CODE + STUDENT NAME; server rejects name mismatch.
+8. Student import server rejects existing SDMS/name mismatch and never overwrites an existing master name.
+9. Print stage off-screen positioning neutralized; timetable print scaling increased from ~0.62 to 0.86 with compact header and readable table.
+10. Top title/controls reduced to preserve working area.
+
+BACKEND MIGRATIONS APPLIED TO PRODUCTION:
+- r18677_student_upload_sdms_name_guard
+- r18677_student_identification_complete_fields

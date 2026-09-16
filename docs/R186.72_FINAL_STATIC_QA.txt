@@ -1,0 +1,33 @@
+GS MUSUMBA SCHOOL MANAGEMENT SYSTEM — R186.72 FINAL STATIC QA
+
+RESULT: 22/22 PASS
+
+PASS — Required production files exist and are non-empty
+PASS — CSS braces balanced (7348/7348)
+PASS — No empty CSS rules
+PASS — index.html parses; no static duplicate IDs
+PASS — r186-qa.html parses; no static duplicate IDs
+PASS — Structured JSON-LD parses
+PASS — Index title exact
+PASS — sitemap.xml parses
+PASS — Production SEO files point only to musumba.pages.dev
+PASS — QA canonical correct; QA remains noindex
+PASS — R186.72 markers across shell/assets/service worker
+PASS — Competition attendance/UI/PDF/XLSX markers present
+PASS — 2G/Save-Data-aware loader and retry present
+PASS — Service worker version bumped; Supabase exclusion retained
+PASS — No escaped-newline corruption in appended layers
+PASS — No trailing whitespace in modified production files
+PASS — R186.72 runtime polish loads after R186.71 final print/class-teacher layer
+PASS — R186.72 CSS authority loads after R186.71 styles
+PASS — Teacher attendance bottom-left save + blue success workflow retained
+PASS — Marks bottom save/submit workflow retained
+PASS — Existing R169 monitor contract already supports Daily/Weekly/Monthly/Termly
+PASS — Timetable XLSX download hooks present
+
+RUNTIME LIMITATIONS / REQUIRED MANUAL ACCEPTANCE
+1. Static QA cannot certify authenticated Supabase writes for every role without a live browser session.
+2. 33-user simultaneous concurrency must be measured against the live Supabase plan/database; this package does not claim a certified 33-user load test.
+3. Universal <1 second response time cannot be guaranteed on MTN/Airtel/Tigo 2G/3G. Initial shell is small and heavy assets are deferred/cached, but first post-login load remains network-dependent.
+4. Before competition acceptance, manually test representative Teacher, DOD, DOS, Headteacher and Super Admin flows: login, attendance save, marks draft/submit, timetable, report print/PDF and XLSX export.
+5. Keep R186.71 Git commit available for rollback until R186.72 live QA passes.

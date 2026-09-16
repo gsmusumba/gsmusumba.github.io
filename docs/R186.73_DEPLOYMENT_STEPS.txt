@@ -1,0 +1,21 @@
+GS MUSUMBA R186.73 — DEPLOYMENT STEPS
+
+1. Keep R186.72 commit 520dd77 as rollback.
+2. Replace the local GS MUSUMBA FINAL DEPLOY contents with this COMPLETE R186.73 package (do not mix JS/CSS versions).
+3. In VS Code Terminal:
+   git status --short
+   git add -A
+   git diff --cached --check
+   git commit -m "R186.73 district competition final"
+   git push origin main
+4. Cloudflare Pages automatically deploys main to https://musumba.pages.dev/.
+5. Wait for green Production status.
+6. Close all old GS MUSUMBA tabs on phones once so the R186.73 service worker activates; reopen musumba.pages.dev.
+7. Run the R186.73 District Acceptance Checklist before the district session.
+
+EXPECTED RESULT
+- Cloudflare production source is the R186.73 commit.
+- Login shows a smaller professional form.
+- Authenticated dashboard appears before the heavy workspace bundle finishes loading.
+- Attendance NOT CALLED is strong red/white and monitoring uses 12 desktop columns.
+- R186.72 remains recoverable from Git/Cloudflare deployment history.

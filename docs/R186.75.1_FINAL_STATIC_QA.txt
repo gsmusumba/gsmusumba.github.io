@@ -1,0 +1,24 @@
+GS MUSUMBA SMS — R186.75.1 FINAL STATIC QA
+
+PASS | JavaScript syntax: r186-core.js
+PASS | JavaScript syntax: r18661-loader.js
+PASS | JavaScript syntax: r18661-extensions.js
+PASS | JavaScript syntax: sw.js
+PASS | Legacy body visibility:hidden rule identified
+PASS | Final #r18671PrintStage visibility override loaded later
+PASS | #printArea legacy direct-print visibility preserved
+PASS | R186.75.1 cache-busting asset query present
+PASS | R186.75.1 loader CSS/JS references present
+PASS | Service worker uses unique R186.75.1 cache key
+PASS | R186.71 print-stage builder retained
+PASS | Timetable print source .r18628-week-wrap retained
+PASS | CSS brace balance
+
+ROOT CAUSE CONFIRMED
+The browser preview was blank because the old print rule `body *{visibility:hidden}`
+only restored visibility for #printArea, while the final print authority rendered into
+#r18671PrintStage. The stage contained the report but remained invisible.
+
+FIX
+The final print CSS now explicitly restores visibility on #r18671PrintStage and all
+its descendants, and preserves #printArea for legacy/direct print paths.

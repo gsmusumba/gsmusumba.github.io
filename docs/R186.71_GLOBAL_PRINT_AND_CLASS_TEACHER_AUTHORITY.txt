@@ -1,0 +1,29 @@
+GS MUSUMBA R186.71 — GLOBAL PRINT / CLASS-TEACHER AUTHORITY FINAL
+
+PRINT RULES
+- One final print stage controls all same-window print jobs.
+- Exactly one official school profile/header and one Prepared/Verified/Approved footer.
+- School profile is bold, vertical and starts at the left.
+- Academic Year, Term and Date are all left aligned.
+- Application/system name is removed from printed documents. School name remains GS MUSUMBA.
+- Timetable defaults to A4 landscape and a one-page print stage.
+- Marks/attendance use landscape with readable multipage tables when needed.
+- Print Settings still supports Paper, Orientation, Fit/Scale, Margins, Colour/B&W, Header Title, Report Date and Footer Text.
+- Browser Headers and Footers must remain OFF in Chrome to suppress browser URL/page/date chrome.
+
+REPORT CARDS
+- Nursery retains front colour bands + back real marks.
+- Nursery school profile and student identity appear on both sides.
+- Primary/Secondary retain school profile plus student SDMS/name/class/sex/year/term.
+- Each report package receives Prepared/Verified/Approved authority footer.
+- Missing marks remain blank; no fake zero conversion was introduced.
+
+MULTI CLASS-TEACHER AUTHORITY
+- Live Supabase migration R186.71 introduces canonical helper r18671_is_class_teacher.
+- Primary class teacher and every ACTIVE co-class-teacher assignment are treated as class teachers.
+- Teacher dashboard, class-attendance scope, absentee follow-up, report-card teacher scope, teacher background metrics and pilot snapshot were updated to use the helper.
+- Class attendance get/save already used r161_teacher_has_class_in_context, which also recognizes active co-class teachers.
+
+IMPORTANT
+- This frontend package does not contain secrets or passwords.
+- Supabase/API responses are not cached by the service worker.

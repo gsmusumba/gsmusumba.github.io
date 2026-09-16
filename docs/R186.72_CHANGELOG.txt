@@ -1,0 +1,31 @@
+GS MUSUMBA R186.72 — COMPETITION + PRODUCTION POLISH CHANGELOG
+
+1. Production identity / SEO
+- Canonical, og:url, og:image, sitemap and robots now use https://musumba.pages.dev/.
+- Added structured WebSite / EducationalOrganization / SoftwareApplication identity for GS MUSUMBA / GSMUSUMBA / MUSUMBA / Groupe Scolaire Musumba.
+
+2. UI / UX
+- Compact service/role headers and cards.
+- Removed repetitive success/status clutter; error/warning states remain visible.
+- Floating PRINT SETTINGS removed; canonical System Management Print Settings retained.
+- Compact forms/buttons and calmer professional color hierarchy.
+- Soft red replaces full saturated red for attendance not-called states.
+
+3. Tables
+- Names and SDMS are protected from truncation.
+- Compact rows/headers with controlled horizontal scrolling on narrow screens.
+- Marks/attendance identity columns receive explicit minimum widths.
+
+4. Attendance
+- Class and Subject Attendance Monitoring support DAILY / WEEKLY / MONTHLY / TERMLY via the existing optimized r169 RPCs.
+- Nursery / Primary / Secondary / Whole School summary cards show present boys, present girls and percentages.
+- Added CSV / EXCEL export and retained central Print / PDF pipeline.
+
+5. Mobile / slow network
+- R186.72 loader avoids prefetch on Save-Data/2G, loads heavy CSS then JS sequentially on constrained links, and retries failed app asset loading once.
+- Service worker bumped to R186.72; Supabase/API responses remain excluded from caching.
+
+6. No destructive changes
+- No database migration.
+- No RPC contract changes.
+- R186.71 print authority, class-teacher authority and save workflows retained.

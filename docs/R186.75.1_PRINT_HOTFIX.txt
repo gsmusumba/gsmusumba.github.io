@@ -1,0 +1,13 @@
+GS MUSUMBA SMS — R186.75.1 PRINT VISIBILITY HOTFIX
+
+ROOT CAUSE
+An early legacy @media print rule applied `body * { visibility:hidden }` and only restored visibility for #printArea. The final R186.71 print pipeline renders official output into #r18671PrintStage. Therefore the stage existed and contained data, but Chrome print preview hid it, producing a blank sheet.
+
+FIX
+- Restore visibility on #r18671PrintStage and every descendant with !important.
+- Preserve #printArea visibility for legacy/direct report printing.
+- Preserve A4 orientation, one-page timetable scaling, headers, signatures, tables, and all existing RPC/data/save authority.
+- Bump production/cache release to R186.75.1.
+
+ACCEPTANCE
+A print test passes only when preview contains school profile, report title, academic year/term/date, actual service data, and signatures. Blank-only preview is a failure.

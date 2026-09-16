@@ -1,0 +1,63 @@
+GS MUSUMBA R186.71 — FINAL STATIC / CONFLICT / PRINT QA
+
+TOTAL: 49/49 PASS
+
+PASS — JavaScript syntax: r18661-extensions.js
+PASS — JavaScript syntax: r186-core.js
+PASS — JavaScript syntax: r18661-loader.js
+PASS — JavaScript syntax: sw.js
+PASS — CSS top-level parser errors = 0 — []
+PASS — CSS braces balanced — {=7229 }=7229
+PASS — HTML parsed: index.html
+PASS — Static duplicate IDs: index.html = 0
+PASS — HTML parsed: r186-qa.html
+PASS — Static duplicate IDs: r186-qa.html = 0
+PASS — Index root assets all exist
+PASS — Loader app assets all exist
+PASS — R186.71 version in index
+PASS — R186.71 version in loader
+PASS — R186.71 service-worker cache
+PASS — Supabase/API not cached
+PASS — R186.71 final print authority exists
+PASS — R186.71 is after R186.70
+PASS — Final window.print override belongs to R186.71
+PASS — Final window.open override belongs to R186.71
+PASS — One-stage print isolation
+PASS — Legacy header removal configured
+PASS — PrintArea does not recycle legacy header text as metadata
+PASS — System name scrub regex active
+PASS — School profile bold left CSS
+PASS — AY / Term / Date are left meta
+PASS — Prepared / Verified / Approved
+PASS — Timetable one-page final rule
+PASS — Global paper/orientation/margin style
+PASS — Popup uses global paper/orientation/margins
+PASS — B&W preference handled
+PASS — Editable header title retained
+PASS — Report date retained
+PASS — Footer text retained
+PASS — Report-card school profile source is vertical/bold
+PASS — Report-card school name fallback excludes system name
+PASS — Nursery duplex preserved
+PASS — Nursery student identity both sides
+PASS — Nursery real marks back side
+PASS — Primary/Secondary student identity profile
+PASS — Each report package popup gets global authority footer
+PASS — R186.69B attendance usability layer retained
+PASS — Class attendance dashboard consumes is_class_teacher
+PASS — MUREKATETE corrected
+PASS — DUSHIMIMANA corrected
+PASS — Known same-window/popup print call surface detected — window.print refs=48; GSM_printReport refs=39; window.open refs=12; .print() refs=47
+PASS — Canonical service registry count documented
+PASS — No generated literal \n line-break corruption
+PASS — No double-escaped whitespace regex in final layer
+
+PRINT ROUTE COUNTS (source references; not unique services):
+- window.print refs: 48
+- GSM_printReport refs: 39
+- window.open refs: 12
+- .print() refs: 47
+
+LIVE CANONICAL SERVICES: 135 (detailed list in R186.71_ALL_135_SERVICES_PRINT_ROUTE_AUDIT.txt)
+
+LIMITATION: Static/runtime-route QA does not replace authenticated browser clicking of every service. Perform representative high-risk local manual QA before GitHub push.

@@ -1,0 +1,33 @@
+GS MUSUMBA R186.71 — GLOBAL PRINT + MULTI CLASS-TEACHER AUTHORITY
+
+LIVE BACKEND AUTHORITY VERIFIED
+The canonical helper r18671_is_class_teacher is live and returns TRUE for BOTH teachers in each dual-teacher class:
+- P4A: IRADUKUNDA GRACE [PRIMARY] + UZARAMA MADELEINE [CO]
+- S1A: HATEGEKIMANA JEAN DAMASCENE [PRIMARY] + KABERUKA FAUSTIN [CO]
+- S3A: DUSHIMIMANA DIDACE [PRIMARY] + MUHIRWA TIMOTHEE [CO]
+- S3B: NYANDWI VALENS [PRIMARY] + NTEZIRIZAZA ILDEPHONSE [CO]
+
+Updated live RPC/function families use the canonical multi-class-teacher helper:
+- r161_teacher_class_attendance_scope
+- r166_teacher_dashboard
+- r167_teacher_dashboard
+- r166_teacher_absentee_followup
+- r169_report_card_data
+- r169_report_card_index
+- r174_teacher_background_metrics
+- r179_teacher_pilot_snapshot
+
+Class-attendance get/save functions already enforce r161_teacher_has_class_in_context, which recognizes active co-class-teacher assignments. No marks, students, attendance records, or timetable rows were modified by this authority migration.
+
+PRINT / REPORT CARD AUTHORITY
+- Final R186.71 print stage is last in load order.
+- One clean school profile + title + left Academic Year/Term/Date + signatures.
+- System/application name is scrubbed from printed output.
+- Report cards retain their own student identity/profile data.
+- Nursery retains two sides: front colour performance from recorded marks; back real marks; missing marks stay blank.
+- Nursery school profile/student identity appears on both sides.
+- Primary/Secondary report cards retain school profile and student identity fields.
+- Report-card popups receive the same global paper/orientation/margins/colour settings and Prepared/Verified/Approved footer.
+
+PRODUCTION CAVEAT
+Browser-generated URL/date/page-number headers are controlled by Chrome/Edge, not the website. Keep Print > More settings > Headers and footers OFF.
