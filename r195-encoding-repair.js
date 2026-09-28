@@ -50,7 +50,15 @@
     });
   }
   var layout=document.createElement('style');
-  layout.textContent='@media (min-width:1101px){#main .r18636-marks-page>.r18636-tools-row.r195-two-rows{grid-template-columns:repeat(7,minmax(0,1fr))!important;grid-auto-rows:auto!important}#main .r18636-marks-page>.r18636-tools-row.r195-two-rows>*{min-width:0!important}}';
+  layout.textContent=''
+    +'#appShell,#appShell #main{background:#f4f7fb!important;color:#102a43!important}'
+    +'#appShell #main :is(input,select,textarea){background:#fff!important;color:#102a43!important;border-color:#466a85!important}'
+    +'#appShell #main :is(input,textarea)::placeholder{color:#526b80!important;opacity:1!important}'
+    +'#appShell #main :is(.card,.t160-panel,.r18612-panel,.r176-table-wrap,.r18636-table-wrap,.r18637-marks-table-host){background-color:#fff!important;color:#102a43!important}'
+    +'#appShell #main :is(.empty-state,.t160-status,.r18612-state,.r18636-marks-status){color:#102a43!important}'
+    +'#appShell #main table tbody tr:nth-child(even) td{background-color:#eef5fa!important;color:#102a43!important}'
+    +'#appShell #main table tbody tr:nth-child(odd) td{color:#102a43!important}'
+    +'@media (min-width:1101px){#main .r18636-marks-page>.r18636-tools-row.r195-two-rows{grid-template-columns:repeat(7,minmax(0,1fr))!important;grid-auto-rows:auto!important}#main .r18636-marks-page>.r18636-tools-row.r195-two-rows>*{min-width:0!important}}';
   document.head.appendChild(layout);
   function repair(){run();compactMarks(document)}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',repair,{once:true});else repair();

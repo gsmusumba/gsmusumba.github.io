@@ -2,7 +2,7 @@
 (function(){'use strict';
  if(window.GSM_loadAppExtensions)return;
  let promise=null;const started=performance.now();
- const APP_CSS='./r18661-app.css?v=R194',APP_JS='./r18661-extensions.js?v=R194',QA_JS='./r194-class-upload-live-qa.js?v=R194',ROLE_JS='./r194-role-menu.js?v=R194',ENCODING_JS='./r195-encoding-repair.js?v=R195.3';
+ const APP_CSS='./r18661-app.css?v=R194',APP_JS='./r18661-extensions.js?v=R194',QA_JS='./r194-class-upload-live-qa.js?v=R194',ROLE_JS='./r194-role-menu.js?v=R194',ENCODING_JS='./r195-encoding-repair.js?v=R195.4';
  const conn=()=>navigator.connection||navigator.mozConnection||navigator.webkitConnection||null;
  const slow=()=>{try{const c=conn();return !!(c&&(c.saveData||/slow-2g|2g/i.test(c.effectiveType||'')))}catch(_){return false}};
  function css(href){return new Promise((ok,bad)=>{if(document.querySelector('link[data-r18661-app]'))return ok();const l=document.createElement('link');l.rel='stylesheet';l.href=href;l.dataset.r18661App='1';l.onload=ok;l.onerror=()=>{l.remove();bad(new Error('APP_CSS_LOAD_FAILED'))};document.head.appendChild(l)})}
