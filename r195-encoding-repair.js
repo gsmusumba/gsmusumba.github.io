@@ -27,6 +27,11 @@
     for(var i=0;i<nodes.length;i++){
       var el=nodes[i];
       if(el.tagName==='SCRIPT'||el.tagName==='STYLE')continue;
+      ['placeholder','title','aria-label','alt','value'].forEach(function(name){
+        if(!el.hasAttribute(name))return;
+        var value=el.getAttribute(name),fixed=clean(value);
+        if(fixed!==value)el.setAttribute(name,fixed);
+      });
       for(var j=0;j<el.childNodes.length;j++)if(el.childNodes[j].nodeType===3)cleanNode(el.childNodes[j]);
     }
   }
@@ -39,4 +44,10 @@
       else for(var j=0;j<r.addedNodes.length;j++)cleanNode(r.addedNodes[j]);
     }
   }).observe(document.documentElement,{childList:true,subtree:true,characterData:true});
+  /* The current teacher-student implementation is the supported screen.
+     Keep legacy Student Identification links on that implementation. */
+  if(window.GSM_VIEWS&&typeof window.GSM_VIEWS.teacherstudents==='function'){
+    window.GSM_VIEWS.teacherstudentidentification=window.GSM_VIEWS.teacherstudents;
+    window.GSM_VIEWS.teachermyclassesstudents=window.GSM_VIEWS.teacherstudents;
+  }
 })();
