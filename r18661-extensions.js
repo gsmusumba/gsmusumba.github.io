@@ -8218,7 +8218,7 @@ function officialExamLabel(code){const c=up(code).replace(/_/g,' ');if(c.include
 function gradeInfo(p,scale){const n=Number(p);if(!Number.isFinite(n))return{grade:'ΓÇö',remark:'ΓÇö'};const row=(scale||[]).find(x=>n>=Number(x.min_percent)&&n<=Number(x.max_percent));return{grade:row&&row.grade||'ΓÇö',remark:row&&(row.performance||row.result)||'ΓÇö'}}
 function statusValue(raw){const s=up(raw);if(['A','E','S','N','P'].includes(s))return{status:s,mark:null,valid:true};if(raw===''||raw==null)return{status:null,mark:null,valid:true,blank:true};const n=Number(raw);return Number.isFinite(n)?{status:'MARK',mark:n,valid:true}:{status:null,mark:null,valid:false}}
 function categoryCode(x){let c=up(x&&(x.code||x.category_code||x.assessment_type||x.type||x.name)||'').replace(/[\s-]+/g,'_');const a={END_UNIT:'END_UNIT_ASSESSMENT',END_OF_UNIT:'END_UNIT_ASSESSMENT',END_UNIT_TEST:'END_UNIT_ASSESSMENT',HOMEWORK:'HOME_WORK',MIDTERM:'MID_TERM',MIDTERM_TEST:'MID_TERM',MID_TERM_TEST:'MID_TERM',DISTRICT:'DISTRICT_EXAM',SCHOOL:'SCHOOL_EXAM',NESA:'NESA_EXAM'};return a[c]||c}
-const ASSESSMENT_ORDER=['QUIZ','END_UNIT_ASSESSMENT','TEST','MID_TERM','HOME_WORK','PRACTICAL_WORK','EXAM','DISTRICT_EXAM','SCHOOL_EXAM','NESA_EXAM'];
+const ASSESSMENT_ORDER=['QUIZ','MORNING_QUIZ','EVENING_QUIZ','GENERAL_TEST','END_UNIT_ASSESSMENT','TEST','MID_TERM','HOME_WORK','PRACTICAL_WORK','EXAM','DISTRICT_EXAM','SCHOOL_EXAM','NESA_EXAM'];
 function sortedCategories(rows){const o=new Map(ASSESSMENT_ORDER.map((x,i)=>[x,i]));return(rows||[]).filter(x=>x&&x.id&&up(x.status||'ACTIVE')!=='INACTIVE').slice().sort((a,b)=>(o.get(categoryCode(a))??999)-(o.get(categoryCode(b))??999)||String(a.name||a.code||'').localeCompare(String(b.name||b.code||'')))}
 function preferredAssessment(rows){const a=(rows||[]).filter(x=>x&&x.assessment_id&&x.editable!==false);return a.find(x=>up(x.workflow_status)==='RETURNED')||a.find(x=>up(x.workflow_status)==='DRAFT')||null}
 
@@ -10130,15 +10130,18 @@ try{document.documentElement.setAttribute('data-gsm-release','R186.77');document
     items.forEach(x=>{if(!ids.has(x.id))g.items.push(x);});
   }
   const item=(id,label,view)=>({id,label,view});
-  addMenu(M.SUPER_ADMIN,'Academic Analysis',[item('r191_sa_marks_analysis','Marks Analysis','r191_marks_analysis'),item('r191_sa_view_marks','View Marks','r191_view_marks')]);
+  addMenu(M.SUPER_ADMIN,'Academic Analysis',[item('r191_sa_marks_analysis','Marks Analysis','r191_marks_analysis')]);
   addMenu(M.SUPER_ADMIN,'Student Affairs',[item('r191_sa_conduct','Students Conduct','r191_students_conduct'),item('r191_sa_move','Movement & Permission','r191_movement'),item('r191_sa_guidance','Guidance & Counselling','r191_guidance')]);
   addMenu(M.SUPER_ADMIN,'System Management',[item('r191_sa_system','System Management','r191_system_management')]);
-  addMenu(M.DOS,'Marks & Analysis',[item('r191_dos_analysis','Marks Analysis','r191_marks_analysis'),item('r191_dos_viewmarks','View Marks','r191_view_marks')]);
+  addMenu(M.DOS,'Marks & Analysis',[item('r191_dos_analysis','Marks Analysis','r191_marks_analysis')]);
   addMenu(M.DOD,'Student Welfare & Conduct',[item('r191_dod_conduct','Students Conduct','r191_students_conduct'),item('r191_dod_move','Movement & Permission','r191_movement'),item('r191_dod_guidance','Guidance & Counselling','r191_guidance')]);
-  addMenu(M.HEADTEACHER||M.HEAD_TEACHER,'Marks & Student Affairs',[item('r191_ht_analysis','Marks Analysis','r191_marks_analysis'),item('r191_ht_viewmarks','View Marks','r191_view_marks'),item('r191_ht_conduct','Students Conduct','r191_students_conduct'),item('r191_ht_move','Movement & Permission','r191_movement'),item('r191_ht_guidance','Guidance & Counselling','r191_guidance')]);
+  addMenu(M.HEADTEACHER||M.HEAD_TEACHER,'Marks & Student Affairs',[item('r191_ht_analysis','Marks Analysis','r191_marks_analysis'),item('r191_ht_conduct','Students Conduct','r191_students_conduct'),item('r191_ht_move','Movement & Permission','r191_movement'),item('r191_ht_guidance','Guidance & Counselling','r191_guidance')]);
 
   /* Teacher: make View Marks explicit and keep direct service opening. */
   addMenu(M.TEACHER,'Marks & Assessment',[item('r191_t_viewmarks','View Marks','r191_view_marks'),item('r191_t_analysis','Marks Analysis','r191_marks_analysis')]);
+
+  /* Keep the teacher's full identification workflow on the current working student screen. */
+  if(typeof V.teacherstudents==='function')V.teacherstudentidentification=function(m,c){return V.teacherstudents(m,c)};
 
   /* Global CSS hook: forms remain compact on desktop and become one-column on phones. */
   document.documentElement.setAttribute('data-gsm-r191','ready');

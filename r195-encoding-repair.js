@@ -62,6 +62,8 @@
     +'#appShell #main .r18628-week tbody th span{color:#e8f4ff!important;-webkit-text-fill-color:#e8f4ff!important}'
     +'#appShell #main .r18658-student-table thead th{position:static!important;top:auto!important}'
     +'#appShell #main .r18638-owner-badge{display:none!important}'
+    +'#appShell #main #r18636MxType,#appShell #main #r18636MxType option{text-transform:uppercase!important}'
+    +'#appShell #main .r18638-card{min-height:0!important;padding:8px 10px!important}'
     +'@media (min-width:1101px){#main .r18636-marks-page>.r18636-tools-row.r195-two-rows{grid-template-columns:repeat(7,minmax(0,1fr))!important;grid-auto-rows:auto!important}#main .r18636-marks-page>.r18636-tools-row.r195-two-rows>*{min-width:0!important}}';
   document.head.appendChild(layout);
   function repair(){run();compactMarks(document)}
