@@ -1,0 +1,41 @@
+/* R196: preserve every approved identification field during roster upload. */
+(function () {
+  'use strict';
+  const V = window.GSM_VIEWS || {};
+  const live = window.GSM_LIVE || {};
+  const util = window.GSM_UTIL || {};
+  const esc = util.esc || (v => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])));
+  const rpc = (name, args) => live.rpc(name, args || {});
+  const normSex = value => { const v = String(value || '').trim().toUpperCase(); return ['M', 'MALE', 'BOY'].includes(v) ? 'MALE' : ['F', 'FEMALE', 'GIRL'].includes(v) ? 'FEMALE' : v; };
+  const fields = ['NO.','SDMS CODE','STUDENT NAME','SEX','AGE','FATHER / GUARDIAN','MOTHER / GUARDIAN','BOARDING TYPE','DISTRICT','SECTOR','CELL','VILLAGE','CLASS'];
+  const csv = value => '"' + String(value == null ? '' : value).replace(/"/g, '""') + '"';
+  const rowsToText = rows => [fields].concat(rows.map(r => [r.no,r.sdms_code,r.student_name,normSex(r.sex),r.age,r.father_guardian,r.mother_guardian,r.boarding_type,r.district,r.sector,r.cell,r.village,r.class_code || r.source_class].map(csv).join(','))).join('\n');
+  const textRows = text => {
+    const lines = String(text || '').replace(/^\uFEFF/, '').replace(/\r/g, '').split('\n').filter(Boolean);
+    if (!lines.length) return [];
+    const split = line => { const out=[]; let v='', quoted=false; for(let i=0;i<line.length;i+=1){const ch=line[i];if(ch==='"'){if(quoted && line[i+1]==='"'){v+='"';i+=1;}else quoted=!quoted;}else if(ch===',' && !quoted){out.push(v.trim());v='';}else v+=ch;}out.push(v.trim());return out; };
+    const head = split(lines[0]).map(v => String(v).trim().toUpperCase());
+    const at = (row, names) => { const i = head.findIndex(h => names.some(n => h === n || h.includes(n))); return i >= 0 ? String(row[i] || '').trim() : ''; };
+    return lines.slice(1).map((line, index) => {
+      const r = split(line);
+      return { no:at(r,['NO.','SN','NUMBER']) || String(index + 1), sdms_code:at(r,['SDMS CODE','SDMS','CODE']), student_name:at(r,['STUDENT NAME','FULL NAME','NAMES','NAME']), sex:at(r,['SEX','GENDER']), age:at(r,['AGE']), father_guardian:at(r,['FATHER / GUARDIAN','FATHER']), mother_guardian:at(r,['MOTHER / GUARDIAN','MOTHER']), boarding_type:at(r,['BOARDING TYPE','BOARDING']), district:at(r,['DISTRICT']), sector:at(r,['SECTOR']), cell:at(r,['CELL']), village:at(r,['VILLAGE']), class_code:at(r,['CLASS','SOURCE CLASS','CLASS CODE']), source_class:at(r,['CLASS','SOURCE CLASS','CLASS CODE']) };
+    }).filter(r => r.sdms_code && r.student_name);
+  };
+  const fullPayload = r => ({ sdms_code:r.sdms_code, student_name:r.student_name, full_name:r.student_name, sex:normSex(r.sex), age:r.age || null, reported_age:r.age || null, father_guardian:r.father_guardian || null, father_guardian_name:r.father_guardian || null, mother_guardian:r.mother_guardian || null, mother_guardian_name:r.mother_guardian || null, boarding_type:r.boarding_type || null, district:r.district || null, sector:r.sector || null, cell:r.cell || null, village:r.village || null, source_class:r.source_class || r.class_code || null, class_code:r.class_code || r.source_class || null });
+  const parseFile = async file => {
+    if (/\.xlsx$/i.test(file.name || '') && typeof window.r18636ReadXlsx === 'function') return window.r18636ReadXlsx(file);
+    return textRows(await file.text());
+  };
+  V.r18636_student_roster_sync = function (mount) {
+    let rows = [], source = 'MANUAL_STUDENT_LIST', loaded = '';
+    mount.innerHTML = `<section class="r18636-panel"><h3>STUDENT LIST SYNCHRONIZATION</h3><p><b>FULL IDENTIFICATION UPLOAD:</b> this imports SDMS code, name, sex, age, father/guardian, mother/guardian, boarding type, district, sector, cell, village and class. SDMS is the match key. Blank source fields do not erase existing profiles, attendance, marks, class history or enrolment.</p><div class="r18636-tools-row r18636-no-print"><button id="r196Pick" class="r18636-btn-blue">UPLOAD EXCEL / CSV</button><button id="r196Preview" class="r18636-btn-white">PREVIEW FULL DATA</button><button id="r196Save" class="r18636-btn-green">SAVE & SYNCHRONIZE</button><button id="r196Clear" class="r18636-btn-red">CLEAR</button><input id="r196File" type="file" accept=".xlsx,.csv,.txt" hidden></div><textarea id="r196Text" class="r18636-roster-text" placeholder="${fields.join(',')}"></textarea><div id="r196State" class="r18636-marks-status">Choose ALL STUDENTS.xlsx, review the full profile data, then save.</div></section><div class="r18636-table-wrap"><table><thead><tr><th>NO.</th><th>SDMS CODE</th><th>STUDENT NAME</th><th>SEX</th><th>AGE</th><th>FATHER / GUARDIAN</th><th>MOTHER / GUARDIAN</th><th>BOARDING</th><th>LOCATION</th><th>CLASS</th></tr></thead><tbody id="r196Rows"><tr><td colspan="10">No preview yet.</td></tr></tbody></table></div>`;
+    const el = id => mount.querySelector('#' + id);
+    const draw = message => { const profiles = rows.filter(r => r.age || r.father_guardian || r.mother_guardian || r.boarding_type || r.district || r.sector || r.cell || r.village).length; el('r196Rows').innerHTML = rows.length ? rows.slice(0, 250).map((r,i) => `<tr><td>${esc(r.no || i + 1)}</td><td><b>${esc(r.sdms_code)}</b></td><td class="name">${esc(r.student_name)}</td><td>${esc(normSex(r.sex))}</td><td>${esc(r.age || '—')}</td><td class="name">${esc(r.father_guardian || '—')}</td><td class="name">${esc(r.mother_guardian || '—')}</td><td>${esc(r.boarding_type || '—')}</td><td>${esc([r.district,r.sector,r.cell,r.village].filter(Boolean).join(' / ') || '—')}</td><td><b>${esc(r.class_code || r.source_class || '—')}</b></td></tr>`).join('') + (rows.length > 250 ? `<tr><td colspan="10">Showing first 250 of ${rows.length} rows. All rows will be synchronized after confirmation.</td></tr>` : '') : '<tr><td colspan="10">No valid rows found.</td></tr>'; el('r196State').textContent = message || `${rows.length} row(s) ready; ${profiles} include full identification fields.`; };
+    const parseEdited = () => { if (el('r196Text').value !== loaded) { rows = textRows(el('r196Text').value); loaded = el('r196Text').value; } draw(); };
+    el('r196Pick').onclick = () => el('r196File').click();
+    el('r196File').onchange = async () => { const file = el('r196File').files[0]; if (!file) return; source = file.name; el('r196State').textContent = 'Reading ' + file.name + '…'; try { rows = await parseFile(file); el('r196Text').value = rowsToText(rows); loaded = el('r196Text').value; draw(`${rows.length} row(s) loaded. Full identification fields are retained for save.`); } catch (error) { rows=[]; el('r196State').textContent = 'UPLOAD ERROR · ' + (error.message || error); } };
+    el('r196Preview').onclick = parseEdited;
+    el('r196Clear').onclick = () => { rows=[]; loaded=''; el('r196Text').value=''; el('r196File').value=''; draw('List cleared.'); };
+    el('r196Save').onclick = async () => { parseEdited(); if (!rows.length) return; const button=el('r196Save'); button.disabled=true; el('r196State').textContent='Synchronizing full profiles by SDMS…'; try { let result; try { result=await rpc('r18636_sync_student_roster',{p_rows:rows.map(fullPayload),p_source_file:source,p_apply:true}); } catch (primary) { const message=String(primary && primary.message || primary); if (!/r18636_sync_student_roster|schema cache|could not find the function|does not exist/i.test(message)) throw primary; result=await rpc('r18661_import_students',{p_rows:rows.map(fullPayload),p_source_file:source,p_apply:true}); } if (window.GSM_GLOBAL_STUDENT_SYNC && window.GSM_GLOBAL_STUDENT_SYNC.refresh) await window.GSM_GLOBAL_STUDENT_SYNC.refresh({reason:'FULL_IDENTIFICATION_UPLOAD',result}); window.dispatchEvent(new CustomEvent('gsm-students-synchronized',{detail:{reason:'FULL_IDENTIFICATION_UPLOAD',result}})); el('r196State').textContent=`DONE · ${result.processed || rows.length} processed · ${result.updated || 0} updated · ${result.created || 0} created · ${result.unchanged || 0} unchanged · ${result.invalid || 0} invalid. Full student identification synchronized.`; if (util.toast) util.toast('FULL STUDENT IDENTIFICATION SAVED.'); } catch (error) { el('r196State').textContent='SYNC FAILED · ' + (error.message || error); } finally { button.disabled=false; } };
+  };
+})();
