@@ -45,8 +45,9 @@
       var tools=page.querySelector(':scope > .r18636-tools-row');
       var report=page.querySelector(':scope > .r18636-report-options');
       if(!tools||!report||report.dataset.r195Moved)return;
-      Array.prototype.slice.call(report.children).forEach(function(control){tools.appendChild(control)});
-      report.dataset.r195Moved='1';report.remove();tools.classList.add('r195-two-rows');
+      /* Keep the report container in the page.  The Print button owns it and
+         toggles its hidden state; removing it caused a null.hidden error. */
+      report.dataset.r195Moved='1';report.hidden=false;tools.classList.add('r195-two-rows');
     });
   }
   var layout=document.createElement('style');
@@ -64,7 +65,8 @@
     +'#appShell #main .r18638-owner-badge{display:none!important}'
     +'#appShell #main #r18636MxType,#appShell #main #r18636MxType option{text-transform:uppercase!important}'
     +'#appShell #main .r18638-card{min-height:0!important;padding:8px 10px!important}'
-    +'@media (min-width:1101px){#main .r18636-marks-page>.r18636-tools-row.r195-two-rows{grid-template-columns:repeat(7,minmax(0,1fr))!important;grid-auto-rows:auto!important}#main .r18636-marks-page>.r18636-tools-row.r195-two-rows>*{min-width:0!important}}';
+    +'#appShell #main .r176-student-table thead th{position:static!important;top:auto!important;z-index:auto!important}'
+    +'@media (min-width:1101px){#main .r18636-marks-page>.r18636-tools-row.r195-two-rows{grid-template-columns:repeat(6,minmax(0,1fr))!important;grid-auto-rows:auto!important}#main .r18636-marks-page>.r18636-tools-row.r195-two-rows>*{min-width:0!important}#main .r18636-marks-page>.r18636-report-options{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:8px!important;padding:8px!important}#main .r18636-marks-page>.r18636-report-options>*{min-width:0!important}}';
   document.head.appendChild(layout);
   function repair(){run();compactMarks(document)}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',repair,{once:true});else repair();
