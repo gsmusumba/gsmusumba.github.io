@@ -36,12 +36,29 @@
     }
   }
   function run(){cleanNode(document.body)}
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',run,{once:true});else run();
+  function compactMarks(root){
+    if(!root||!root.querySelectorAll)return;
+    var pages=[];
+    if(root.matches&&root.matches('.r18636-marks-page'))pages.push(root);
+    Array.prototype.push.apply(pages,root.querySelectorAll('.r18636-marks-page'));
+    pages.forEach(function(page){
+      var tools=page.querySelector(':scope > .r18636-tools-row');
+      var report=page.querySelector(':scope > .r18636-report-options');
+      if(!tools||!report||report.dataset.r195Moved)return;
+      Array.prototype.slice.call(report.children).forEach(function(control){tools.appendChild(control)});
+      report.dataset.r195Moved='1';report.remove();tools.classList.add('r195-two-rows');
+    });
+  }
+  var layout=document.createElement('style');
+  layout.textContent='@media (min-width:1101px){#main .r18636-marks-page>.r18636-tools-row.r195-two-rows{grid-template-columns:repeat(7,minmax(0,1fr))!important;grid-auto-rows:auto!important}#main .r18636-marks-page>.r18636-tools-row.r195-two-rows>*{min-width:0!important}}';
+  document.head.appendChild(layout);
+  function repair(){run();compactMarks(document)}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',repair,{once:true});else repair();
   new MutationObserver(function(records){
     for(var i=0;i<records.length;i++){
       var r=records[i];
       if(r.type==='characterData')cleanNode(r.target);
-      else for(var j=0;j<r.addedNodes.length;j++)cleanNode(r.addedNodes[j]);
+      else for(var j=0;j<r.addedNodes.length;j++){cleanNode(r.addedNodes[j]);compactMarks(r.addedNodes[j])}
     }
   }).observe(document.documentElement,{childList:true,subtree:true,characterData:true});
   /* The current teacher-student implementation is the supported screen.
