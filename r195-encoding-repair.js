@@ -58,6 +58,10 @@
     +'#appShell #main :is(.empty-state,.t160-status,.r18612-state,.r18636-marks-status){color:#102a43!important}'
     +'#appShell #main table tbody tr:nth-child(even) td{background-color:#eef5fa!important;color:#102a43!important}'
     +'#appShell #main table tbody tr:nth-child(odd) td{color:#102a43!important}'
+    +'#appShell #main .r18628-week tbody th{background:#123f62!important;color:#fff!important;-webkit-text-fill-color:#fff!important}'
+    +'#appShell #main .r18628-week tbody th span{color:#e8f4ff!important;-webkit-text-fill-color:#e8f4ff!important}'
+    +'#appShell #main .r18658-student-table thead th{position:static!important;top:auto!important}'
+    +'#appShell #main .r18638-owner-badge{display:none!important}'
     +'@media (min-width:1101px){#main .r18636-marks-page>.r18636-tools-row.r195-two-rows{grid-template-columns:repeat(7,minmax(0,1fr))!important;grid-auto-rows:auto!important}#main .r18636-marks-page>.r18636-tools-row.r195-two-rows>*{min-width:0!important}}';
   document.head.appendChild(layout);
   function repair(){run();compactMarks(document)}
@@ -71,8 +75,18 @@
   }).observe(document.documentElement,{childList:true,subtree:true,characterData:true});
   /* The current teacher-student implementation is the supported screen.
      Keep legacy Student Identification links on that implementation. */
-  if(window.GSM_VIEWS&&typeof window.GSM_VIEWS.teacherstudents==='function'){
-    window.GSM_VIEWS.teacherstudentidentification=window.GSM_VIEWS.teacherstudents;
-    window.GSM_VIEWS.teachermyclassesstudents=window.GSM_VIEWS.teacherstudents;
+  if(window.GSM_VIEWS){
+    var views=window.GSM_VIEWS;
+    views.teacherstudentidentification=function(mount,ctx){
+      var screen=views.teacherstudents||views.teachermyclassesstudents;
+      if(typeof screen==='function')return screen(mount,ctx);
+      mount.innerHTML='<div class="empty-state">Student Identification is loading. Please use My Students if this page does not open.</div>';
+    };
+    var performance=views.teacherperformance;
+    if(typeof performance==='function')views.teacherperformance=function(mount,ctx){
+      var result=performance(mount,ctx);
+      setTimeout(function(){if(mount&&!mount.textContent.trim())mount.innerHTML='<div class="empty-state">Student Performance is temporarily unavailable. Use Marks Analysis after valid marks are saved.</div>'},700);
+      return result;
+    };
   }
 })();
