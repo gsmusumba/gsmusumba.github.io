@@ -1,0 +1,21 @@
+/* R200 shared readability and identification/marks workflow refinements. */
+:root{--gsm-page:#f3f6fa;--gsm-ink:#172b3f;--gsm-blue:#0b4d79;--gsm-border:#b7c9d8}
+#main{background:var(--gsm-page);color:var(--gsm-ink)}
+#main :is(input,select,textarea,button){font-family:inherit}
+#main :is(.r18658-students,.r18636-marks-page){font-size:14px;line-height:1.4;color:var(--gsm-ink)}
+#main :is(.r18658-students,.r18636-marks-page) :is(h2,h3,h4){letter-spacing:0;text-transform:none}
+#main .r18658-student-table{min-width:1260px;border-collapse:collapse}
+#main .r18658-student-table :is(th,td){font-size:12px;line-height:1.35;padding:7px 8px;vertical-align:top}
+#main .r18658-student-table td.code{white-space:nowrap;word-break:normal}
+#main .r18658-student-table td.name{min-width:180px}
+#main .r18658-student-table .r200-location{min-width:170px;max-width:260px;overflow-wrap:anywhere}
+#main .r18658-stu-list{overflow-x:auto;max-width:100%}
+#main .r18658-student-table thead th{background:#0b4d79;color:white}
+#main .r18658-student-table tbody tr:nth-child(even){background:#eef4f8}
+#main .r18658-student-table tbody tr:hover{background:#e4eff7}
+#main .r18658-profile-section{background:#fff;border-color:var(--gsm-border)}
+#main .r200-assessment-summary{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;background:#ecf6f2;border:1px solid #74b8a0;border-radius:8px;margin:8px 0;color:#173b32}
+#main .r200-assessment-summary strong{font-size:14px;font-weight:700;overflow-wrap:anywhere}
+#main .r200-assessment-summary button{white-space:nowrap;font-size:12px}
+#main [hidden]{display:none!important}
+@media(max-width:700px){#main .r200-assessment-summary{align-items:flex-start;flex-direction:column}#main .r18658-student-table{min-width:1150px}}

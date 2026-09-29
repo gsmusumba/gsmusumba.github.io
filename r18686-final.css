@@ -422,3 +422,67 @@
     overflow-x:auto!important;-webkit-overflow-scrolling:touch!important;
   }
 }
+/* ===== R187.0 DOD 17-MODULE COMPACT MASTER NAVIGATION ===== */
+#appShell #main .r132-workspace-dod .r132-workspace-banner{margin-bottom:6px!important;padding:7px 10px!important;min-height:0!important}
+#appShell #main .r132-workspace-dod .r132-workspace-banner span{font-size:10px!important}
+#appShell #main .r132-workspace-dod .r132-card-grid{
+  display:grid!important;
+  grid-template-rows:repeat(2,minmax(56px,auto))!important;
+  grid-auto-flow:column!important;
+  grid-auto-columns:minmax(175px,1fr)!important;
+  gap:5px!important;
+  overflow-x:auto!important;
+  overflow-y:hidden!important;
+  padding:4px 2px 8px!important;
+  margin:0!important;
+  scrollbar-width:thin;
+}
+#appShell #main .r132-workspace-dod .r132-card{
+  min-height:56px!important;
+  padding:7px 9px!important;
+  border:1px solid #1f2937!important;
+  border-radius:4px!important;
+  box-shadow:none!important;
+  background:#fff!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  gap:6px!important;
+}
+#appShell #main .r132-workspace-dod .r132-card h3{font-size:11px!important;line-height:1.15!important;font-weight:900!important;margin:0!important;color:#102f49!important}
+#appShell #main .r132-workspace-dod .r132-card p{display:none!important}
+#appShell #main .r132-workspace-dod .r132-card>span{font-size:8px!important;font-weight:900!important;white-space:nowrap!important;color:#075d94!important}
+#appShell #main .r132-workspace-dod .r132-card:hover{background:#eef7ff!important;border-color:#0877b7!important}
+#appShell #main .r132-workspace-dod .r132-report-strip{margin-top:6px!important;padding:7px 10px!important}
+@media(max-width:700px){
+ #appShell #main .r132-workspace-dod .r132-card-grid{grid-auto-columns:minmax(155px,78vw)!important}
+}
+
+/* R187.4 — readable operational font sizes and timetable view. */
+#appShell #main{font-size:14px!important;line-height:1.4!important}
+#appShell #main :is(button,input,select,textarea){font-size:13px!important;line-height:1.25!important}
+#appShell #main :is(table th,table td){font-size:12px!important;line-height:1.3!important}
+#appShell #main :is(.r18638-card span,.r132-card p,.r18628-state,.t160-status,.r18636-marks-status){font-size:12px!important;line-height:1.4!important}
+#appShell #main .r18681-week :is(th,td){font-size:11px!important}
+#appShell #main .r18681-week td :is(b,span,small){font-size:10px!important}
+#appShell #main .r187-tt-tools{display:flex;flex-wrap:wrap;align-items:end;gap:10px;padding:12px;margin:10px 0;border:1px solid #b9cedf;background:#f7fbfe}
+#appShell #main .r187-tt-tools label{display:grid;gap:4px;min-width:180px;font-size:12px!important;font-weight:900;color:#164c73}
+#appShell #main .r187-tt-tools select,#appShell #main .r187-tt-tools button{min-height:40px!important;padding:6px 9px!important;border:1px solid #2b668f;border-radius:5px;background:#fff;color:#123f61;font-weight:850}
+#appShell #main .r187-tt-tools button{background:#075c92;color:#fff}
+#appShell #main .r187-tt-wrap{overflow:auto;border:1px solid #9db8ca;background:#fff}
+#appShell #main .r187-tt-table{width:100%;min-width:820px;border-collapse:collapse}
+#appShell #main .r187-tt-table th{padding:9px!important;background:#073f72!important;color:#fff!important;text-align:left;font-size:12px!important}
+#appShell #main .r187-tt-table td{padding:9px!important;vertical-align:middle;font-size:12px!important}
+#appShell #main .r187-tt-table tr:nth-child(even) td{background:#f4f9fc}
+#appShell #main .r187-tt-table small{display:block;margin-top:3px;font-size:11px!important;color:#48677d}
+@media(max-width:700px){#appShell #main{font-size:13px!important}#appShell #main :is(button,input,select,textarea){font-size:12px!important}#appShell #main :is(table th,table td){font-size:11px!important}#appShell #main .r187-tt-tools label{min-width:calc(50% - 6px)}#appShell #main .r187-tt-tools button{width:100%}}
+
+/* R187.5 — final type scale: readable at normal browser zoom. */
+#appShell #main{font-size:16px!important;line-height:1.45!important}
+#appShell #main :is(button,input,select,textarea){font-size:15px!important;min-height:42px!important}
+#appShell #main :is(table th,table td){font-size:14px!important;line-height:1.35!important;padding:8px!important}
+#appShell #main :is(.r132-card h3,.r18638-card b,.r18636-marks-page h2,.t160-head h2){font-size:16px!important}
+#appShell #main :is(.r132-card>span,.r18638-card span,.r132-card p,.r18628-state,.t160-status,.r18636-marks-status){font-size:14px!important;line-height:1.45!important}
+#appShell #main .r187-tt-table :is(th,td){font-size:14px!important;padding:10px!important}
+#appShell #main .r187-tt-table small{font-size:13px!important}
+@media(max-width:700px){#appShell #main{font-size:15px!important}#appShell #main :is(button,input,select,textarea){font-size:14px!important}#appShell #main :is(table th,table td){font-size:13px!important;padding:7px!important}}
